@@ -1,12 +1,14 @@
 <script setup>
-import { useAuthStore } from '@/stores/auth'
-import AppNavbar from '@/components/AppNavbar.vue'
+import { useAuthStore } from "@/stores/auth";
+import AppNavbar from "@/components/AppNavbar.vue";
 
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 </script>
 
 <template>
-  <div class="min-h-screen bg-background dark:bg-background-dark transition-colors">
+  <div
+    class="min-h-screen bg-background dark:bg-background-dark transition-colors"
+  >
     <AppNavbar v-if="authStore.user" />
     <main>
       <router-view />
