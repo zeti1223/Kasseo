@@ -8,6 +8,9 @@ const props = defineProps({
   transaction: { type: Object, default: null },
   groupId: { type: String, required: true },
   customCategories: { type: Array, default: () => [] },
+  mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
+  members: { type: Object, default: () => ({}) },
+  currentUserId: { type: String, default: "" },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -20,6 +23,8 @@ const description = ref("");
 const date = ref(new Date().toISOString().slice(0, 10));
 const loading = ref(false);
 const amountInput = ref(null);
+const selectedSplit = ref([]);
+const recipient = ref("");
 
 const allCategories = computed(() => {
   const customNames = props.customCategories.map((cat) => cat.name);
@@ -27,6 +32,17 @@ const allCategories = computed(() => {
     (cat) => !customNames.includes(cat),
   );
   return [...customNames, ...defaultCategories];
+});
+
+const memberEntries = computed(() =>
+  Object.entries(props.members).map(([id, m]) => ({ id, ...m })),
+);
+const otherMembers = computed(() =>
+  memberEntries.value.filter((m) => m.id !== props.transaction?.paidBy),
+);
+const eachShare = computed(() => {
+  if (!amount.value || !selectedSplit.value.length) return null;
+  return (Number(amount.value) / selectedSplit.value.length).toFixed(2);
 });
 
 watch(
@@ -38,6 +54,10 @@ watch(
       category.value = props.transaction.category;
       description.value = props.transaction.description || "";
       date.value = props.transaction.date;
+      selectedSplit.value = props.transaction.splitAmong?.length
+        ? [...props.transaction.splitAmong]
+        : Object.keys(props.members);
+      recipient.value = props.transaction.to || otherMembers.value[0]?.id || "";
       nextTick(() => {
         amountInput.value?.focus();
       });
@@ -45,21 +65,47 @@ watch(
   },
 );
 
+function toggleSplitMember(id) {
+  if (selectedSplit.value.includes(id)) {
+    if (selectedSplit.value.length === 1) return;
+    selectedSplit.value = selectedSplit.value.filter((m) => m !== id);
+  } else {
+    selectedSplit.value = [...selectedSplit.value, id];
+  }
+}
+
+const canSubmit = computed(() => {
+  if (!amount.value || Number(amount.value) <= 0) return false;
+  if (type.value === "settlement" && !recipient.value) return false;
+  return true;
+});
+
 async function handleUpdate() {
-  if (!amount.value || Number(amount.value) <= 0) return;
+  if (!canSubmit.value) return;
   loading.value = true;
   try {
+    const payload = {
+      amount: amount.value,
+      type: type.value,
+      description: description.value,
+      date: date.value,
+      paidBy: props.transaction.paidBy,
+    };
+    if (type.value === "expense") {
+      payload.category = category.value;
+      if (props.mode === "split") {
+        payload.splitAmong = selectedSplit.value.length
+          ? selectedSplit.value
+          : Object.keys(props.members);
+      }
+    }
+    if (type.value === "settlement") {
+      payload.to = recipient.value;
+    }
     await transactionsStore.updateTransaction(
       props.groupId,
       props.transaction.id,
-      {
-        amount: amount.value,
-        type: type.value,
-        category: category.value,
-        description: description.value,
-        date: date.value,
-        paidBy: props.transaction.paidBy,
-      },
+      payload,
     );
     emit("update:modelValue", false);
   } finally {
@@ -111,7 +157,9 @@ async function handleUpdate() {
           </svg>
           Expense
         </button>
+
         <button
+          v-if="mode === 'kitty'"
           @click="type = 'deposit'"
           :class="
             type === 'deposit'
@@ -134,6 +182,38 @@ async function handleUpdate() {
             />
           </svg>
           Deposit
+        </button>
+
+        <button
+          v-else
+          @click="type = 'settlement'"
+          :class="
+            type === 'settlement'
+              ? 'bg-[#A5E3FC] text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          "
+          class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 11l5-5m0 0l5 5m-5-5v12"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20H7"
+            />
+          </svg>
+          Settle up
         </button>
       </div>
 
@@ -166,6 +246,52 @@ async function handleUpdate() {
             </option>
           </select>
         </div>
+
+        <div v-if="mode === 'split' && type === 'expense'">
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Split between</label
+          >
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="m in memberEntries"
+              :key="m.id"
+              type="button"
+              @click="toggleSplitMember(m.id)"
+              class="text-xs px-3 py-1.5 rounded-full border transition-colors"
+              :class="
+                selectedSplit.includes(m.id)
+                  ? 'bg-[#C8A5FC] border-[#C8A5FC] text-white'
+                  : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+              "
+            >
+              {{ m.id === currentUserId ? "You" : m.displayName }}
+            </button>
+          </div>
+          <p
+            v-if="eachShare"
+            class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+          >
+            {{ eachShare }} each, split between {{ selectedSplit.length }}
+            {{ selectedSplit.length === 1 ? "person" : "people" }}
+          </p>
+        </div>
+
+        <div v-if="mode === 'split' && type === 'settlement'">
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Paid to</label
+          >
+          <select
+            v-model="recipient"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+          >
+            <option v-for="m in otherMembers" :key="m.id" :value="m.id">
+              {{ m.displayName }}
+            </option>
+          </select>
+        </div>
+
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -199,7 +325,7 @@ async function handleUpdate() {
         </button>
         <button
           @click="handleUpdate"
-          :disabled="!amount || Number(amount) <= 0"
+          :disabled="!canSubmit"
           class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <svg

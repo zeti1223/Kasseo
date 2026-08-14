@@ -9,6 +9,7 @@ const props = defineProps({
   transactions: { type: Array, default: () => [] },
   members: { type: Object, default: () => ({}) },
   customCategories: { type: Array, default: () => [] },
+  mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
 });
 const transactionsStore = useTransactionsStore();
 const authStore = useAuthStore();
@@ -40,6 +41,36 @@ function handleEdit(tx) {
     showPermissionAlert.value = true;
   }
 }
+
+// Split-mode context: how a given expense relates to the signed-in
+// member, e.g. "You owe 5.00" or "You're owed 10.00".
+function splitInfo(tx) {
+  if (props.mode !== "split" || tx.type !== "expense") return null;
+  const uid = authStore.user?.uid;
+  if (!uid) return null;
+  const participants = tx.splitAmong?.length
+    ? tx.splitAmong
+    : Object.keys(props.members);
+  if (!participants.includes(uid)) return null;
+
+  const share = tx.amount / participants.length;
+  if (tx.paidBy === uid) {
+    const owedToYou = tx.amount - share;
+    if (owedToYou < 0.005) return { text: "Your share only", tone: "muted" };
+    return { text: `You're owed ${owedToYou.toFixed(2)}`, tone: "positive" };
+  }
+  return { text: `You owe ${share.toFixed(2)}`, tone: "negative" };
+}
+
+function splitBetweenLabel(tx) {
+  const participants = tx.splitAmong?.length
+    ? tx.splitAmong
+    : Object.keys(props.members);
+  const uid = authStore.user?.uid;
+  return participants
+    .map((id) => (id === uid ? "you" : memberName(id)))
+    .join(", ");
+}
 </script>
 
 <template>
@@ -54,7 +85,8 @@ function handleEdit(tx) {
       v-if="!transactions.length"
       class="bg-[#A5E3FC]/20 border border-[#A5E3FC] text-[#A5E3FC] rounded-lg p-3"
     >
-      No transactions yet — log the first deposit or expense to get started.
+      No transactions yet — log the first
+      {{ mode === "split" ? "expense" : "deposit or expense" }} to get started.
     </div>
 
     <div v-else class="space-y-2">
@@ -64,7 +96,13 @@ function handleEdit(tx) {
         class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <div
-          :class="tx.type === 'deposit' ? 'bg-[#A7F49D]' : 'bg-[#C1503A]'"
+          :class="
+            tx.type === 'deposit'
+              ? 'bg-[#A7F49D]'
+              : tx.type === 'settlement'
+                ? 'bg-[#A5E3FC]'
+                : 'bg-[#C1503A]'
+          "
           class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
         >
           <svg
@@ -80,6 +118,20 @@ function handleEdit(tx) {
               stroke-width="2"
               d="M19 14l-7 7m0 0l-7-7m7 7V3"
             />
+            <template v-else-if="tx.type === 'settlement'">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 11l5-5m0 0l5 5m-5-5v12"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 20H7"
+              />
+            </template>
             <path
               v-else
               stroke-linecap="round"
@@ -92,20 +144,56 @@ function handleEdit(tx) {
 
         <div class="flex-1 min-w-0">
           <div class="flex justify-between items-start">
-            <span class="font-medium truncate dark:text-white">{{
-              tx.description || tx.category
-            }}</span>
+            <span class="font-medium truncate dark:text-white">
+              <template v-if="tx.type === 'settlement'">
+                {{ memberName(tx.paidBy) }} paid {{ memberName(tx.to) }}
+              </template>
+              <template v-else>
+                {{ tx.description || tx.category }}
+              </template>
+            </span>
             <span
               class="font-bold money dark:text-white"
               :class="
-                tx.type === 'deposit' ? 'text-[#A7F49D]' : 'text-[#C1503A]'
+                tx.type === 'deposit'
+                  ? 'text-[#A7F49D]'
+                  : tx.type === 'settlement'
+                    ? 'text-[#5C7A99] dark:text-[#A5E3FC]'
+                    : 'text-[#C1503A]'
               "
             >
-              {{ tx.type === "deposit" ? "+" : "-" }}{{ tx.amount.toFixed(2) }}
+              {{
+                tx.type === "deposit"
+                  ? "+"
+                  : tx.type === "settlement"
+                    ? ""
+                    : "-"
+              }}{{ tx.amount.toFixed(2) }}
             </span>
           </div>
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ tx.date }} · {{ memberName(tx.paidBy) }} · {{ tx.category }}
+            <template v-if="tx.type === 'settlement'">
+              {{ tx.date }}{{ tx.description ? ` · ${tx.description}` : "" }}
+            </template>
+            <template v-else>
+              {{ tx.date }} · {{ memberName(tx.paidBy) }} · {{ tx.category }}
+            </template>
+          </div>
+          <div
+            v-if="mode === 'split' && tx.type === 'expense'"
+            class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"
+          >
+            Split between {{ splitBetweenLabel(tx) }}
+            <span
+              v-if="splitInfo(tx)"
+              class="ml-1 font-medium"
+              :class="{
+                'text-[#3FA34D] dark:text-[#A7F49D]':
+                  splitInfo(tx).tone === 'positive',
+                'text-[#C1503A]': splitInfo(tx).tone === 'negative',
+              }"
+              >· {{ splitInfo(tx).text }}</span
+            >
           </div>
         </div>
 
@@ -156,6 +244,9 @@ function handleEdit(tx) {
       :transaction="editingTransaction"
       :group-id="groupId"
       :custom-categories="customCategories"
+      :mode="mode"
+      :members="members"
+      :current-user-id="authStore.user?.uid"
     />
 
     <!-- Permission Alert Dialog -->

@@ -1,10 +1,22 @@
 <script setup>
 import { computed } from "vue";
 import { Line } from "vue-chartjs";
-import { buildBalanceOverTime } from "@/utils/chartData";
+import {
+  buildBalanceOverTime,
+  buildYourBalanceOverTime,
+} from "@/utils/chartData";
 
-const props = defineProps({ transactions: { type: Array, default: () => [] } });
-const chartData = computed(() => buildBalanceOverTime(props.transactions));
+const props = defineProps({
+  transactions: { type: Array, default: () => [] },
+  mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
+  members: { type: Object, default: () => ({}) }, // only needed for 'split'
+  userId: { type: String, default: "" }, // only needed for 'split'
+});
+const chartData = computed(() =>
+  props.mode === "split"
+    ? buildYourBalanceOverTime(props.transactions, props.members, props.userId)
+    : buildBalanceOverTime(props.transactions),
+);
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,

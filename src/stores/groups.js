@@ -46,6 +46,7 @@ export const useGroupsStore = defineStore("groups", () => {
     await set(newGroupRef, {
       name,
       currency,
+      mode: "kitty",
       ownerId: user.uid,
       createdAt: serverTimestamp(),
       members: {
@@ -90,6 +91,13 @@ export const useGroupsStore = defineStore("groups", () => {
     await set(dbRef(db, `groups/${groupId}/currency`), newCurrency);
   }
 
+  // mode: 'kitty' (default, shared pool funded by deposits) or
+  // 'split' (no deposits — every expense is split between members and
+  // members settle their share directly with each other).
+  async function updateMode(groupId, newMode) {
+    await set(dbRef(db, `groups/${groupId}/mode`), newMode);
+  }
+
   async function removeMember(groupId, userId) {
     await remove(dbRef(db, `groups/${groupId}/members/${userId}`));
     await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
@@ -115,6 +123,7 @@ export const useGroupsStore = defineStore("groups", () => {
     joinGroup,
     loadGroup,
     updateCurrency,
+    updateMode,
     removeMember,
     addCategory,
     removeCategory,

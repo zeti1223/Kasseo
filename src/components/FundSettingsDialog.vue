@@ -14,6 +14,21 @@ const authStore = useAuthStore();
 const activeTab = ref("currency");
 const currency = ref("USD");
 const currencies = ["USD", "EUR", "HUF", "GBP"];
+const mode = ref("kitty");
+const modes = [
+  {
+    value: "kitty",
+    label: "Kitty",
+    description:
+      "Everyone deposits money into one shared pot. Expenses come out of that pot, and the fund tracks a single running balance.",
+  },
+  {
+    value: "split",
+    label: "Split",
+    description:
+      "No deposits. Every expense is split between members automatically, and members settle up directly with each other.",
+  },
+];
 const loading = ref(false);
 
 const newCategory = ref("");
@@ -29,6 +44,7 @@ watch(
   (isOpen) => {
     if (isOpen && props.group) {
       currency.value = props.group.currency;
+      mode.value = props.group.mode || "kitty";
       loadCategories();
     }
   },
@@ -49,6 +65,18 @@ async function handleCurrencyChange() {
     await groupsStore.updateCurrency(props.group.id, currency.value);
     await groupsStore.loadGroup(props.group.id);
     emit("update:modelValue", false);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleModeChange(newMode) {
+  if (!props.group?.id || newMode === (props.group.mode || "kitty")) return;
+  mode.value = newMode;
+  loading.value = true;
+  try {
+    await groupsStore.updateMode(props.group.id, newMode);
+    await groupsStore.loadGroup(props.group.id);
   } finally {
     loading.value = false;
   }
@@ -133,6 +161,17 @@ const members = computed(() => {
           Currency
         </button>
         <button
+          @click="activeTab = 'mode'"
+          :class="[
+            'px-4 py-2 text-sm font-medium transition-colors',
+            activeTab === 'mode'
+              ? 'border-b-2 border-[#C8A5FC] text-[#C8A5FC]'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+          ]"
+        >
+          Mode
+        </button>
+        <button
           @click="activeTab = 'members'"
           :class="[
             'px-4 py-2 text-sm font-medium transition-colors',
@@ -193,6 +232,43 @@ const members = computed(() => {
             Save
           </button>
         </div>
+      </div>
+
+      <div v-if="activeTab === 'mode'" class="space-y-3">
+        <button
+          v-for="opt in modes"
+          :key="opt.value"
+          type="button"
+          :disabled="!isOwner || loading"
+          @click="handleModeChange(opt.value)"
+          class="w-full text-left p-3 rounded-lg border transition-colors disabled:cursor-not-allowed"
+          :class="
+            mode === opt.value
+              ? 'border-[#C8A5FC] bg-[#C8A5FC]/10'
+              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+          "
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium dark:text-white">{{
+              opt.label
+            }}</span>
+            <span
+              v-if="mode === opt.value"
+              class="text-xs font-medium text-[#C8A5FC]"
+              >Selected</span
+            >
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {{ opt.description }}
+          </p>
+        </button>
+        <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400">
+          Only the owner can change the fund's mode
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Switching modes doesn't delete any transactions — it only changes how
+          new ones are logged and how balances are calculated.
+        </p>
       </div>
 
       <div v-if="activeTab === 'members'" class="space-y-4">
