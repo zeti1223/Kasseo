@@ -1,11 +1,13 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useAuthStore } from "@/stores/auth";
 
 const props = defineProps({ modelValue: Boolean });
 const emit = defineEmits(["update:modelValue"]);
 
+const router = useRouter();
 const settingsStore = useSettingsStore();
 const authStore = useAuthStore();
 
@@ -44,6 +46,11 @@ function cancelEdit() {
   nickname.value =
     authStore.userProfile?.nickname || authStore.user?.displayName || "";
   isEditingNickname.value = false;
+}
+
+async function handleSignOut() {
+  await authStore.logout();
+  router.push({ name: "landing" });
 }
 </script>
 
@@ -172,11 +179,19 @@ function cancelEdit() {
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 mt-6">
+      <div class="flex justify-between gap-2 mt-6">
+        <button
+          @click="handleSignOut"
+          class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+          Sign Out
+        </button>
         <button
           @click="emit('update:modelValue', false)"
-          class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
         >
+          <i class="fas fa-times"></i>
           Close
         </button>
       </div>

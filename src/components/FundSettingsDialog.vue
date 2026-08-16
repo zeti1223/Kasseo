@@ -284,8 +284,9 @@ const members = computed(() => {
             </div>
             <button
               @click="copyInviteLink"
-              class="text-sm px-3 py-1.5 rounded-lg bg-[#A5E3FC]/30 hover:bg-[#A5E3FC]/50 transition-colors text-[#A5E3FC]"
+              class="text-sm px-3 py-1.5 rounded-lg bg-[#A5E3FC]/30 hover:bg-[#A5E3FC]/50 transition-colors text-[#A5E3FC] flex items-center gap-2"
             >
+              <i class="fas fa-link"></i>
               Copy link
             </button>
           </div>
@@ -333,8 +334,9 @@ const members = computed(() => {
                 member.id !== authStore.user?.uid
               "
               @click="showRemoveMemberConfirm = member.id"
-              class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+              class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
             >
+              <i class="fas fa-user-minus"></i>
               Remove
             </button>
           </div>
@@ -407,8 +409,9 @@ const members = computed(() => {
             <button
               v-if="isOwner"
               @click="showRemoveCategoryConfirm = category.id"
-              class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+              class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
             >
+              <i class="fas fa-trash"></i>
               Remove
             </button>
           </div>
@@ -459,8 +462,9 @@ const members = computed(() => {
       <div v-if="activeTab !== 'currency'" class="flex justify-end mt-6">
         <button
           @click="emit('update:modelValue', false)"
-          class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
         >
+          <i class="fas fa-times"></i>
           Close
         </button>
       </div>
