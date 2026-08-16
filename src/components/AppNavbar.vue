@@ -37,7 +37,7 @@ async function handleLogout() {
           :alt="authStore.user?.displayName"
           class="w-8 h-8 rounded-full object-cover"
         />
-        <span class="text-sm hidden sm:inline">{{
+        <span class="text-sm hidden sm:inline dark:text-white">{{
           authStore.userProfile?.nickname || authStore.user?.displayName
         }}</span>
       </div>

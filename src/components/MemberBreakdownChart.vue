@@ -28,7 +28,7 @@ const chartOptions = {
     <Bar v-if="transactions.length" :data="chartData" :options="chartOptions" />
     <div
       v-else
-      class="text-body-2 text-medium-emphasis d-flex align-center justify-center h-100"
+      class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full"
     >
       No data yet
     </div>

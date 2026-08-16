@@ -176,7 +176,7 @@ function splitBetweenLabel(tx) {
               {{ tx.date }}{{ tx.description ? ` · ${tx.description}` : "" }}
             </template>
             <template v-else>
-              {{ tx.date }} · {{ memberName(tx.paidBy) }} · {{ tx.category }}
+              {{ tx.date }} · <span class="dark:text-gray-300">{{ memberName(tx.paidBy) }}</span> · <span class="dark:text-gray-300">{{ tx.category }}</span>
             </template>
           </div>
           <div
