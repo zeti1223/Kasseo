@@ -13,7 +13,7 @@ const showSettingsDialog = ref(false);
 
 async function handleLogout() {
   await authStore.logout();
-  router.push({ name: "login" });
+  router.push({ name: "landing" });
 }
 </script>
 

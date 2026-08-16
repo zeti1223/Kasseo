@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import LoginView from "@/views/LoginView.vue";
+import LandingView from "@/views/LandingView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import GroupView from "@/views/GroupView.vue";
 import JoinView from "@/views/JoinView.vue";
@@ -9,6 +10,11 @@ const routes = [
   { path: "/login", name: "login", component: LoginView },
   {
     path: "/",
+    name: "landing",
+    component: LandingView,
+  },
+  {
+    path: "/dashboard",
     name: "dashboard",
     component: DashboardView,
     meta: { requiresAuth: true },
@@ -53,6 +59,9 @@ router.beforeEach((to) => {
     if (redirectPath && redirectPath !== "/login") {
       return redirectPath;
     }
+    return { name: "dashboard" };
+  }
+  if (to.name === "landing" && isAuthed) {
     return { name: "dashboard" };
   }
   return true;
