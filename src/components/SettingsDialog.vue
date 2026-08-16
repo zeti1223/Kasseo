@@ -13,6 +13,12 @@ const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
 
+const themeOptions = [
+  { value: "light", label: "Light" },
+  { value: "system", label: "Auto" },
+  { value: "dark", label: "Dark" },
+];
+
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -65,23 +71,31 @@ function cancelEdit() {
 
           <div class="flex items-center justify-between">
             <div>
-              <div class="font-medium dark:text-white">Dark Mode</div>
+              <div class="font-medium dark:text-white">Theme</div>
               <div class="text-sm text-gray-500 dark:text-gray-400">
-                Switch between light and dark theme
+                Light, dark, or match your system
               </div>
             </div>
-            <button
-              @click="settingsStore.toggleDarkMode"
-              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-              :class="settingsStore.isDarkMode ? 'bg-primary' : 'bg-gray-300'"
+            <div
+              class="inline-flex items-center rounded-lg bg-gray-200 dark:bg-gray-600 p-1 gap-1"
             >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              <button
+                v-for="option in themeOptions"
+                :key="option.value"
+                type="button"
+                @click="settingsStore.setThemeMode(option.value)"
+                :aria-pressed="settingsStore.themeMode === option.value"
+                :title="option.label"
+                class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
                 :class="
-                  settingsStore.isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                  settingsStore.themeMode === option.value
+                    ? 'bg-white dark:bg-surface-dark text-primary shadow-sm'
+                    : 'text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white'
                 "
-              />
-            </button>
+              >
+                {{ option.label }}
+              </button>
+            </div>
           </div>
         </div>
 
