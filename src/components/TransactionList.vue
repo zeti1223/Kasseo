@@ -105,41 +105,14 @@ function splitBetweenLabel(tx) {
           "
           class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
         >
-          <svg
-            class="w-4.5 h-4.5 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              v-if="tx.type === 'deposit'"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-            <template v-else-if="tx.type === 'settlement'">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 11l5-5m0 0l5 5m-5-5v12"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 20H7"
-              />
-            </template>
-            <path
-              v-else
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            />
-          </svg>
+          <i
+            :class="[
+              'text-white',
+              tx.type === 'deposit' ? 'fas fa-arrow-down' :
+              tx.type === 'settlement' ? 'fas fa-handshake' :
+              'fas fa-arrow-up'
+            ]"
+          ></i>
         </div>
 
         <div class="flex-1 min-w-0">
@@ -176,7 +149,7 @@ function splitBetweenLabel(tx) {
               {{ tx.date }}{{ tx.description ? ` · ${tx.description}` : "" }}
             </template>
             <template v-else>
-              {{ tx.date }} · {{ memberName(tx.paidBy) }} · {{ tx.category }}
+              {{ tx.date }} · <span class="dark:text-gray-300">{{ memberName(tx.paidBy) }}</span> · <span class="dark:text-gray-300">{{ tx.category }}</span>
             </template>
           </div>
           <div
@@ -203,37 +176,13 @@ function splitBetweenLabel(tx) {
             class="text-gray-400 hover:text-[#C8A5FC] transition-colors p-1"
             :class="{ 'opacity-50': !canEdit(tx) }"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
+            <i class="fas fa-edit"></i>
           </button>
           <button
             @click="handleDelete(tx.id)"
             class="text-gray-400 hover:text-red-500 transition-colors p-1"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
+            <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>

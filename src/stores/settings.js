@@ -1,26 +1,57 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
+
+const VALID_MODES = ["light", "system", "dark"];
+const media = window.matchMedia("(prefers-color-scheme: dark)");
 
 export const useSettingsStore = defineStore("settings", () => {
-  const isDarkMode = ref(false);
+  // "light" | "system" | "dark"
+  const themeMode = ref("system");
   const nickname = ref("");
+
+  // Whether the system currently reports dark, kept in sync via a listener
+  const systemPrefersDark = ref(media.matches);
+
+  // The effective boolean used to actually toggle the "dark" class
+  const isDarkMode = computed(() =>
+    themeMode.value === "system"
+      ? systemPrefersDark.value
+      : themeMode.value === "dark",
+  );
+
+  function handleSystemChange(e) {
+    systemPrefersDark.value = e.matches;
+  }
+  media.addEventListener("change", handleSystemChange);
 
   // Load settings from localStorage on initialization
   function loadSettings() {
-    const savedDarkMode = localStorage.getItem("darkMode");
+    const savedThemeMode = localStorage.getItem("themeMode");
     const savedNickname = localStorage.getItem("nickname");
 
-    if (savedDarkMode !== null) {
-      isDarkMode.value = savedDarkMode === "true";
+    if (savedThemeMode !== null && VALID_MODES.includes(savedThemeMode)) {
+      themeMode.value = savedThemeMode;
+    } else {
+      // Migrate from the old boolean "darkMode" key if present
+      const legacyDarkMode = localStorage.getItem("darkMode");
+      if (legacyDarkMode !== null) {
+        themeMode.value = legacyDarkMode === "true" ? "dark" : "light";
+      }
     }
+
     if (savedNickname !== null) {
       nickname.value = savedNickname;
     }
+
+    applyTheme(isDarkMode.value);
   }
 
   // Watch for changes and save to localStorage
+  watch(themeMode, (newValue) => {
+    localStorage.setItem("themeMode", newValue);
+  });
+
   watch(isDarkMode, (newValue) => {
-    localStorage.setItem("darkMode", newValue.toString());
     applyTheme(newValue);
   });
 
@@ -36,8 +67,10 @@ export const useSettingsStore = defineStore("settings", () => {
     }
   }
 
-  function toggleDarkMode() {
-    isDarkMode.value = !isDarkMode.value;
+  function setThemeMode(mode) {
+    if (VALID_MODES.includes(mode)) {
+      themeMode.value = mode;
+    }
   }
 
   function setNickname(newNickname) {
@@ -45,10 +78,11 @@ export const useSettingsStore = defineStore("settings", () => {
   }
 
   return {
+    themeMode,
     isDarkMode,
     nickname,
     loadSettings,
-    toggleDarkMode,
+    setThemeMode,
     setNickname,
   };
 });

@@ -19,6 +19,7 @@ import router from "./router";
 import { useAuthStore } from "./stores/auth";
 import { useSettingsStore } from "./stores/settings";
 import "./assets/main.css";
+import "@fortawesome/fontawesome-free/css/all.css";
 
 ChartJS.register(
   ArcElement,

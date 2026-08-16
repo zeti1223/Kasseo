@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
@@ -20,6 +20,10 @@ onMounted(() => {
   groupsStore.listenToMyGroups();
   loadRecentTransactions();
 });
+
+watch(() => groupsStore.groups, () => {
+  loadRecentTransactions();
+}, { deep: true });
 
 async function loadRecentTransactions() {
   if (groupsStore.groups.length === 0) return;
@@ -147,19 +151,7 @@ function getTransactionColor(type) {
         @click="showCreateDialog = true"
         class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
       >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
+        <i class="fas fa-plus"></i>
         New fund
       </button>
     </div>
@@ -173,19 +165,7 @@ function getTransactionColor(type) {
         <div
           class="w-16 h-16 bg-[#A5E3FC]/30 rounded-full flex items-center justify-center mx-auto mb-4"
         >
-          <svg
-            class="w-8 h-8 text-[#A5E3FC]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <i class="fas fa-coins w-8 h-8 text-[#A5E3FC]"></i>
         </div>
         <h2 class="text-xl font-semibold mb-2 dark:text-white">
           Start your shared fund journey
@@ -284,38 +264,14 @@ function getTransactionColor(type) {
                   @click.stop="copyInviteLink(group.id)"
                   class="flex-1 text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 dark:text-white"
                 >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                    />
-                  </svg>
+                  <i class="fas fa-link w-4 h-4"></i>
                   {{ copiedId === group.id ? "Copied!" : "Share" }}
                 </button>
                 <button
                   @click.stop="openGroup(group.id)"
                   class="flex-1 text-sm px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
                 >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                  <i class="fas fa-arrow-right w-4 h-4"></i>
                   Open
                 </button>
               </div>
@@ -343,19 +299,7 @@ function getTransactionColor(type) {
               v-if="recentTransactions.length === 0 && !loadingTransactions"
               class="p-6 text-center text-gray-500 dark:text-gray-400"
             >
-              <svg
-                class="w-8 h-8 mx-auto mb-2 opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
+              <i class="fas fa-clipboard-list w-8 h-8 mx-auto mb-2 opacity-50"></i>
               No recent activity
             </div>
 
@@ -375,24 +319,14 @@ function getTransactionColor(type) {
                         : 'bg-[#C1503A]/20'
                     "
                   >
-                    <svg
-                      class="w-4 h-4"
-                      :class="
+                    <i
+                      :class="[
+                        'w-4 h-4',
                         tx.type === 'deposit'
-                          ? 'text-[#A7F49D]'
-                          : 'text-[#C1503A]'
-                      "
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                      />
-                    </svg>
+                          ? 'fas fa-arrow-down text-[#A7F49D]'
+                          : 'fas fa-arrow-up text-[#C1503A]'
+                      ]"
+                    ></i>
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between mb-1">
