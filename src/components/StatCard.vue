@@ -26,7 +26,7 @@ const labelClass = computed(() => {
 
 const iconClass = computed(() => {
   const iconMap = {
-    "cash": "fa-coins",
+    cash: "fa-coins",
     "piggy-bank": "fa-piggy-bank",
     "arrow-down": "fa-arrow-down",
     "arrow-up": "fa-arrow-up",
@@ -41,7 +41,9 @@ const iconClass = computed(() => {
   >
     <div class="flex items-center justify-between mb-1">
       <span :class="labelClass">{{ label }}</span>
-      <i :class="['fas', iconClass, 'w-5 h-5 text-gray-500 dark:text-gray-400']"></i>
+      <i
+        :class="['fas', iconClass, 'w-5 h-5 text-gray-500 dark:text-gray-400']"
+      ></i>
     </div>
     <div class="text-xl font-bold money dark:text-white" :class="colorClass">
       {{ value.toFixed(2) }} {{ currency }}

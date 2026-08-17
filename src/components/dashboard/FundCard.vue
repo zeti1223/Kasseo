@@ -33,7 +33,9 @@ function formatCurrency(amount, currency) {
         >
           {{ formatCurrency(group.balance, group.currency) }}
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">Current balance</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+          Current balance
+        </div>
       </div>
     </div>
 

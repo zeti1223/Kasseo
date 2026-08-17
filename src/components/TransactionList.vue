@@ -109,9 +109,11 @@ function splitBetweenLabel(tx) {
           <i
             :class="[
               'text-white',
-              tx.type === 'deposit' ? 'fas fa-arrow-down' :
-              tx.type === 'settlement' ? 'fas fa-handshake' :
-              'fas fa-arrow-up'
+              tx.type === 'deposit'
+                ? 'fas fa-arrow-down'
+                : tx.type === 'settlement'
+                  ? 'fas fa-handshake'
+                  : 'fas fa-arrow-up',
             ]"
           ></i>
         </div>
@@ -150,7 +152,11 @@ function splitBetweenLabel(tx) {
               {{ tx.date }}{{ tx.description ? ` · ${tx.description}` : "" }}
             </template>
             <template v-else>
-              {{ tx.date }} · <span class="dark:text-gray-300">{{ memberName(tx.paidBy) }}</span> · <span class="dark:text-gray-300">{{ tx.category }}</span>
+              {{ tx.date }} ·
+              <span class="dark:text-gray-300">{{
+                memberName(tx.paidBy)
+              }}</span>
+              · <span class="dark:text-gray-300">{{ tx.category }}</span>
             </template>
           </div>
           <div
@@ -208,8 +214,8 @@ function splitBetweenLabel(tx) {
       @confirm="showPermissionAlert = false"
     >
       <p class="mb-3">
-        You can only edit transactions you created. This transaction was
-        created by <strong>{{ memberName(permissionTx?.paidBy) }}</strong
+        You can only edit transactions you created. This transaction was created
+        by <strong>{{ memberName(permissionTx?.paidBy) }}</strong
         >.
       </p>
       <p class="text-xs text-gray-500 dark:text-gray-400">

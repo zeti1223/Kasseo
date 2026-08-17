@@ -11,7 +11,8 @@ defineEmits(["update:currency", "save", "cancel"]);
 <template>
   <div class="space-y-4">
     <div>
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+      <label
+        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
         >Current currency</label
       >
       <select

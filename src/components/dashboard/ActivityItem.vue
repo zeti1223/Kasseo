@@ -41,7 +41,9 @@ function formatCurrency(amount, currency) {
             }}{{ formatCurrency(tx.amount, tx.groupCurrency) }}
           </div>
         </div>
-        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div
+          class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+        >
           <div class="truncate">{{ tx.groupName }}</div>
           <div>{{ new Date(tx.date).toLocaleDateString() }}</div>
         </div>

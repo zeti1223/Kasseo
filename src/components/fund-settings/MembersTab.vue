@@ -35,7 +35,10 @@ defineEmits(["copy-invite", "remove"]);
         class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
       >
         <div class="flex items-center gap-3">
-          <div v-if="member.photoURL" class="w-8 h-8 rounded-full overflow-hidden">
+          <div
+            v-if="member.photoURL"
+            class="w-8 h-8 rounded-full overflow-hidden"
+          >
             <img
               :src="member.photoURL"
               :alt="member.displayName"

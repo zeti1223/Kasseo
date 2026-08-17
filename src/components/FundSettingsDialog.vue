@@ -118,7 +118,10 @@ async function confirmRemoveCategory() {
   if (!props.group?.id || !removeCategoryTarget.value) return;
   loading.value = true;
   try {
-    await groupsStore.removeCategory(props.group.id, removeCategoryTarget.value);
+    await groupsStore.removeCategory(
+      props.group.id,
+      removeCategoryTarget.value,
+    );
     await loadCategories();
     removeCategoryTarget.value = null;
   } finally {
@@ -149,7 +152,10 @@ function copyInviteLink() {
     v-if="props.modelValue"
     class="fixed inset-0 z-50 flex items-center justify-center"
   >
-    <div class="absolute inset-0 bg-black/50" @click="emit('update:modelValue', false)" />
+    <div
+      class="absolute inset-0 bg-black/50"
+      @click="emit('update:modelValue', false)"
+    />
     <div
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4 max-h-[90vh] overflow-y-auto"
     >

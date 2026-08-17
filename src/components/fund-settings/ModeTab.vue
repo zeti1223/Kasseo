@@ -25,7 +25,9 @@ defineEmits(["change"]);
     >
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium dark:text-white">{{ opt.label }}</span>
-        <span v-if="mode === opt.value" class="text-xs font-medium text-[#C8A5FC]"
+        <span
+          v-if="mode === opt.value"
+          class="text-xs font-medium text-[#C8A5FC]"
           >Selected</span
         >
       </div>
@@ -37,8 +39,8 @@ defineEmits(["change"]);
       Only the owner can change the fund's mode
     </p>
     <p class="text-xs text-gray-500 dark:text-gray-400">
-      Switching modes doesn't delete any transactions — it only changes how
-      new ones are logged and how balances are calculated.
+      Switching modes doesn't delete any transactions — it only changes how new
+      ones are logged and how balances are calculated.
     </p>
   </div>
 </template>

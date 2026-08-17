@@ -30,9 +30,13 @@ onMounted(() => {
   loadRecentTransactions();
 });
 
-watch(() => groupsStore.groups, () => {
-  loadRecentTransactions();
-}, { deep: true });
+watch(
+  () => groupsStore.groups,
+  () => {
+    loadRecentTransactions();
+  },
+  { deep: true },
+);
 
 async function loadRecentTransactions() {
   if (groupsStore.groups.length === 0) return;

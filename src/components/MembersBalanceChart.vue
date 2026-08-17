@@ -19,7 +19,11 @@ const chartOptions = computed(() => cartesianOptions(props.currency));
 
 <template>
   <div style="height: 260px">
-    <Line v-if="transactions.length" :data="chartData" :options="chartOptions" />
+    <Line
+      v-if="transactions.length"
+      :data="chartData"
+      :options="chartOptions"
+    />
     <div
       v-else
       class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full"

@@ -103,7 +103,9 @@ const totals = computed(() => {
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="md:col-span-2">
         <ChartCard
-          :title="mode === 'split' ? 'Your balance over time' : 'Balance over time'"
+          :title="
+            mode === 'split' ? 'Your balance over time' : 'Balance over time'
+          "
         >
           <BalanceOverTimeChart
             :transactions="transactionsStore.transactions"
@@ -143,7 +145,9 @@ const totals = computed(() => {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <ChartCard :title="mode === 'split' ? 'Monthly spending' : 'Monthly cash flow'">
+      <ChartCard
+        :title="mode === 'split' ? 'Monthly spending' : 'Monthly cash flow'"
+      >
         <MonthlyCashFlowChart
           :transactions="transactionsStore.transactions"
           :currency="groupsStore.currentGroup.currency"
@@ -197,5 +201,8 @@ const totals = computed(() => {
     ></div>
   </div>
 
-  <FundSettingsDialog v-model="showSettings" :group="groupsStore.currentGroup" />
+  <FundSettingsDialog
+    v-model="showSettings"
+    :group="groupsStore.currentGroup"
+  />
 </template>

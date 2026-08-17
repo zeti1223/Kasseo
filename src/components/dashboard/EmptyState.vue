@@ -16,8 +16,8 @@ defineEmits(["create"]);
         Start your shared fund journey
       </h2>
       <p class="text-gray-600 dark:text-gray-400 mb-4">
-        Create your first shared fund to track expenses with friends, family,
-        or roommates.
+        Create your first shared fund to track expenses with friends, family, or
+        roommates.
       </p>
       <button
         @click="$emit('create')"

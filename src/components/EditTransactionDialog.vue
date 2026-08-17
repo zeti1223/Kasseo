@@ -130,13 +130,17 @@ async function handleUpdate() {
         Edit transaction
       </h2>
 
-      <div class="flex mb-4 divide-x divide-gray-200 dark:divide-gray-600 rounded-lg overflow-hidden">
+      <div
+        class="flex mb-4 divide-x divide-gray-200 dark:divide-gray-600 rounded-lg overflow-hidden"
+      >
         <button
           @click="type = 'expense'"
           class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
-          :class="type === 'expense'
+          :class="
+            type === 'expense'
               ? 'bg-[#C1503A] text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          "
         >
           <i class="fas fa-arrow-up"></i>
           Expense
@@ -146,9 +150,11 @@ async function handleUpdate() {
           v-if="mode === 'kitty'"
           @click="type = 'deposit'"
           class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
-          :class="type === 'deposit'
+          :class="
+            type === 'deposit'
               ? 'bg-[#A7F49D] text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          "
         >
           <i class="fas fa-arrow-down"></i>
           Deposit
@@ -158,9 +164,11 @@ async function handleUpdate() {
           v-else
           @click="type = 'settlement'"
           class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
-          :class="type === 'settlement'
+          :class="
+            type === 'settlement'
               ? 'bg-[#A5E3FC] text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          "
         >
           <i class="fas fa-handshake"></i>
           Settle up
