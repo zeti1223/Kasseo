@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
-import SettingsDialog from "@/components/SettingsDialog.vue";
+import SettingsDialog from "../features/settings/SettingsDialog.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();

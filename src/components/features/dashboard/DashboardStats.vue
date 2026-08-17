@@ -1,5 +1,5 @@
 <script setup>
-import StatCard from "@/components/StatCard.vue";
+import StatCard from "../../common/StatCard.vue";
 
 defineProps({
   totalBalance: { type: Number, required: true },

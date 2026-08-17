@@ -1,5 +1,5 @@
 <script setup>
-import StatCard from "@/components/StatCard.vue";
+import StatCard from "../../common/StatCard.vue";
 
 defineProps({
   mode: { type: String, required: true }, // 'kitty' | 'split'
