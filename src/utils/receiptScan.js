@@ -3,7 +3,7 @@
 // API key ships inside the client bundle — see README/SETUP notes on
 // restricting the key by HTTP referrer in Google AI Studio.
 
-const GEMINI_MODEL = "gemini-2.5-flash-lite";
+const GEMINI_MODEL = "gemini-3.5-flash-lite";
 
 export function extractJsonArray(text) {
   let cleaned = (text || "").trim();
@@ -102,7 +102,6 @@ export async function scanReceiptImage(imageBase64, allCategories, overrides) {
               ],
             },
           ],
-          generationConfig: { temperature: 0.2 },
         }),
       },
     );
