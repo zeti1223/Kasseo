@@ -20,6 +20,7 @@ import BalancesPanel from "@/components/features/groups/BalancesPanel.vue";
 import TransactionForm from "@/components/features/transactions/TransactionForm.vue";
 import TransactionList from "@/components/features/transactions/TransactionList.vue";
 import FundSettingsDialog from "@/components/features/settings/FundSettingsDialog.vue";
+import ReceiptScanDialog from "@/components/features/transactions/ReceiptScanDialog.vue";
 
 const route = useRoute();
 const groupsStore = useGroupsStore();
@@ -28,6 +29,7 @@ const authStore = useAuthStore();
 
 const groupId = computed(() => route.params.id);
 const showSettings = ref(false);
+const showScan = ref(false);
 const customCategories = ref([]);
 const settleTarget = ref(null); // member id prefilled into the "Settle up" form
 
@@ -173,6 +175,13 @@ const totals = computed(() => {
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="md:col-span-2">
+        <button
+          @click="showScan = true"
+          class="w-full mb-3 px-4 py-2 rounded-lg border border-[#C8A5FC] text-[#C8A5FC] hover:bg-[#C8A5FC]/10 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+        >
+          <i class="fas fa-camera"></i>
+          Scan a receipt
+        </button>
         <TransactionForm
           :group-id="groupId"
           :custom-categories="customCategories"
@@ -196,13 +205,19 @@ const totals = computed(() => {
   </div>
 
   <div v-else class="py-16 text-center">
-    <div
-      class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#C8A5FC]"
-    ></div>
+    <i class="fas fa-spinner fa-spin text-3xl text-[#C8A5FC]"></i>
   </div>
 
   <FundSettingsDialog
     v-model="showSettings"
     :group="groupsStore.currentGroup"
+  />
+  <ReceiptScanDialog
+    v-if="groupsStore.currentGroup"
+    v-model="showScan"
+    :group-id="groupId"
+    :custom-categories="customCategories"
+    :mode="mode"
+    :members="groupsStore.currentGroup.members"
   />
 </template>
