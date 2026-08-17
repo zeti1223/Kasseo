@@ -8,7 +8,7 @@ import {
   onValue,
   serverTimestamp,
 } from "firebase/database";
-import { db } from "@/firebase/config";
+import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 
 function categoryFor(type, category) {

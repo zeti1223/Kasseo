@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from "@/stores/auth";
-import AppNavbar from "@/components/AppNavbar.vue";
+import AppNavbar from "@/components/layouts/AppNavbar.vue";
 
 const authStore = useAuthStore();
 </script>

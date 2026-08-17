@@ -6,7 +6,7 @@ import {
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import { ref as dbRef, get, set, serverTimestamp } from "firebase/database";
-import { auth, db, googleProvider } from "@/firebase/config";
+import { auth, db, googleProvider } from "@/services/firebase/config";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);

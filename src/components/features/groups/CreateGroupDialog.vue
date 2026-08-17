@@ -12,7 +12,7 @@ const groupsStore = useGroupsStore();
 const name = ref("");
 const currency = ref("USD");
 const loading = ref(false);
-const currencies = ["USD", "EUR", "HUF", "GBP"];
+const currencies = ["USD", "EUR", "HUF", "GBP", "INR"];
 const nameInput = ref(null);
 
 watch(

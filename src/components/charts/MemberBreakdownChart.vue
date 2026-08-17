@@ -2,25 +2,19 @@
 import { computed } from "vue";
 import { Bar } from "vue-chartjs";
 import { buildMemberBreakdown } from "@/utils/chartData";
+import { cartesianOptions } from "@/utils/chartTheme";
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   members: { type: Object, default: () => ({}) },
+  currency: { type: String, default: "" },
 });
 const chartData = computed(() =>
   buildMemberBreakdown(props.transactions, props.members),
 );
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "bottom",
-      labels: { boxWidth: 12, font: { size: 11 } },
-    },
-  },
-  scales: { y: { beginAtZero: true } },
-};
+const chartOptions = computed(() =>
+  cartesianOptions(props.currency, { scales: { y: { beginAtZero: true } } }),
+);
 </script>
 
 <template>

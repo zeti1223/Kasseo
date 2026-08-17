@@ -9,7 +9,7 @@ import {
   serverTimestamp,
   remove,
 } from "firebase/database";
-import { db } from "@/firebase/config";
+import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 
 export const useGroupsStore = defineStore("groups", () => {

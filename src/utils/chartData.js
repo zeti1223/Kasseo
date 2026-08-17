@@ -1,3 +1,5 @@
+import { areaGradient } from "./chartTheme";
+
 const PALETTE = [
   "#C8A5FC",
   "#A5E3FC",
@@ -28,10 +30,13 @@ export function buildBalanceOverTime(transactions) {
         label: "Balance",
         data,
         borderColor: "#C8A5FC",
-        backgroundColor: "rgba(200, 165, 252, 0.12)",
+        backgroundColor: (ctx) =>
+          areaGradient(ctx.chart.ctx, ctx.chart.chartArea, "#C8A5FC"),
         fill: true,
         tension: 0.3,
         pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
       },
     ],
   };
@@ -99,10 +104,13 @@ export function buildYourBalanceOverTime(transactions, members, userId) {
         label: "Your balance",
         data,
         borderColor: "#C8A5FC",
-        backgroundColor: "rgba(200, 165, 252, 0.12)",
+        backgroundColor: (ctx) =>
+          areaGradient(ctx.chart.ctx, ctx.chart.chartArea, "#C8A5FC"),
         fill: true,
         tension: 0.3,
         pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
       },
     ],
   };
@@ -128,6 +136,141 @@ function applySplitTransaction(balances, tx, memberIds) {
   }
 }
 
+function monthKey(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(key) {
+  const [year, month] = key.split("-").map(Number);
+  return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
+    month: "short",
+    year: "2-digit",
+  });
+}
+
+// Every month between the first and last transaction, so gaps (a month
+// with no activity) still show up as a zero bar instead of a jump cut.
+function monthRange(transactions) {
+  if (!transactions.length) return [];
+  const sorted = [...transactions].sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
+  const start = new Date(sorted[0].date);
+  const end = new Date(sorted[sorted.length - 1].date);
+  const keys = [];
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  while (cursor <= last) {
+    keys.push(
+      `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`,
+    );
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return keys;
+}
+
+// Deposits vs. expenses per month. Settlements are excluded on purpose:
+// they move money between members but don't change how much is in (or
+// spent from) the fund overall, so they'd just add noise here.
+export function buildMonthlyCashFlow(transactions) {
+  const months = monthRange(transactions);
+  const deposited = Object.fromEntries(months.map((m) => [m, 0]));
+  const spent = Object.fromEntries(months.map((m) => [m, 0]));
+
+  transactions.forEach((tx) => {
+    const key = monthKey(tx.date);
+    if (!(key in deposited)) return;
+    if (tx.type === "deposit") deposited[key] += tx.amount;
+    else if (tx.type === "expense") spent[key] += tx.amount;
+  });
+
+  return {
+    labels: months.map(monthLabel),
+    datasets: [
+      {
+        label: "Deposited",
+        data: months.map((m) => Number(deposited[m].toFixed(2))),
+        backgroundColor: "#A7F49D",
+        borderRadius: 4,
+        maxBarThickness: 28,
+      },
+      {
+        label: "Spent",
+        data: months.map((m) => Number(spent[m].toFixed(2))),
+        backgroundColor: "#C1503A",
+        borderRadius: 4,
+        maxBarThickness: 28,
+      },
+    ],
+  };
+}
+
+// Stacked, per-category spending by month — shows how the mix of
+// expenses shifts over time, not just the all-time total.
+export function buildCategoryTrend(transactions) {
+  const months = monthRange(transactions);
+  const expenses = transactions.filter((t) => t.type === "expense");
+  const categories = [...new Set(expenses.map((t) => t.category))];
+
+  const totalsByCategory = Object.fromEntries(
+    categories.map((c) => [c, Object.fromEntries(months.map((m) => [m, 0]))]),
+  );
+  expenses.forEach((tx) => {
+    const key = monthKey(tx.date);
+    if (totalsByCategory[tx.category] && key in totalsByCategory[tx.category]) {
+      totalsByCategory[tx.category][key] += tx.amount;
+    }
+  });
+
+  return {
+    labels: months.map(monthLabel),
+    datasets: categories.map((category, i) => ({
+      label: category,
+      data: months.map((m) => Number(totalsByCategory[category][m].toFixed(2))),
+      backgroundColor: PALETTE[i % PALETTE.length],
+      borderRadius: 3,
+      maxBarThickness: 28,
+    })),
+  };
+}
+
+// Split mode: net balance of *every* member over time (not just the
+// current user), one line each — makes it easy to spot at a glance who
+// tends to run a deficit vs. who's usually owed.
+export function buildAllMembersBalanceOverTime(transactions, members) {
+  const memberIds = Object.keys(members || {});
+  const sorted = [...transactions].sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
+  const balances = {};
+  memberIds.forEach((id) => (balances[id] = 0));
+
+  const labels = [];
+  const series = Object.fromEntries(memberIds.map((id) => [id, []]));
+  for (const tx of sorted) {
+    applySplitTransaction(balances, tx, memberIds);
+    labels.push(tx.date);
+    memberIds.forEach((id) =>
+      series[id].push(Number((balances[id] || 0).toFixed(2))),
+    );
+  }
+
+  return {
+    labels,
+    datasets: memberIds.map((id, i) => ({
+      label: members[id]?.displayName || "Someone",
+      data: series[id],
+      borderColor: PALETTE[i % PALETTE.length],
+      backgroundColor: PALETTE[i % PALETTE.length],
+      tension: 0.3,
+      pointRadius: 2,
+      pointHoverRadius: 4,
+      fill: false,
+    })),
+  };
+}
+
 export function buildMemberBreakdown(transactions, members) {
   const memberIds = Object.keys(members || {});
   const deposited = memberIds.map((uid) =>
@@ -143,8 +286,20 @@ export function buildMemberBreakdown(transactions, members) {
   return {
     labels: memberIds.map((uid) => members[uid]?.displayName || "Someone"),
     datasets: [
-      { label: "Deposited", data: deposited, backgroundColor: "#A7F49D" },
-      { label: "Spent", data: spent, backgroundColor: "#C1503A" },
+      {
+        label: "Deposited",
+        data: deposited,
+        backgroundColor: "#A7F49D",
+        borderRadius: 4,
+        maxBarThickness: 28,
+      },
+      {
+        label: "Spent",
+        data: spent,
+        backgroundColor: "#C1503A",
+        borderRadius: 4,
+        maxBarThickness: 28,
+      },
     ],
   };
 }
