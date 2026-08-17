@@ -2,9 +2,11 @@
 import { ref, computed, watch } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { CATEGORIES } from "@/constants/categories";
+import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({
   groupId: { type: String, required: true },
+  groupCurrency: { type: String, required: true },
   customCategories: { type: Array, default: () => [] },
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
   members: { type: Object, default: () => ({}) },
@@ -16,6 +18,7 @@ const transactionsStore = useTransactionsStore();
 
 const type = ref("expense");
 const amount = ref("");
+const currency = ref(props.groupCurrency);
 const category = ref(CATEGORIES[0]);
 const description = ref("");
 const date = ref(new Date().toISOString().slice(0, 10));
@@ -64,6 +67,17 @@ watch(
   { immediate: true },
 );
 
+// If the fund's currency changes while this form is open (or on first
+// load), default the picker to it — the user can still override it for
+// a one-off transaction in a different currency.
+watch(
+  () => props.groupCurrency,
+  (c) => {
+    currency.value = c;
+  },
+  { immediate: true },
+);
+
 // BalancesPanel can ask this form to prefill a "Settle up" for a member.
 watch(
   () => props.settleWith,
@@ -104,6 +118,7 @@ async function handleSubmit() {
   try {
     const payload = {
       amount: amount.value,
+      currency: currency.value,
       type: type.value,
       description: description.value,
       date: date.value,
@@ -119,8 +134,13 @@ async function handleSubmit() {
     if (type.value === "settlement") {
       payload.to = recipient.value;
     }
-    await transactionsStore.addTransaction(props.groupId, payload);
+    await transactionsStore.addTransaction(
+      props.groupId,
+      props.groupCurrency,
+      payload,
+    );
     amount.value = "";
+    currency.value = props.groupCurrency;
     description.value = "";
   } finally {
     loading.value = false;
@@ -187,13 +207,29 @@ async function handleSubmit() {
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >Amount</label
         >
-        <input
-          v-model="amount"
-          type="number"
-          min="0"
-          step="0.01"
-          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
-        />
+        <div class="flex gap-2">
+          <input
+            v-model="amount"
+            type="number"
+            min="0"
+            step="0.01"
+            class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+          <select
+            v-model="currency"
+            class="w-24 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+          >
+            <option v-for="curr in CURRENCIES" :key="curr" :value="curr">
+              {{ curr }}
+            </option>
+          </select>
+        </div>
+        <p
+          v-if="currency !== groupCurrency"
+          class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+        >
+          Will be converted to {{ groupCurrency }} at today's rate
+        </p>
       </div>
 
       <div v-if="type === 'expense'">

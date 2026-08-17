@@ -184,6 +184,7 @@ const totals = computed(() => {
         </button>
         <TransactionForm
           :group-id="groupId"
+          :group-currency="groupsStore.currentGroup.currency"
           :custom-categories="customCategories"
           :mode="mode"
           :members="groupsStore.currentGroup.members"
@@ -195,6 +196,7 @@ const totals = computed(() => {
       <div class="md:col-span-2">
         <TransactionList
           :group-id="groupId"
+          :group-currency="groupsStore.currentGroup.currency"
           :transactions="transactionsStore.transactions"
           :members="groupsStore.currentGroup.members"
           :custom-categories="customCategories"
@@ -216,6 +218,7 @@ const totals = computed(() => {
     v-if="groupsStore.currentGroup"
     v-model="showScan"
     :group-id="groupId"
+    :group-currency="groupsStore.currentGroup.currency"
     :custom-categories="customCategories"
     :mode="mode"
     :members="groupsStore.currentGroup.members"

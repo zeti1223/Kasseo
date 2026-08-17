@@ -2,6 +2,7 @@
 import { ref, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
+import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({ modelValue: Boolean });
 const emit = defineEmits(["update:modelValue"]);
@@ -12,7 +13,7 @@ const groupsStore = useGroupsStore();
 const name = ref("");
 const currency = ref("USD");
 const loading = ref(false);
-const currencies = ["USD", "EUR", "HUF", "GBP", "INR"];
+const currencies = CURRENCIES;
 const nameInput = ref(null);
 
 watch(

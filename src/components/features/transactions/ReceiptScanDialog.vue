@@ -9,6 +9,7 @@ import { scanReceiptImage, ScanError } from "@/utils/receiptScan";
 const props = defineProps({
   modelValue: Boolean,
   groupId: { type: String, required: true },
+  groupCurrency: { type: String, required: true },
   customCategories: { type: Array, default: () => [] },
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
   members: { type: Object, default: () => ({}) },
@@ -223,8 +224,9 @@ async function approveAndSave() {
     for (const it of items.value) {
       const label =
         it.quantity && it.quantity > 1 ? `${it.name} ×${it.quantity}` : it.name;
-      await transactionsStore.addTransaction(props.groupId, {
+      await transactionsStore.addTransaction(props.groupId, props.groupCurrency, {
         amount: it.totalPrice,
+        currency: props.groupCurrency,
         type: "expense",
         category: it.category,
         description: label,
