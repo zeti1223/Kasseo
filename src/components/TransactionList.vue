@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
+import ConfirmDialog from "./ui/ConfirmDialog.vue";
 
 const props = defineProps({
   groupId: { type: String, required: true },
@@ -199,39 +200,23 @@ function splitBetweenLabel(tx) {
     />
 
     <!-- Permission Alert Dialog -->
-    <div
-      v-if="showPermissionAlert"
-      class="fixed inset-0 z-50 flex items-center justify-center"
+    <ConfirmDialog
+      v-model="showPermissionAlert"
+      title="Permission Required"
+      confirm-label="Got it"
+      :show-cancel="false"
+      @confirm="showPermissionAlert = false"
     >
-      <div
-        class="absolute inset-0 bg-black/50"
-        @click="showPermissionAlert = false"
-      />
-      <div
-        class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[420px] mx-4"
-      >
-        <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
-          Permission Required
-        </h2>
-        <p class="text-gray-700 dark:text-gray-300 mb-4">
-          You can only edit transactions you created. This transaction was
-          created by <strong>{{ memberName(permissionTx?.paidBy) }}</strong
-          >.
-        </p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          If you need to edit this transaction, please ask
-          {{ memberName(permissionTx?.paidBy) }} to make the changes or contact
-          your group administrator.
-        </p>
-        <div class="flex justify-end gap-2">
-          <button
-            @click="showPermissionAlert = false"
-            class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors"
-          >
-            Got it
-          </button>
-        </div>
-      </div>
-    </div>
+      <p class="mb-3">
+        You can only edit transactions you created. This transaction was
+        created by <strong>{{ memberName(permissionTx?.paidBy) }}</strong
+        >.
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        If you need to edit this transaction, please ask
+        {{ memberName(permissionTx?.paidBy) }} to make the changes or contact
+        your group administrator.
+      </p>
+    </ConfirmDialog>
   </div>
 </template>

@@ -1,19 +1,20 @@
 <script setup>
 import { computed } from "vue";
 import { Bar } from "vue-chartjs";
-import { buildMemberBreakdown } from "@/utils/chartData";
+import { buildMonthlyCashFlow } from "@/utils/chartData";
 import { cartesianOptions } from "@/utils/chartTheme";
 
+// Deposits vs. expenses per month. Settlements are intentionally left
+// out (see buildMonthlyCashFlow) since they don't change the fund total.
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
-  members: { type: Object, default: () => ({}) },
   currency: { type: String, default: "" },
 });
-const chartData = computed(() =>
-  buildMemberBreakdown(props.transactions, props.members),
-);
+const chartData = computed(() => buildMonthlyCashFlow(props.transactions));
 const chartOptions = computed(() =>
-  cartesianOptions(props.currency, { scales: { y: { beginAtZero: true } } }),
+  cartesianOptions(props.currency, {
+    scales: { x: { stacked: false }, y: { beginAtZero: true } },
+  }),
 );
 </script>
 

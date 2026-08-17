@@ -7,10 +7,15 @@ import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/firebase/config";
 import { computeSplitBalances } from "@/utils/chartData";
-import StatCard from "@/components/StatCard.vue";
+import ChartCard from "@/components/ui/ChartCard.vue";
+import GroupHeader from "@/components/group/GroupHeader.vue";
+import GroupStats from "@/components/group/GroupStats.vue";
 import BalanceOverTimeChart from "@/components/BalanceOverTimeChart.vue";
 import CategoryBreakdownChart from "@/components/CategoryBreakdownChart.vue";
 import MemberBreakdownChart from "@/components/MemberBreakdownChart.vue";
+import MonthlyCashFlowChart from "@/components/MonthlyCashFlowChart.vue";
+import CategoryTrendChart from "@/components/CategoryTrendChart.vue";
+import MembersBalanceChart from "@/components/MembersBalanceChart.vue";
 import BalancesPanel from "@/components/BalancesPanel.vue";
 import TransactionForm from "@/components/TransactionForm.vue";
 import TransactionList from "@/components/TransactionList.vue";
@@ -83,107 +88,42 @@ const totals = computed(() => {
 
 <template>
   <div v-if="groupsStore.currentGroup" class="max-w-[1100px] mx-auto px-4 py-8">
-    <div class="flex items-center gap-4 mb-1">
-      <h1 class="text-xl font-bold font-display dark:text-white">
-        {{ groupsStore.currentGroup.name }}
-      </h1>
-      <button
-        @click="showSettings = true"
-        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-      >
-        <i class="fas fa-cog"></i>
-      </button>
-    </div>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-      {{ groupsStore.currentGroup.currency }}
-    </p>
+    <GroupHeader
+      :name="groupsStore.currentGroup.name"
+      :currency="groupsStore.currentGroup.currency"
+      @open-settings="showSettings = true"
+    />
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <template v-if="mode === 'split'">
-        <StatCard
-          label="Your balance"
-          :value="totals.yourBalance"
-          :currency="groupsStore.currentGroup.currency"
-          :color="totals.yourBalance >= 0 ? 'success' : 'error'"
-          icon="piggy-bank"
-        />
-        <StatCard
-          label="You paid"
-          :value="totals.youPaid"
-          :currency="groupsStore.currentGroup.currency"
-          color="primary"
-          icon="arrow-up"
-        />
-        <StatCard
-          label="Total spent"
-          :value="totals.totalSpent"
-          :currency="groupsStore.currentGroup.currency"
-          color="warning"
-          icon="arrow-up"
-        />
-      </template>
-      <template v-else>
-        <StatCard
-          label="Current balance"
-          :value="totals.balance"
-          :currency="groupsStore.currentGroup.currency"
-          color="primary"
-          icon="piggy-bank"
-        />
-        <StatCard
-          label="Total deposited"
-          :value="totals.deposited"
-          :currency="groupsStore.currentGroup.currency"
-          color="success"
-          icon="arrow-down"
-        />
-        <StatCard
-          label="Total spent"
-          :value="totals.spent"
-          :currency="groupsStore.currentGroup.currency"
-          color="error"
-          icon="arrow-up"
-        />
-      </template>
-    </div>
+    <GroupStats
+      :mode="mode"
+      :totals="totals"
+      :currency="groupsStore.currentGroup.currency"
+    />
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="md:col-span-2">
-        <div
-          class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+        <ChartCard
+          :title="mode === 'split' ? 'Your balance over time' : 'Balance over time'"
         >
-          <div class="text-base font-medium mb-2 font-display dark:text-white">
-            {{
-              mode === "split" ? "Your balance over time" : "Balance over time"
-            }}
-          </div>
           <BalanceOverTimeChart
             :transactions="transactionsStore.transactions"
             :mode="mode"
             :members="groupsStore.currentGroup.members"
             :user-id="authStore.user?.uid"
+            :currency="groupsStore.currentGroup.currency"
           />
-        </div>
+        </ChartCard>
       </div>
       <div class="md:col-span-1">
-        <div
-          class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
-        >
-          <div class="text-base font-medium mb-2 font-display dark:text-white">
-            By category
-          </div>
+        <ChartCard title="By category">
           <CategoryBreakdownChart
             :transactions="transactionsStore.transactions"
+            :currency="groupsStore.currentGroup.currency"
           />
-        </div>
+        </ChartCard>
       </div>
       <div class="md:col-span-1">
-        <div
-          class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
-        >
-          <div class="text-base font-medium mb-2 font-display dark:text-white">
-            {{ mode === "split" ? "Balances" : "By member" }}
-          </div>
+        <ChartCard :title="mode === 'split' ? 'Balances' : 'By member'">
           <BalancesPanel
             v-if="mode === 'split'"
             :transactions="transactionsStore.transactions"
@@ -196,9 +136,35 @@ const totals = computed(() => {
             v-else
             :transactions="transactionsStore.transactions"
             :members="groupsStore.currentGroup.members"
+            :currency="groupsStore.currentGroup.currency"
           />
-        </div>
+        </ChartCard>
       </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <ChartCard :title="mode === 'split' ? 'Monthly spending' : 'Monthly cash flow'">
+        <MonthlyCashFlowChart
+          :transactions="transactionsStore.transactions"
+          :currency="groupsStore.currentGroup.currency"
+        />
+      </ChartCard>
+      <ChartCard title="Spending by category, over time">
+        <CategoryTrendChart
+          :transactions="transactionsStore.transactions"
+          :currency="groupsStore.currentGroup.currency"
+        />
+      </ChartCard>
+    </div>
+
+    <div v-if="mode === 'split'" class="grid grid-cols-1 gap-4 mb-6">
+      <ChartCard title="Everyone's balance over time">
+        <MembersBalanceChart
+          :transactions="transactionsStore.transactions"
+          :members="groupsStore.currentGroup.members"
+          :currency="groupsStore.currentGroup.currency"
+        />
+      </ChartCard>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -231,8 +197,5 @@ const totals = computed(() => {
     ></div>
   </div>
 
-  <FundSettingsDialog
-    v-model="showSettings"
-    :group="groupsStore.currentGroup"
-  />
+  <FundSettingsDialog v-model="showSettings" :group="groupsStore.currentGroup" />
 </template>
