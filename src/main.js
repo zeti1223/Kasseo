@@ -36,11 +36,16 @@ ChartJS.register(
 
 const app = createApp(App);
 app.use(createPinia());
-app.use(router);
 
 // Wait for Firebase to report the initial auth state before the first
-// route is resolved, so the /login redirect guard never gets a false
-// negative on page refresh.
+// route is resolved, so the / -> /dashboard and /login redirect guards
+// never get a false negative on page refresh.
+//
+// NOTE: app.use(router) triggers Vue Router's initial navigation
+// synchronously, so it must happen AFTER authStore.init() resolves -
+// otherwise the beforeEach guard runs with isReady still false, lets
+// the very first navigation through unchecked, and never re-evaluates
+// it once the auth state becomes known.
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
 
@@ -48,5 +53,6 @@ const settingsStore = useSettingsStore();
 settingsStore.loadSettings();
 
 authStore.init().then(() => {
+  app.use(router);
   app.mount("#app");
 });
