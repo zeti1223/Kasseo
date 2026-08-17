@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useGroupsStore } from "@/stores/groups";
+import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
+import { CURRENCIES } from "@/constants/currencies";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 import CurrencyTab from "./CurrencyTab.vue";
 import ModeTab from "./ModeTab.vue";
@@ -14,6 +16,7 @@ const props = defineProps({ modelValue: Boolean, group: Object });
 const emit = defineEmits(["update:modelValue"]);
 
 const groupsStore = useGroupsStore();
+const transactionsStore = useTransactionsStore();
 const authStore = useAuthStore();
 
 const tabs = [
@@ -25,7 +28,7 @@ const tabs = [
 const activeTab = ref("currency");
 
 const currency = ref("USD");
-const currencies = ["USD", "EUR", "HUF", "GBP", "INR"];
+const currencies = CURRENCIES;
 const mode = ref("kitty");
 const modes = [
   {
@@ -42,6 +45,8 @@ const modes = [
   },
 ];
 const loading = ref(false);
+const recalcProgress = ref(null); // { done, total } while reconverting transactions
+const recalcFailedCount = ref(0); // set after a run that left some transactions unconverted
 
 const newCategory = ref("");
 const categories = ref([]);
@@ -80,13 +85,54 @@ async function loadCategories() {
 
 async function handleCurrencyChange() {
   if (!props.group?.id) return;
+  const newCurrency = currency.value;
+  const changed = newCurrency !== props.group.currency;
   loading.value = true;
+  recalcFailedCount.value = 0;
   try {
-    await groupsStore.updateCurrency(props.group.id, currency.value);
+    if (changed) {
+      await runRecalculation(newCurrency);
+    }
     await groupsStore.loadGroup(props.group.id);
-    emit("update:modelValue", false);
+    // If some transactions couldn't be reconverted (e.g. a flaky rate
+    // lookup), keep the dialog open so the failure notice + retry button
+    // are visible instead of silently closing on a partial result.
+    if (recalcFailedCount.value === 0) {
+      emit("update:modelValue", false);
+    }
   } finally {
     loading.value = false;
+    recalcProgress.value = null;
+  }
+}
+
+// Pulled out so "Retry" can call the exact same conversion pass again —
+// it's safe to rerun: transactions that already converted correctly just
+// get recomputed to the same values.
+async function runRecalculation(newCurrency) {
+  await groupsStore.updateCurrency(props.group.id, newCurrency);
+  recalcProgress.value = { done: 0, total: 0 };
+  const failed = await transactionsStore.recalculateForCurrency(
+    props.group.id,
+    newCurrency,
+    (done, total) => {
+      recalcProgress.value = { done, total };
+    },
+  );
+  recalcFailedCount.value = failed.length;
+}
+
+async function retryRecalculation() {
+  loading.value = true;
+  try {
+    await runRecalculation(currency.value);
+    await groupsStore.loadGroup(props.group.id);
+    if (recalcFailedCount.value === 0) {
+      emit("update:modelValue", false);
+    }
+  } finally {
+    loading.value = false;
+    recalcProgress.value = null;
   }
 }
 
@@ -154,7 +200,7 @@ function copyInviteLink() {
   >
     <div
       class="absolute inset-0 bg-black/50"
-      @click="emit('update:modelValue', false)"
+      @click="!loading && emit('update:modelValue', false)"
     />
     <div
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4 max-h-[90vh] overflow-y-auto"
@@ -185,7 +231,10 @@ function copyInviteLink() {
         :currencies="currencies"
         :is-owner="isOwner"
         :loading="loading"
+        :recalc-progress="recalcProgress"
+        :recalc-failed-count="recalcFailedCount"
         @save="handleCurrencyChange"
+        @retry="retryRecalculation"
         @cancel="emit('update:modelValue', false)"
       />
 

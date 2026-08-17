@@ -2,11 +2,13 @@
 import { ref, watch, nextTick, computed } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { CATEGORIES } from "@/constants/categories";
+import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({
   modelValue: Boolean,
   transaction: { type: Object, default: null },
   groupId: { type: String, required: true },
+  groupCurrency: { type: String, required: true },
   customCategories: { type: Array, default: () => [] },
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
   members: { type: Object, default: () => ({}) },
@@ -18,6 +20,7 @@ const transactionsStore = useTransactionsStore();
 
 const type = ref("expense");
 const amount = ref("");
+const currency = ref(props.groupCurrency);
 const category = ref(CATEGORIES[0]);
 const description = ref("");
 const date = ref(new Date().toISOString().slice(0, 10));
@@ -50,7 +53,11 @@ watch(
   (isOpen) => {
     if (isOpen && props.transaction) {
       type.value = props.transaction.type;
-      amount.value = props.transaction.amount;
+      // Edit the value as it was originally entered, not the converted
+      // amount, so re-saving without changes doesn't run it through a
+      // second, unnecessary conversion.
+      amount.value = props.transaction.originalAmount ?? props.transaction.amount;
+      currency.value = props.transaction.originalCurrency ?? props.groupCurrency;
       category.value = props.transaction.category;
       description.value = props.transaction.description || "";
       date.value = props.transaction.date;
@@ -86,6 +93,7 @@ async function handleUpdate() {
   try {
     const payload = {
       amount: amount.value,
+      currency: currency.value,
       type: type.value,
       description: description.value,
       date: date.value,
@@ -105,6 +113,7 @@ async function handleUpdate() {
     await transactionsStore.updateTransaction(
       props.groupId,
       props.transaction.id,
+      props.groupCurrency,
       payload,
     );
     emit("update:modelValue", false);
@@ -181,14 +190,30 @@ async function handleUpdate() {
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >Amount</label
           >
-          <input
-            ref="amountInput"
-            v-model="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
-          />
+          <div class="flex gap-2">
+            <input
+              ref="amountInput"
+              v-model="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+            <select
+              v-model="currency"
+              class="w-24 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            >
+              <option v-for="curr in CURRENCIES" :key="curr" :value="curr">
+                {{ curr }}
+              </option>
+            </select>
+          </div>
+          <p
+            v-if="currency !== groupCurrency"
+            class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+          >
+            Will be converted to {{ groupCurrency }}
+          </p>
         </div>
         <div v-if="type === 'expense'">
           <label

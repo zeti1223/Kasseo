@@ -7,6 +7,7 @@ import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
 const props = defineProps({
   groupId: { type: String, required: true },
+  groupCurrency: { type: String, required: true },
   transactions: { type: Array, default: () => [] },
   members: { type: Object, default: () => ({}) },
   customCategories: { type: Array, default: () => [] },
@@ -61,6 +62,16 @@ function splitInfo(tx) {
     return { text: `You're owed ${owedToYou.toFixed(2)}`, tone: "positive" };
   }
   return { text: `You owe ${share.toFixed(2)}`, tone: "negative" };
+}
+
+// Shown as a small note when a transaction was entered in a different
+// currency than the fund's, so the converted amount above it isn't a
+// mystery.
+function originalAmountLabel(tx) {
+  if (!tx.originalCurrency || tx.originalCurrency === props.groupCurrency) {
+    return null;
+  }
+  return `${tx.originalAmount.toFixed(2)} ${tx.originalCurrency}`;
 }
 
 function splitBetweenLabel(tx) {
@@ -145,6 +156,11 @@ function splitBetweenLabel(tx) {
                     ? ""
                     : "-"
               }}{{ tx.amount.toFixed(2) }}
+              <span
+                v-if="originalAmountLabel(tx)"
+                class="font-normal text-xs text-gray-400 dark:text-gray-500"
+                >({{ originalAmountLabel(tx) }})</span
+              >
             </span>
           </div>
           <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -199,6 +215,7 @@ function splitBetweenLabel(tx) {
       v-model="showEditDialog"
       :transaction="editingTransaction"
       :group-id="groupId"
+      :group-currency="groupCurrency"
       :custom-categories="customCategories"
       :mode="mode"
       :members="members"
