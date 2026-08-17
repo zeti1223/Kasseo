@@ -3,12 +3,12 @@ import { ref, computed, watch } from "vue";
 import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
-import { db } from "@/firebase/config";
-import ConfirmDialog from "./ui/ConfirmDialog.vue";
-import CurrencyTab from "./fund-settings/CurrencyTab.vue";
-import ModeTab from "./fund-settings/ModeTab.vue";
-import MembersTab from "./fund-settings/MembersTab.vue";
-import CategoriesTab from "./fund-settings/CategoriesTab.vue";
+import { db } from "@/services/firebase/config";
+import ConfirmDialog from "../../common/ConfirmDialog.vue";
+import CurrencyTab from "./CurrencyTab.vue";
+import ModeTab from "./ModeTab.vue";
+import MembersTab from "./MembersTab.vue";
+import CategoriesTab from "./CategoriesTab.vue";
 
 const props = defineProps({ modelValue: Boolean, group: Object });
 const emit = defineEmits(["update:modelValue"]);

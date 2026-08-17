@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import LoginView from "@/views/LoginView.vue";
+import LoginView from "@/components/features/auth/LoginView.vue";
 import LandingView from "@/views/LandingView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import GroupView from "@/views/GroupView.vue";
-import JoinView from "@/views/JoinView.vue";
+import JoinView from "@/components/features/auth/JoinView.vue";
 
 const routes = [
   { path: "/login", name: "login", component: LoginView },

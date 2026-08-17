@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
-import ConfirmDialog from "./ui/ConfirmDialog.vue";
+import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
 const props = defineProps({
   groupId: { type: String, required: true },
