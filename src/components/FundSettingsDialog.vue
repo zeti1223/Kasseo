@@ -25,7 +25,7 @@ const tabs = [
 const activeTab = ref("currency");
 
 const currency = ref("USD");
-const currencies = ["USD", "EUR", "HUF", "GBP"];
+const currencies = ["USD", "EUR", "HUF", "GBP", "INR"];
 const mode = ref("kitty");
 const modes = [
   {
