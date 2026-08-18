@@ -2,6 +2,8 @@
 
 A modern financial app for managing shared expenses and funds.
 
+> ### *Pronunciation:* kaːsˈø
+
 ## Functions
 
 - **User authentication**: using Google OAuth
