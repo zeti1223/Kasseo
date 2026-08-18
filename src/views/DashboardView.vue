@@ -6,10 +6,7 @@ import { useTransactionsStore } from "@/stores/transactions";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import CreateGroupDialog from "@/components/features/groups/CreateGroupDialog.vue";
-import ChartCard from "@/components/common/ChartCard.vue";
-import MonthlyCashFlowChart from "@/components/charts/MonthlyCashFlowChart.vue";
 import EmptyState from "@/components/features/dashboard/EmptyState.vue";
-import DashboardStats from "@/components/features/dashboard/DashboardStats.vue";
 import FundsList from "@/components/features/dashboard/FundsList.vue";
 import RecentActivity from "@/components/features/dashboard/RecentActivity.vue";
 
@@ -69,36 +66,6 @@ async function loadRecentTransactions() {
   }
 }
 
-const aggregateStats = computed(() => {
-  if (groupsStore.groups.length === 0) {
-    return {
-      totalBalance: 0,
-      totalDeposited: 0,
-      totalSpent: 0,
-      currency: "USD",
-    };
-  }
-
-  let totalDeposited = 0;
-  let totalSpent = 0;
-  const currency = groupsStore.groups[0]?.currency || "USD";
-
-  for (const tx of allTransactions.value) {
-    if (tx.type === "deposit") {
-      totalDeposited += tx.amount;
-    } else if (tx.type === "expense") {
-      totalSpent += tx.amount;
-    }
-  }
-
-  return {
-    totalBalance: totalDeposited - totalSpent,
-    totalDeposited,
-    totalSpent,
-    currency,
-  };
-});
-
 const groupStats = computed(() => {
   return groupsStore.groups.map((group) => {
     const groupTxs = allTransactions.value.filter(
@@ -119,13 +86,6 @@ const groupStats = computed(() => {
     };
   });
 });
-
-const hasMixedCurrencies = computed(
-  () => new Set(groupsStore.groups.map((g) => g.currency)).size > 1,
-);
-const chartCurrencyLabel = computed(() =>
-  hasMixedCurrencies.value ? "" : aggregateStats.value.currency,
-);
 
 function openGroup(id) {
   router.push({ name: "group", params: { id } });
@@ -166,30 +126,6 @@ async function copyInviteLink(id) {
     />
 
     <template v-else>
-      <DashboardStats
-        :total-balance="aggregateStats.totalBalance"
-        :total-deposited="aggregateStats.totalDeposited"
-        :total-spent="aggregateStats.totalSpent"
-        :currency="aggregateStats.currency"
-      />
-
-      <div class="mb-6">
-        <ChartCard title="Spending overview">
-          <template #actions>
-            <span
-              v-if="hasMixedCurrencies"
-              class="text-xs text-gray-500 dark:text-gray-400"
-            >
-              Mixed currencies, amounts combined as-is
-            </span>
-          </template>
-          <MonthlyCashFlowChart
-            :transactions="allTransactions"
-            :currency="chartCurrencyLabel"
-          />
-        </ChartCard>
-      </div>
-
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
           <FundsList
