@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
+import { splitShareAmount } from "@/utils/chartData";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
@@ -55,7 +56,7 @@ function splitInfo(tx) {
     : Object.keys(props.members);
   if (!participants.includes(uid)) return null;
 
-  const share = tx.amount / participants.length;
+  const share = splitShareAmount(tx, uid, participants);
   if (tx.paidBy === uid) {
     const owedToYou = tx.amount - share;
     if (owedToYou < 0.005) return { text: "Your share only", tone: "muted" };
@@ -80,7 +81,14 @@ function splitBetweenLabel(tx) {
     : Object.keys(props.members);
   const uid = authStore.user?.uid;
   return participants
-    .map((id) => (id === uid ? "you" : memberName(id)))
+    .map((id) => {
+      const name = id === uid ? "you" : memberName(id);
+      if (tx.splitType === "percent" && tx.splitShares) {
+        const pct = Number(tx.splitShares[id] || 0);
+        return `${name} (${pct}%)`;
+      }
+      return name;
+    })
     .join(", ");
 }
 </script>
