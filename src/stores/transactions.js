@@ -91,7 +91,18 @@ export const useTransactionsStore = defineStore("transactions", () => {
   async function addTransaction(
     groupId,
     groupCurrency,
-    { amount, currency, type, category, description, date, splitAmong, to },
+    {
+      amount,
+      currency,
+      type,
+      category,
+      description,
+      date,
+      splitAmong,
+      splitType,
+      splitShares,
+      to,
+    },
   ) {
     const authStore = useAuthStore();
     const newRef = push(dbRef(db, `transactions/${groupId}`));
@@ -111,9 +122,15 @@ export const useTransactionsStore = defineStore("transactions", () => {
       createdAt: serverTimestamp(),
     };
     // Split-mode expense: who the cost is shared between (snapshot of
-    // member ids at the time it was logged).
+    // member ids at the time it was logged), and how — evenly, or by
+    // `splitShares` (id -> percent of the total) when `splitType` is
+    // "percent".
     if (type === "expense" && splitAmong?.length) {
       payload.splitAmong = splitAmong;
+      if (splitType === "percent" && splitShares) {
+        payload.splitType = "percent";
+        payload.splitShares = splitShares;
+      }
     }
     // Split-mode settlement: who received the direct payment.
     if (type === "settlement" && to) {
@@ -130,7 +147,19 @@ export const useTransactionsStore = defineStore("transactions", () => {
     groupId,
     txId,
     groupCurrency,
-    { amount, currency, type, category, description, date, paidBy, splitAmong, to },
+    {
+      amount,
+      currency,
+      type,
+      category,
+      description,
+      date,
+      paidBy,
+      splitAmong,
+      splitType,
+      splitShares,
+      to,
+    },
   ) {
     const conversion = await buildConversionFields(
       groupCurrency,
@@ -148,6 +177,10 @@ export const useTransactionsStore = defineStore("transactions", () => {
     };
     if (type === "expense" && splitAmong?.length) {
       payload.splitAmong = splitAmong;
+      if (splitType === "percent" && splitShares) {
+        payload.splitType = "percent";
+        payload.splitShares = splitShares;
+      }
     }
     if (type === "settlement" && to) {
       payload.to = to;

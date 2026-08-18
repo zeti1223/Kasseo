@@ -25,6 +25,8 @@ const date = ref(new Date().toISOString().slice(0, 10));
 const loading = ref(false);
 const selectedSplit = ref([]);
 const recipient = ref("");
+const splitType = ref("equal"); // 'equal' | 'percent'
+const splitPercents = ref({}); // member id -> percent (string, as typed)
 
 const allCategories = computed(() => {
   const customNames = props.customCategories.map((cat) => cat.name);
@@ -45,12 +47,52 @@ const eachShare = computed(() => {
   return (Number(amount.value) / selectedSplit.value.length).toFixed(2);
 });
 
+// Sum of the percent inputs across the currently selected members —
+// used to warn the user (and block submit) until it adds up to 100.
+const totalPercent = computed(() =>
+  selectedSplit.value.reduce(
+    (sum, id) => sum + (Number(splitPercents.value[id]) || 0),
+    0,
+  ),
+);
+const percentValid = computed(() => Math.abs(totalPercent.value - 100) < 0.01);
+
+function percentShareAmount(id) {
+  if (!amount.value) return null;
+  const pct = Number(splitPercents.value[id]) || 0;
+  return ((Number(amount.value) * pct) / 100).toFixed(2);
+}
+
+// Spreads 100% evenly across the selected members (with any remainder
+// from rounding dropped onto the last one so they still sum to 100).
+function splitPercentsEvenly() {
+  const ids = selectedSplit.value;
+  if (!ids.length) return;
+  const even = +(100 / ids.length).toFixed(2);
+  const next = {};
+  ids.forEach((id, i) => {
+    next[id] = i === ids.length - 1 ? +(100 - even * (ids.length - 1)).toFixed(2) : even;
+  });
+  splitPercents.value = next;
+}
+
+// Only auto-fills an even spread the first time percent mode is turned
+// on for this form — once the user has typed their own numbers,
+// switching back to "Equal" and forth doesn't clobber them.
+function enablePercentSplit() {
+  splitType.value = "percent";
+  if (!selectedSplit.value.some((id) => splitPercents.value[id] !== undefined)) {
+    splitPercentsEvenly();
+  }
+}
+
 // Keep the split selection in sync with the current member list —
 // defaults to "split between everyone".
 watch(
   () => props.members,
   (m) => {
     selectedSplit.value = Object.keys(m || {});
+    if (splitType.value === "percent") splitPercentsEvenly();
   },
   { immediate: true, deep: true },
 );
@@ -100,6 +142,7 @@ function toggleSplitMember(id) {
   } else {
     selectedSplit.value = [...selectedSplit.value, id];
   }
+  if (splitType.value === "percent") splitPercentsEvenly();
 }
 
 function memberName(id) {
@@ -109,6 +152,13 @@ function memberName(id) {
 const canSubmit = computed(() => {
   if (!amount.value || Number(amount.value) <= 0) return false;
   if (type.value === "settlement" && !recipient.value) return false;
+  if (
+    props.mode === "split" &&
+    type.value === "expense" &&
+    splitType.value === "percent" &&
+    !percentValid.value
+  )
+    return false;
   return true;
 });
 
@@ -129,6 +179,15 @@ async function handleSubmit() {
         payload.splitAmong = selectedSplit.value.length
           ? selectedSplit.value
           : Object.keys(props.members);
+        if (splitType.value === "percent") {
+          payload.splitType = "percent";
+          payload.splitShares = Object.fromEntries(
+            payload.splitAmong.map((id) => [
+              id,
+              Number(splitPercents.value[id]) || 0,
+            ]),
+          );
+        }
       }
     }
     if (type.value === "settlement") {
@@ -248,10 +307,38 @@ async function handleSubmit() {
       </div>
 
       <div v-if="mode === 'split' && type === 'expense'">
-        <label
-          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Split between</label
-        >
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Split between</label
+          >
+          <div class="flex text-xs rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+            <button
+              type="button"
+              @click="splitType = 'equal'"
+              class="px-2.5 py-1 transition-colors"
+              :class="
+                splitType === 'equal'
+                  ? 'bg-[#C8A5FC] text-white'
+                  : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              Equal
+            </button>
+            <button
+              type="button"
+              @click="enablePercentSplit"
+              class="px-2.5 py-1 transition-colors"
+              :class="
+                splitType === 'percent'
+                  ? 'bg-[#C8A5FC] text-white'
+                  : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              Percent
+            </button>
+          </div>
+        </div>
+
         <div class="flex flex-wrap gap-2">
           <button
             v-for="m in memberEntries"
@@ -268,13 +355,60 @@ async function handleSubmit() {
             {{ m.id === currentUserId ? "You" : m.displayName }}
           </button>
         </div>
+
         <p
-          v-if="eachShare"
+          v-if="splitType === 'equal' && eachShare"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
           {{ eachShare }} each, split between {{ selectedSplit.length }}
           {{ selectedSplit.length === 1 ? "person" : "people" }}
         </p>
+
+        <div v-if="splitType === 'percent'" class="mt-2 space-y-1.5">
+          <div
+            v-for="id in selectedSplit"
+            :key="id"
+            class="flex items-center gap-2"
+          >
+            <span class="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate">
+              {{ id === currentUserId ? "You" : memberName(id) }}
+            </span>
+            <input
+              v-model="splitPercents[id]"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              class="w-16 px-2 py-1 text-xs text-right border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+            <span class="text-xs text-gray-500 dark:text-gray-400 w-4">%</span>
+            <span
+              v-if="percentShareAmount(id)"
+              class="text-xs text-gray-400 dark:text-gray-500 w-16 text-right"
+            >
+              {{ percentShareAmount(id) }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between pt-0.5">
+            <button
+              type="button"
+              @click="splitPercentsEvenly"
+              class="text-xs text-[#8A5FBF] dark:text-[#C8A5FC] hover:underline"
+            >
+              Split evenly
+            </button>
+            <span
+              class="text-xs"
+              :class="
+                percentValid
+                  ? 'text-gray-500 dark:text-gray-400'
+                  : 'text-[#C1503A] font-medium'
+              "
+            >
+              Total: {{ totalPercent.toFixed(2) }}%
+            </span>
+          </div>
+        </div>
       </div>
 
       <div v-if="mode === 'split' && type === 'settlement'">

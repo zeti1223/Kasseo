@@ -116,15 +116,27 @@ export function buildYourBalanceOverTime(transactions, members, userId) {
   };
 }
 
+// How much of a split-mode expense a single participant owes. Defaults
+// to an even split unless the transaction was logged with
+// `splitType: "percent"`, in which case each participant's cut comes
+// from their entry in `splitShares` (id -> percent of the total, meant
+// to add up to 100 across `participants`).
+export function splitShareAmount(tx, participantId, participants) {
+  if (tx.splitType === "percent" && tx.splitShares) {
+    const pct = Number(tx.splitShares[participantId] || 0);
+    return (tx.amount * pct) / 100;
+  }
+  return tx.amount / participants.length;
+}
+
 function applySplitTransaction(balances, tx, memberIds) {
   if (tx.type === "expense") {
     const participants = (
       tx.splitAmong?.length ? tx.splitAmong : memberIds
     ).filter((id) => id in balances);
     if (!participants.length) return;
-    const share = tx.amount / participants.length;
     participants.forEach((id) => {
-      balances[id] -= share;
+      balances[id] -= splitShareAmount(tx, id, participants);
     });
     if (tx.paidBy in balances) {
       balances[tx.paidBy] += tx.amount;
