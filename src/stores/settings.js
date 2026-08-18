@@ -9,10 +9,10 @@ export const useSettingsStore = defineStore("settings", () => {
   const themeMode = ref("system");
   const nickname = ref("");
 
-  // Whether the system currently reports dark, kept in sync via a listener
+  // Kept in sync via a listener below
   const systemPrefersDark = ref(media.matches);
 
-  // The effective boolean used to actually toggle the "dark" class
+  // The effective boolean that toggles the "dark" class
   const isDarkMode = computed(() =>
     themeMode.value === "system"
       ? systemPrefersDark.value
@@ -24,7 +24,6 @@ export const useSettingsStore = defineStore("settings", () => {
   }
   media.addEventListener("change", handleSystemChange);
 
-  // Load settings from localStorage on initialization
   function loadSettings() {
     const savedThemeMode = localStorage.getItem("themeMode");
     const savedNickname = localStorage.getItem("nickname");

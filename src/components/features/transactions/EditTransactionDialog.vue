@@ -84,9 +84,8 @@ watch(
   (isOpen) => {
     if (isOpen && props.transaction) {
       type.value = props.transaction.type;
-      // Edit the value as it was originally entered, not the converted
-      // amount, so re-saving without changes doesn't run it through a
-      // second, unnecessary conversion.
+      // Use the originally entered value, not the converted amount, so
+      // re-saving without changes skips a redundant reconversion.
       amount.value = props.transaction.originalAmount ?? props.transaction.amount;
       currency.value = props.transaction.originalCurrency ?? props.groupCurrency;
       category.value = props.transaction.category;
@@ -120,9 +119,7 @@ function toggleSplitMember(id) {
   if (splitType.value === "percent") splitPercentsEvenly();
 }
 
-// Only auto-fills an even spread if the dialog wasn't opened on an
-// already percent-split transaction — otherwise this would clobber the
-// loaded percentages the moment the user reopens the "Percent" tab.
+// Don't auto-fill if the transaction already has percent splits loaded.
 function enablePercentSplit() {
   splitType.value = "percent";
   if (!selectedSplit.value.some((id) => splitPercents.value[id] !== undefined)) {

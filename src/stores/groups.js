@@ -17,8 +17,7 @@ export const useGroupsStore = defineStore("groups", () => {
   const currentGroup = ref(null);
   let unsubscribeIds = null;
 
-  // Listens to users/{uid}/groups (an index of fund ids) and keeps
-  // `groups` in sync with the full fund data for each one.
+  // Keeps `groups` in sync with the full data of every fund the user belongs to.
   function listenToMyGroups() {
     const authStore = useAuthStore();
     if (!authStore.user) return;
@@ -61,9 +60,8 @@ export const useGroupsStore = defineStore("groups", () => {
     return groupId;
   }
 
-  // Anyone signed in who has the invite link (i.e. knows the fund id)
-  // can add themselves as a member. See database.rules.json: a member
-  // can only ever write their own membership entry, never anyone else's.
+  // Anyone signed in with the invite link (the fund id) can add
+  // themselves as a member — see database.rules.json.
   async function joinGroup(groupId) {
     const authStore = useAuthStore();
     const user = authStore.user;
@@ -91,9 +89,8 @@ export const useGroupsStore = defineStore("groups", () => {
     await set(dbRef(db, `groups/${groupId}/currency`), newCurrency);
   }
 
-  // mode: 'kitty' (default, shared pool funded by deposits) or
-  // 'split' (no deposits — every expense is split between members and
-  // members settle their share directly with each other).
+  // mode: 'kitty' (shared pool funded by deposits) or 'split' (members
+  // settle expenses directly with each other, no deposits).
   async function updateMode(groupId, newMode) {
     await set(dbRef(db, `groups/${groupId}/mode`), newMode);
   }

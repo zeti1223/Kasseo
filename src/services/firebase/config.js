@@ -2,9 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
-// All values come from .env (copy .env.example -> .env and fill in
-// the config from Firebase console > Project settings > General >
-// Your apps > Web app). Vite only exposes vars prefixed VITE_.
+// Values come from .env (see .env.example). Vite only exposes VITE_-prefixed vars.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,

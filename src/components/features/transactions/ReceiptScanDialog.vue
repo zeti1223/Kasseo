@@ -63,10 +63,8 @@ function sanitizeKey(str) {
   return str.replace(/[.#$[\]/]/g, "_");
 }
 
-// Atomically claims one of today's scan slots for this fund. Enforced
-// both here and by database.rules.json (count can only go up by 1, up
-// to the daily cap) — there's no backend, so this is a soft limit that
-// protects against accidents/races, not a determined bad actor.
+// Atomically claims one of today's scan slots for this fund. A soft
+// limit (also enforced in database.rules.json) since there's no backend.
 async function reserveScanSlot() {
   const limitRef = dbRef(db, `scanLimits/${props.groupId}/${budapestDateKey()}`);
   const result = await runTransaction(limitRef, (current) => {

@@ -1,25 +1,19 @@
-// Historical exchange-rate lookups, backed by the free Frankfurter API
-// (ECB reference rates, no API key required, CORS-enabled). Used so a
-// transaction's value can be converted to the fund's currency using the
-// rate that applied *on the day it happened*, rather than whatever the
-// rate happens to be right now.
+// Historical exchange rates from the free Frankfurter API (ECB rates,
+// no API key needed), so amounts convert using the rate on the day they happened.
 const API_BASE = "https://api.frankfurter.dev/v1";
 
-// date|from|to -> rate. In-memory only: a fresh page load re-fetches,
-// which is fine since historical rates never change.
+// date|from|to -> rate, cached in memory (historical rates never change).
 const rateCache = new Map();
-// date|from|to -> in-flight Promise<rate>. Separate from rateCache so
-// that many transactions converting on the same day (a common case when
-// recalculating a whole fund at once) share a single network request
-// instead of each firing its own.
+// date|from|to -> in-flight Promise<rate>, so concurrent lookups for the
+// same day share one request.
 const inFlight = new Map();
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Frankfurter has no data for "today" until markets close and none at
-// all for future dates, so clamp anything beyond today back to today.
+// Frankfurter has no rates for today (until markets close) or the future,
+// so clamp anything beyond today back to today.
 function safeDate(date) {
   const today = todayKey();
   if (!date || date > today) return today;
@@ -37,8 +31,7 @@ async function fetchRate(from, to, date, attempt = 1) {
     const url = `${API_BASE}/${date}?base=${encodeURIComponent(from)}&symbols=${encodeURIComponent(to)}`;
     const res = await fetch(url, { signal: controller.signal });
 
-    // 429 (rate limited) and 5xx are worth retrying; other errors
-    // (like a genuinely unsupported currency) are not.
+    // Retry on rate-limit/server errors only.
     if (!res.ok) {
       const retryable = res.status === 429 || res.status >= 500;
       if (retryable && attempt < MAX_ATTEMPTS) {
@@ -55,10 +48,7 @@ async function fetchRate(from, to, date, attempt = 1) {
     }
     return rate;
   } catch (err) {
-    // Network error or timeout — also worth a retry, since a free,
-    // unauthenticated API can throttle a burst of concurrent requests
-    // (this is what recalculating a whole fund's history fires at once)
-    // by hanging or dropping some of them rather than a clean 429.
+    // Also retry on network error/timeout.
     const isAbort = err.name === "AbortError";
     if (attempt < MAX_ATTEMPTS && (isAbort || err instanceof TypeError)) {
       await backoff(attempt);
@@ -98,8 +88,7 @@ export async function getExchangeRate(from, to, date) {
 }
 
 // Converts `amount` from `from` to `to` using the rate on `date`.
-// Returns the converted amount plus the date the rate actually applies
-// to (equal to `date`, clamped to today), so callers can record it.
+// Returns the converted amount and the (clamped) rate date.
 export async function convertCurrency(amount, from, to, date) {
   const rateDate = safeDate(date);
   if (from === to) {

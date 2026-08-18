@@ -1,7 +1,5 @@
 <script setup>
-// Shared card shell for every chart on the Dashboard and Group pages —
-// keeps the border/shadow/title markup in one place instead of being
-// repeated at every call site.
+// Shared card shell for every chart on the Dashboard and Group pages.
 defineProps({
   title: { type: String, default: "" },
 });

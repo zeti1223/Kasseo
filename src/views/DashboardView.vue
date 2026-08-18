@@ -16,9 +16,8 @@ const transactionsStore = useTransactionsStore();
 const showCreateDialog = ref(false);
 const copiedId = ref(null);
 const recentTransactions = ref([]);
-// Unlike recentTransactions (top 5, for the activity feed), this holds
-// every transaction across every fund, so the chart below has real
-// month-by-month history to plot instead of just the last few entries.
+// Holds every transaction across every fund (unlike recentTransactions,
+// which is just the top 5) so the chart has full history to plot.
 const allTransactions = ref([]);
 const loadingTransactions = ref(false);
 

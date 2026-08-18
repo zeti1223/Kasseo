@@ -38,14 +38,12 @@ const router = createRouter({
   routes,
 });
 
-// Safe to read synchronously: main.js waits for authStore.init() to
-// resolve before it mounts the app / performs the first navigation.
+// Safe to read synchronously: main.js waits for authStore.init() first.
 router.beforeEach((to) => {
   const authStore = useAuthStore();
 
-  // Wait for auth state to be ready before making routing decisions
   if (!authStore.isReady) {
-    return true; // Let it proceed, main.js already waited for init()
+    return true;
   }
 
   const isAuthed = !!authStore.user;
@@ -54,7 +52,7 @@ router.beforeEach((to) => {
     return { name: "login", query: { redirect: to.fullPath } };
   }
   if (to.name === "login" && isAuthed) {
-    // Ha van redirect query paraméter, oda irányítunk, különben a dashboardra
+    // Go to the redirect target if there is one, otherwise the dashboard.
     const redirectPath = to.query.redirect;
     if (redirectPath && redirectPath !== "/login") {
       return redirectPath;

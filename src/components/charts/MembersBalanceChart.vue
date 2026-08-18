@@ -4,8 +4,7 @@ import { Line } from "vue-chartjs";
 import { buildAllMembersBalanceOverTime } from "@/utils/chartData";
 import { cartesianOptions } from "@/utils/chartTheme";
 
-// Split mode only: every member's net balance over time, one line each
-// — companion to BalanceOverTimeChart, which only tracks the current user.
+// Split mode only: every member's net balance over time, one line each.
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   members: { type: Object, default: () => ({}) },

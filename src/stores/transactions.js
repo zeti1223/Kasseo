@@ -14,10 +14,8 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { convertCurrency } from "@/services/currency";
 
-// Runs `fn` over `items` with at most `limit` in flight at once. Used
-// for the currency reconversion below — firing every rate lookup at
-// the same instant is what triggers a free, unauthenticated API to
-// throttle or drop some of the requests in the first place.
+// Runs `fn` over `items` with at most `limit` calls in flight (avoids
+// overwhelming the free, unauthenticated rate API).
 async function mapWithConcurrency(items, limit, fn) {
   const results = new Array(items.length);
   let next = 0;
@@ -39,14 +37,8 @@ function categoryFor(type, category) {
   return "Deposit";
 }
 
-// Every transaction keeps the currency and value it was entered in
-// bound together (`originalAmount`/`originalCurrency`), alongside
-// `amount`: the same value converted into the fund's currency using the
-// exchange rate on the transaction's date. All balance/chart math in the
-// app reads `amount`, so a transaction's contribution never silently
-// changes just because the fund's currency changes later — instead,
-// `recalculateForCurrency` explicitly redoes the conversion for every
-// transaction when that happens (see FundSettingsDialog).
+// Converts `amount` into the fund's currency, keeping the original
+// value/currency alongside the converted `amount` used for balance/chart math.
 async function buildConversionFields(groupCurrency, amount, currency, date) {
   const originalAmount = Number(amount);
   const originalCurrency = currency || groupCurrency;
@@ -121,10 +113,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
       date,
       createdAt: serverTimestamp(),
     };
-    // Split-mode expense: who the cost is shared between (snapshot of
-    // member ids at the time it was logged), and how — evenly, or by
-    // `splitShares` (id -> percent of the total) when `splitType` is
-    // "percent".
+    // Split-mode expense: who the cost is split between, and how
+    // (evenly, or by `splitShares` percentages).
     if (type === "expense" && splitAmong?.length) {
       payload.splitAmong = splitAmong;
       if (splitType === "percent" && splitShares) {
@@ -188,23 +178,9 @@ export const useTransactionsStore = defineStore("transactions", () => {
     await set(dbRef(db, `transactions/${groupId}/${txId}`), payload);
   }
 
-  // Re-converts every transaction in the fund into `newCurrency`, each
-  // using the exchange rate on *that transaction's own date* — not
-  // today's rate — so history stays accurate instead of everything
-  // just being relabeled. Transactions saved before this feature existed
-  // (no originalCurrency recorded) are assumed to have been entered in
-  // whatever the fund's currency was previously.
-  //
-  // Rate lookups are deduped by (date, fromCurrency) and run with a
-  // capped concurrency — with many transactions this is what keeps the
-  // fund's currency switch from taking forever (and looking frozen)
-  // without firing so many requests at once that the free rate API
-  // throttles or drops some of them.
-  //
-  // onProgress(done, total), if given, is called as each transaction's
-  // conversion resolves. Returns the list of transaction ids that
-  // couldn't be converted (e.g. after retries were exhausted), so the
-  // caller can warn the user and offer to retry just those.
+  // Re-converts every transaction into `newCurrency` using each
+  // transaction's own historical rate, with capped concurrency.
+  // onProgress(done, total) reports progress; returns ids that failed to convert.
   async function recalculateForCurrency(groupId, newCurrency, onProgress) {
     const snap = await get(dbRef(db, `transactions/${groupId}`));
     if (!snap.exists()) return [];

@@ -7,13 +7,11 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 async function handleLogin() {
-  // Store redirect URL in localStorage before login
   const redirectPath = route.query.redirect || "/dashboard";
   localStorage.setItem("authRedirect", redirectPath);
 
   await authStore.loginWithGoogle();
 
-  // Retrieve and clear the stored redirect
   const storedRedirect = localStorage.getItem("authRedirect");
   localStorage.removeItem("authRedirect");
 

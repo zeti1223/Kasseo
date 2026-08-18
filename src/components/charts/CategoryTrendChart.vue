@@ -4,9 +4,7 @@ import { Bar } from "vue-chartjs";
 import { buildCategoryTrend } from "@/utils/chartData";
 import { cartesianOptions } from "@/utils/chartTheme";
 
-// Stacked spending-by-category, per month — shows how the mix shifts
-// over time instead of just an all-time total (see CategoryBreakdownChart
-// for that).
+// Stacked spending-by-category, per month.
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   currency: { type: String, default: "" },
