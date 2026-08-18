@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
@@ -6,19 +7,39 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
+const loading = ref(false);
+const errorMessage = ref("");
+
 async function handleLogin() {
-  const redirectPath = route.query.redirect || "/dashboard";
-  localStorage.setItem("authRedirect", redirectPath);
+  loading.value = true;
+  errorMessage.value = "";
+  try {
+    const redirectPath = route.query.redirect || "/dashboard";
+    localStorage.setItem("authRedirect", redirectPath);
 
-  await authStore.loginWithGoogle();
+    await authStore.loginWithGoogle();
 
-  const storedRedirect = localStorage.getItem("authRedirect");
-  localStorage.removeItem("authRedirect");
+    if (authStore.user) {
+      const storedRedirect = localStorage.getItem("authRedirect");
+      localStorage.removeItem("authRedirect");
 
-  if (storedRedirect && storedRedirect !== "/dashboard") {
-    router.push(storedRedirect);
-  } else {
-    router.push({ name: "dashboard" });
+      if (
+        storedRedirect &&
+        storedRedirect !== "/dashboard" &&
+        storedRedirect !== "/login"
+      ) {
+        router.push(storedRedirect);
+      } else {
+        router.push({ name: "dashboard" });
+      }
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    if (err?.code !== "auth/popup-closed-by-user") {
+      errorMessage.value = err?.message || "Could not sign in with Google.";
+    }
+  } finally {
+    loading.value = false;
   }
 }
 </script>
@@ -51,11 +72,21 @@ async function handleLogin() {
           with, in real time.
         </p>
       </div>
+
+      <div
+        v-if="errorMessage || authStore.authError"
+        class="bg-[#C1503A]/10 border border-[#C1503A] text-[#C1503A] rounded-lg p-3 mb-4 text-xs break-words text-center"
+      >
+        {{ errorMessage || authStore.authError }}
+      </div>
+
       <button
         @click="handleLogin"
-        class="w-full px-4 py-3 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors flex items-center justify-center gap-2"
+        :disabled="loading"
+        class="w-full px-4 py-3 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <i class="fab fa-google"></i>
+        <i v-if="loading" class="fas fa-spinner fa-spin"></i>
+        <i v-else class="fab fa-google"></i>
         Sign in with Google
       </button>
     </div>

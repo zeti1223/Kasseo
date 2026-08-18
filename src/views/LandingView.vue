@@ -6,8 +6,11 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 async function handleLogin() {
+  localStorage.setItem("authRedirect", "/dashboard");
   await authStore.loginWithGoogle();
-  router.push({ name: "dashboard" });
+  if (authStore.user) {
+    router.push({ name: "dashboard" });
+  }
 }
 </script>
 

@@ -52,14 +52,32 @@ router.beforeEach((to) => {
     return { name: "login", query: { redirect: to.fullPath } };
   }
   if (to.name === "login" && isAuthed) {
-    // Go to the redirect target if there is one, otherwise the dashboard.
+    // Go to the redirect target if there is one, otherwise check stored redirect or dashboard.
     const redirectPath = to.query.redirect;
     if (redirectPath && redirectPath !== "/login") {
       return redirectPath;
     }
+    const storedRedirect = localStorage.getItem("authRedirect");
+    if (storedRedirect) {
+      localStorage.removeItem("authRedirect");
+      if (storedRedirect !== "/login" && storedRedirect !== "/dashboard") {
+        return storedRedirect;
+      }
+    }
     return { name: "dashboard" };
   }
   if (to.name === "landing" && isAuthed) {
+    const storedRedirect = localStorage.getItem("authRedirect");
+    if (storedRedirect) {
+      localStorage.removeItem("authRedirect");
+      if (
+        storedRedirect !== "/login" &&
+        storedRedirect !== "/dashboard" &&
+        storedRedirect !== "/"
+      ) {
+        return storedRedirect;
+      }
+    }
     return { name: "dashboard" };
   }
   return true;
