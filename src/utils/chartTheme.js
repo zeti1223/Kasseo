@@ -1,6 +1,4 @@
-// Shared Chart.js styling so every chart in the app looks and behaves
-// the same way: currency-formatted tooltips, a combined tooltip across
-// all datasets at a given point, and a subtle, dark-mode-aware grid.
+// Shared Chart.js styling: currency-formatted tooltips and a dark-mode-aware grid.
 
 export function formatMoney(value, currency) {
   const amount = Number(value).toFixed(2);
@@ -106,8 +104,8 @@ export function radialOptions(currency) {
   };
 }
 
-// Builds a vertical canvas gradient for line-chart fills. Falls back to
-// a flat color if the canvas context isn't ready yet (first render).
+// Vertical gradient for line-chart fills; falls back to a flat color
+// before the canvas is ready.
 export function areaGradient(ctx, chartArea, colorHex, alpha = 0.25) {
   if (!chartArea) return colorHex;
   const gradient = ctx.createLinearGradient(

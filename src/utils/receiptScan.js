@@ -1,7 +1,5 @@
-// Calls the Gemini API directly from the browser. There's no server
-// component (no Cloud Functions / Blaze plan needed), which means the
-// API key ships inside the client bundle — see README/SETUP notes on
-// restricting the key by HTTP referrer in Google AI Studio.
+// Calls the Gemini API directly from the browser (no backend). The API
+// key ships in the client bundle — restrict it by HTTP referrer in Google AI Studio.
 
 const GEMINI_MODEL = "gemini-3.5-flash-lite";
 
@@ -66,12 +64,12 @@ class ScanError extends Error {
 }
 
 /**
- * Sends the compressed receipt photo straight to Gemini and returns a
- * cleaned-up list of { name, quantity, unitPrice, totalPrice, category }.
+ * Sends a receipt photo to Gemini and returns
+ * { name, quantity, unitPrice, totalPrice, category } items.
  *
  * @param {string} imageBase64 - JPEG bytes, base64-encoded, no data: prefix
- * @param {string[]} allCategories - category names Gemini is allowed to pick from
- * @param {Object} overrides - { normalizedKeyword: category } learned from past corrections
+ * @param {string[]} allCategories - categories Gemini may pick from
+ * @param {Object} overrides - { normalizedKeyword: category } from past corrections
  */
 export async function scanReceiptImage(imageBase64, allCategories, overrides) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;

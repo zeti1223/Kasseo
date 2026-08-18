@@ -6,11 +6,9 @@ const props = defineProps({
   currencies: { type: Array, required: true },
   isOwner: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
-  // { done, total } while existing transactions are being reconverted,
-  // or null the rest of the time (see FundSettingsDialog).
+  // { done, total } while transactions are being reconverted, else null.
   recalcProgress: { type: Object, default: null },
-  // How many transactions were left unconverted after the last attempt
-  // (e.g. a flaky rate lookup that exhausted its retries).
+  // How many transactions failed to convert on the last attempt.
   recalcFailedCount: { type: Number, default: 0 },
 });
 defineEmits(["update:currency", "save", "retry", "cancel"]);
@@ -55,9 +53,7 @@ const statusText = computed(() => {
       </p>
     </div>
 
-    <!-- Visible progress while the reconversion is running in the
-         background, so a fund with a lot of transactions doesn't look
-         frozen while it works through them. -->
+    <!-- Reconversion progress -->
     <div
       v-if="loading"
       class="flex items-center gap-2 text-sm text-[#8A5FBF] dark:text-[#C8A5FC] bg-[#C8A5FC]/10 rounded-lg px-3 py-2"
@@ -77,10 +73,7 @@ const statusText = computed(() => {
       ></div>
     </div>
 
-    <!-- A rate lookup can fail even with retries (e.g. the API throttled
-         a burst of requests) — say so plainly and offer a one-click
-         retry rather than leaving those transactions silently stuck on
-         their old amount. -->
+    <!-- Failed conversions: offer a retry -->
     <div
       v-if="!loading && recalcFailedCount > 0"
       class="flex items-start gap-2 text-sm text-[#C1503A] bg-[#C1503A]/10 rounded-lg px-3 py-2"

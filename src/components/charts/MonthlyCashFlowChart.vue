@@ -4,8 +4,8 @@ import { Bar } from "vue-chartjs";
 import { buildMonthlyCashFlow } from "@/utils/chartData";
 import { cartesianOptions } from "@/utils/chartTheme";
 
-// Deposits vs. expenses per month. Settlements are intentionally left
-// out (see buildMonthlyCashFlow) since they don't change the fund total.
+// Deposits vs. expenses per month. Settlements are left out since they
+// don't change the fund total.
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
   currency: { type: String, default: "" },

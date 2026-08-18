@@ -62,12 +62,8 @@ export function buildCategoryBreakdown(transactions) {
   };
 }
 
-// Split mode: net balance per member across every expense + settlement.
-// Positive = the group owes this member money. Negative = this member
-// owes the group money. This is a net position, not a pairwise ledger,
-// so with more than two members it answers "am I owed / do I owe
-// overall", not "who exactly owes whom" — settling up is still done
-// directly between two chosen members.
+// Split mode: net balance per member (positive = owed money, negative =
+// owes money). A net position, not a pairwise ledger.
 export function computeSplitBalances(transactions, members) {
   const memberIds = Object.keys(members || {});
   const balances = {};
@@ -78,9 +74,8 @@ export function computeSplitBalances(transactions, members) {
   return balances;
 }
 
-// Same math as computeSplitBalances, but only tracks the running total
-// for a single member, in date order, for a "your balance over time"
-// line chart.
+// Same as computeSplitBalances, but tracks one member's running total
+// over time for a line chart.
 export function buildYourBalanceOverTime(transactions, members, userId) {
   const memberIds = Object.keys(members || {});
   const sorted = [...transactions].sort(
@@ -116,11 +111,8 @@ export function buildYourBalanceOverTime(transactions, members, userId) {
   };
 }
 
-// How much of a split-mode expense a single participant owes. Defaults
-// to an even split unless the transaction was logged with
-// `splitType: "percent"`, in which case each participant's cut comes
-// from their entry in `splitShares` (id -> percent of the total, meant
-// to add up to 100 across `participants`).
+// A participant's share of a split-mode expense: even by default, or
+// by `splitShares` percentage when `splitType` is "percent".
 export function splitShareAmount(tx, participantId, participants) {
   if (tx.splitType === "percent" && tx.splitShares) {
     const pct = Number(tx.splitShares[participantId] || 0);
@@ -161,8 +153,8 @@ function monthLabel(key) {
   });
 }
 
-// Every month between the first and last transaction, so gaps (a month
-// with no activity) still show up as a zero bar instead of a jump cut.
+// Every month between the first and last transaction, so inactive
+// months show as a zero bar instead of being skipped.
 function monthRange(transactions) {
   if (!transactions.length) return [];
   const sorted = [...transactions].sort(
@@ -182,9 +174,8 @@ function monthRange(transactions) {
   return keys;
 }
 
-// Deposits vs. expenses per month. Settlements are excluded on purpose:
-// they move money between members but don't change how much is in (or
-// spent from) the fund overall, so they'd just add noise here.
+// Deposits vs. expenses per month. Settlements are excluded — they move
+// money between members without changing the fund's overall total.
 export function buildMonthlyCashFlow(transactions) {
   const months = monthRange(transactions);
   const deposited = Object.fromEntries(months.map((m) => [m, 0]));
@@ -218,8 +209,7 @@ export function buildMonthlyCashFlow(transactions) {
   };
 }
 
-// Stacked, per-category spending by month — shows how the mix of
-// expenses shifts over time, not just the all-time total.
+// Stacked per-category spending by month.
 export function buildCategoryTrend(transactions) {
   const months = monthRange(transactions);
   const expenses = transactions.filter((t) => t.type === "expense");
@@ -247,9 +237,7 @@ export function buildCategoryTrend(transactions) {
   };
 }
 
-// Split mode: net balance of *every* member over time (not just the
-// current user), one line each — makes it easy to spot at a glance who
-// tends to run a deficit vs. who's usually owed.
+// Split mode: every member's net balance over time, one line each.
 export function buildAllMembersBalanceOverTime(transactions, members) {
   const memberIds = Object.keys(members || {});
   const sorted = [...transactions].sort(

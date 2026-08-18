@@ -94,9 +94,8 @@ async function handleCurrencyChange() {
       await runRecalculation(newCurrency);
     }
     await groupsStore.loadGroup(props.group.id);
-    // If some transactions couldn't be reconverted (e.g. a flaky rate
-    // lookup), keep the dialog open so the failure notice + retry button
-    // are visible instead of silently closing on a partial result.
+    // If some transactions failed to reconvert, keep the dialog open
+    // so the retry notice is visible.
     if (recalcFailedCount.value === 0) {
       emit("update:modelValue", false);
     }
@@ -106,9 +105,7 @@ async function handleCurrencyChange() {
   }
 }
 
-// Pulled out so "Retry" can call the exact same conversion pass again —
-// it's safe to rerun: transactions that already converted correctly just
-// get recomputed to the same values.
+// Pulled out so "Retry" can rerun the same conversion pass safely.
 async function runRecalculation(newCurrency) {
   await groupsStore.updateCurrency(props.group.id, newCurrency);
   recalcProgress.value = { done: 0, total: 0 };

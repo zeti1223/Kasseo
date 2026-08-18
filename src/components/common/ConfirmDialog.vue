@@ -1,8 +1,6 @@
 <script setup>
-// Generic overlay confirm/alert modal. Covers both "confirm this
-// destructive action" (two buttons) and plain alerts (one button) —
-// used by FundSettingsDialog and TransactionList so the modal markup
-// only needs to exist once.
+// Generic overlay confirm/alert modal — two buttons for confirmations,
+// one for plain alerts.
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   title: { type: String, required: true },

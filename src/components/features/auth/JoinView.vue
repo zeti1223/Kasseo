@@ -13,7 +13,6 @@ const loading = ref(false);
 const error = ref("");
 
 onMounted(() => {
-  // Make sure user is authenticated
   if (!authStore.user) {
     error.value = "You need to be signed in to join a fund.";
     setTimeout(() => {

@@ -45,8 +45,7 @@ function handleEdit(tx) {
   }
 }
 
-// Split-mode context: how a given expense relates to the signed-in
-// member, e.g. "You owe 5.00" or "You're owed 10.00".
+// Split-mode context, e.g. "You owe 5.00" or "You're owed 10.00".
 function splitInfo(tx) {
   if (props.mode !== "split" || tx.type !== "expense") return null;
   const uid = authStore.user?.uid;
@@ -65,9 +64,8 @@ function splitInfo(tx) {
   return { text: `You owe ${share.toFixed(2)}`, tone: "negative" };
 }
 
-// Shown as a small note when a transaction was entered in a different
-// currency than the fund's, so the converted amount above it isn't a
-// mystery.
+// Small note showing the original amount when it differs from the
+// fund's currency.
 function originalAmountLabel(tx) {
   if (!tx.originalCurrency || tx.originalCurrency === props.groupCurrency) {
     return null;

@@ -47,8 +47,7 @@ const eachShare = computed(() => {
   return (Number(amount.value) / selectedSplit.value.length).toFixed(2);
 });
 
-// Sum of the percent inputs across the currently selected members —
-// used to warn the user (and block submit) until it adds up to 100.
+// Sum of the percent inputs; must reach 100 before submit is allowed.
 const totalPercent = computed(() =>
   selectedSplit.value.reduce(
     (sum, id) => sum + (Number(splitPercents.value[id]) || 0),
@@ -63,8 +62,7 @@ function percentShareAmount(id) {
   return ((Number(amount.value) * pct) / 100).toFixed(2);
 }
 
-// Spreads 100% evenly across the selected members (with any remainder
-// from rounding dropped onto the last one so they still sum to 100).
+// Spreads 100% evenly, dropping any rounding remainder onto the last member.
 function splitPercentsEvenly() {
   const ids = selectedSplit.value;
   if (!ids.length) return;
@@ -76,9 +74,8 @@ function splitPercentsEvenly() {
   splitPercents.value = next;
 }
 
-// Only auto-fills an even spread the first time percent mode is turned
-// on for this form — once the user has typed their own numbers,
-// switching back to "Equal" and forth doesn't clobber them.
+// Only auto-fills an even spread the first time; doesn't clobber
+// numbers the user already typed.
 function enablePercentSplit() {
   splitType.value = "percent";
   if (!selectedSplit.value.some((id) => splitPercents.value[id] !== undefined)) {
@@ -86,8 +83,7 @@ function enablePercentSplit() {
   }
 }
 
-// Keep the split selection in sync with the current member list —
-// defaults to "split between everyone".
+// Keep the split selection in sync with the member list.
 watch(
   () => props.members,
   (m) => {
@@ -97,9 +93,7 @@ watch(
   { immediate: true, deep: true },
 );
 
-// A split-mode fund only has 'expense' and 'settlement' types; a kitty
-// fund only has 'expense' and 'deposit'. Keep the current selection valid
-// when the fund's mode changes.
+// Keep the selected type valid when the fund's mode changes.
 watch(
   () => props.mode,
   (m) => {
@@ -109,9 +103,7 @@ watch(
   { immediate: true },
 );
 
-// If the fund's currency changes while this form is open (or on first
-// load), default the picker to it — the user can still override it for
-// a one-off transaction in a different currency.
+// Default the currency picker to the fund's currency; user can override it.
 watch(
   () => props.groupCurrency,
   (c) => {
