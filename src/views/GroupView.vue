@@ -222,5 +222,6 @@ const totals = computed(() => {
     :custom-categories="customCategories"
     :mode="mode"
     :members="groupsStore.currentGroup.members"
+    :current-user-id="authStore.user?.uid"
   />
 </template>
