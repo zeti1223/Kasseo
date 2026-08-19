@@ -83,4 +83,10 @@ Building:
 npm run build
 ```
 
-## [LICENSE](LICENSE)
+---
+
+### [LICENSE](LICENSE)
+
+---
+
+This project has nothing to do with [KASSEO](https://open.spotify.com/artist/76UKhIGvZtS7jjb1muDTUM?si=U4IUSirBQDuLucBmK3mR0Q&utm_source=copy_link), but if you feel like it, give it a listen
