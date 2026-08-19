@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import { splitShareAmount } from "@/utils/chartData";
+import { getCategoryIcon } from "@/constants/categories";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
@@ -14,6 +15,11 @@ const props = defineProps({
   customCategories: { type: Array, default: () => [] },
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
 });
+
+function categoryIcon(catName) {
+  const customCat = props.customCategories.find((c) => c.name === catName);
+  return getCategoryIcon(catName, customCat?.icon);
+}
 const transactionsStore = useTransactionsStore();
 const authStore = useAuthStore();
 
@@ -230,7 +236,9 @@ function splitBetweenLabel(tx) {
               :key="tx.id"
               class="flex items-center gap-3 p-2.5 pl-6 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-colors text-sm"
             >
-              <div class="w-2 h-2 rounded-full bg-[#C8A5FC] flex-shrink-0"></div>
+              <div class="w-6 h-6 rounded-full bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0 text-xs">
+                <i :class="categoryIcon(tx.category)"></i>
+              </div>
 
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start">
@@ -301,12 +309,12 @@ function splitBetweenLabel(tx) {
           >
             <i
               :class="[
-                'text-white',
+                'text-white text-sm',
                 entry.tx.type === 'deposit'
                   ? 'fas fa-arrow-down'
                   : entry.tx.type === 'settlement'
                     ? 'fas fa-handshake'
-                    : 'fas fa-arrow-up',
+                    : categoryIcon(entry.tx.category),
               ]"
             ></i>
           </div>

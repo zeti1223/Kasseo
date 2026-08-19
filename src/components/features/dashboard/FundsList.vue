@@ -3,9 +3,8 @@ import FundCard from "./FundCard.vue";
 
 defineProps({
   groups: { type: Array, required: true },
-  copiedId: { type: String, default: null },
 });
-defineEmits(["open", "copy-invite"]);
+defineEmits(["open"]);
 </script>
 
 <template>
@@ -24,9 +23,7 @@ defineEmits(["open", "copy-invite"]);
         v-for="group in groups"
         :key="group.id"
         :group="group"
-        :copied="copiedId === group.id"
         @open="$emit('open', group.id)"
-        @copy-invite="$emit('copy-invite', group.id)"
       />
     </div>
   </div>

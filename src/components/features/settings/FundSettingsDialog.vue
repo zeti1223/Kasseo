@@ -145,11 +145,17 @@ async function handleModeChange(newMode) {
   }
 }
 
-async function handleAddCategory() {
-  if (!newCategory.value.trim() || !props.group?.id) return;
+async function handleAddCategory(payload) {
+  const catName =
+    typeof payload === "object" && payload?.name
+      ? payload.name
+      : newCategory.value.trim();
+  const icon =
+    typeof payload === "object" && payload?.icon ? payload.icon : null;
+  if (!catName || !props.group?.id) return;
   loading.value = true;
   try {
-    await groupsStore.addCategory(props.group.id, newCategory.value.trim());
+    await groupsStore.addCategory(props.group.id, catName, icon);
     newCategory.value = "";
     await loadCategories();
   } finally {
@@ -183,10 +189,14 @@ async function confirmRemoveMember() {
   }
 }
 
+const inviteUrl = computed(() => {
+  if (!props.group?.id) return "";
+  return `${window.location.origin}/join/${props.group.id}`;
+});
+
 function copyInviteLink() {
   if (!props.group?.id) return;
-  const url = `${window.location.origin}/join/${props.group.id}`;
-  navigator.clipboard.writeText(url);
+  navigator.clipboard.writeText(inviteUrl.value);
 }
 </script>
 
@@ -200,7 +210,7 @@ function copyInviteLink() {
       @click="!loading && emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4 max-h-[90vh] overflow-y-auto"
+      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         Fund Settings
@@ -250,6 +260,7 @@ function copyInviteLink() {
         :owner-id="props.group?.ownerId"
         :current-user-id="authStore.user?.uid"
         :is-owner="isOwner"
+        :invite-url="inviteUrl"
         @copy-invite="copyInviteLink"
         @remove="(id) => (removeMemberTarget = id)"
       />

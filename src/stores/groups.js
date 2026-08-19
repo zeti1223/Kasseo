@@ -100,10 +100,11 @@ export const useGroupsStore = defineStore("groups", () => {
     await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
   }
 
-  async function addCategory(groupId, category) {
+  async function addCategory(groupId, category, icon = null) {
     const newCategoryRef = push(dbRef(db, `groups/${groupId}/categories`));
     await set(newCategoryRef, {
       name: category,
+      icon: icon || null,
       createdAt: serverTimestamp(),
     });
   }

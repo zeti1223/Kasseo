@@ -1,4 +1,6 @@
 <script setup>
+import { getCategoryIcon } from "@/constants/categories";
+
 defineProps({
   tx: { type: Object, required: true },
 });
@@ -17,14 +19,22 @@ function formatCurrency(amount, currency) {
     <div class="flex items-start gap-3">
       <div
         class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-        :class="tx.type === 'deposit' ? 'bg-[#A7F49D]/20' : 'bg-[#C1503A]/20'"
+        :class="
+          tx.type === 'deposit'
+            ? 'bg-[#A7F49D]/20'
+            : tx.type === 'settlement'
+              ? 'bg-[#A5E3FC]/20'
+              : 'bg-[#C1503A]/20'
+        "
       >
         <i
           :class="[
-            'w-4 h-4',
+            'text-xs flex items-center justify-center',
             tx.type === 'deposit'
               ? 'fas fa-arrow-down text-[#A7F49D]'
-              : 'fas fa-arrow-up text-[#C1503A]',
+              : tx.type === 'settlement'
+                ? 'fas fa-handshake text-[#A5E3FC]'
+                : `${getCategoryIcon(tx.category)} text-[#C1503A]`,
           ]"
         ></i>
       </div>
@@ -44,7 +54,10 @@ function formatCurrency(amount, currency) {
         <div
           class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
         >
-          <div class="truncate">{{ tx.groupName }}</div>
+          <div class="truncate flex items-center gap-1.5">
+            <span>{{ tx.groupName }}</span>
+            <span v-if="tx.category && tx.type === 'expense'" class="text-gray-400 dark:text-gray-500">· {{ tx.category }}</span>
+          </div>
           <div>{{ new Date(tx.date).toLocaleDateString() }}</div>
         </div>
       </div>

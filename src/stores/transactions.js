@@ -88,6 +88,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       currency,
       type,
       category,
+      categoryIcon,
       description,
       date,
       splitAmong,
@@ -115,6 +116,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       date,
       createdAt: serverTimestamp(),
     };
+    if (categoryIcon) payload.categoryIcon = categoryIcon;
     if (receiptId) payload.receiptId = receiptId;
     if (splitOption) payload.splitOption = splitOption;
     // Split-mode expense: who the cost is split between, and how
@@ -175,6 +177,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       currency,
       type,
       category,
+      categoryIcon,
       description,
       date,
       paidBy,
@@ -200,6 +203,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       paidBy,
       date,
     };
+    if (categoryIcon) payload.categoryIcon = categoryIcon;
     if (receiptId) payload.receiptId = receiptId;
     if (splitOption) payload.splitOption = splitOption;
     if (type === "expense" && splitAmong?.length) {
