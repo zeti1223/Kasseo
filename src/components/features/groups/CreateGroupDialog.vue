@@ -54,19 +54,19 @@ async function handleCreate() {
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[420px] mx-4"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
-        New shared fund
+        {{ $t('groups.newFundTitle') }}
       </h2>
       <div class="space-y-4">
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Fund name</label
+            >{{ $t('groups.fundName') }}</label
           >
           <input
             ref="nameInput"
             v-model="name"
             type="text"
-            placeholder="e.g. Roommates fund"
+            :placeholder="$t('groups.fundNamePlaceholder')"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
             @keyup.enter="handleCreate"
           />
@@ -74,7 +74,7 @@ async function handleCreate() {
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Currency</label
+            >{{ $t('common.currency') }}</label
           >
           <select
             v-model="currency"
@@ -91,7 +91,7 @@ async function handleCreate() {
           @click="emit('update:modelValue', false)"
           class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </button>
         <button
           @click="handleCreate"
@@ -99,7 +99,7 @@ async function handleCreate() {
           class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin h-4 w-4"></i>
-          Create
+          {{ $t('common.create') }}
         </button>
       </div>
     </div>

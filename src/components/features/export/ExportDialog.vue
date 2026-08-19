@@ -97,10 +97,10 @@ function handleExport() {
           </div>
           <div>
             <h2 class="text-lg font-bold font-display dark:text-white">
-              Export Transactions
+              {{ $t('export.title') }}
             </h2>
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              Download your fund history and financial reports
+              {{ $t('export.subtitle') }}
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ function handleExport() {
         <!-- Format Selection -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
-            File Format
+            {{ $t('export.fileFormat') }}
           </label>
           <div class="grid grid-cols-2 gap-3">
             <button
@@ -134,7 +134,7 @@ function handleExport() {
                 <span class="font-semibold text-sm dark:text-white">CSV</span>
               </div>
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                Excel, Google Sheets, table format
+                {{ $t('export.csvDesc') }}
               </span>
             </button>
 
@@ -153,7 +153,7 @@ function handleExport() {
                 <span class="font-semibold text-sm dark:text-white">JSON</span>
               </div>
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                Full structured data backup
+                {{ $t('export.jsonDesc') }}
               </span>
             </button>
           </div>
@@ -162,7 +162,7 @@ function handleExport() {
         <!-- Date Range Filter -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
-            Time Period
+            {{ $t('export.timePeriod') }}
           </label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
             <button
@@ -175,7 +175,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              All Time
+              {{ $t('export.allTime') }}
             </button>
             <button
               type="button"
@@ -187,7 +187,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              This Month
+              {{ $t('export.thisMonth') }}
             </button>
             <button
               type="button"
@@ -199,7 +199,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              Last Month
+              {{ $t('export.lastMonth') }}
             </button>
             <button
               type="button"
@@ -211,7 +211,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              Custom
+              {{ $t('export.custom') }}
             </button>
           </div>
 
@@ -221,7 +221,7 @@ function handleExport() {
             class="grid grid-cols-2 gap-3 mt-2 p-3 bg-gray-50 dark:bg-gray-800/60 rounded-lg border border-gray-100 dark:border-gray-700"
           >
             <div>
-              <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">From</label>
+              <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">{{ $t('export.from') }}</label>
               <input
                 v-model="startDate"
                 type="date"
@@ -229,7 +229,7 @@ function handleExport() {
               />
             </div>
             <div>
-              <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">To</label>
+              <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">{{ $t('export.to') }}</label>
               <input
                 v-model="endDate"
                 type="date"
@@ -242,7 +242,7 @@ function handleExport() {
         <!-- Transaction Type Filter -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
-            Transaction Type
+            {{ $t('export.transactionType') }}
           </label>
           <div class="flex flex-wrap gap-2">
             <button
@@ -255,7 +255,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              All Types
+              {{ $t('export.allTypes') }}
             </button>
             <button
               type="button"
@@ -267,7 +267,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              Expenses
+              {{ $t('transactions.expense') }}
             </button>
             <button
               v-if="mode === 'kitty'"
@@ -280,7 +280,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              Deposits
+              {{ $t('transactions.deposit') }}
             </button>
             <button
               v-if="mode === 'split'"
@@ -293,7 +293,7 @@ function handleExport() {
                   : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               "
             >
-              Settlements
+              {{ $t('transactions.settleUp') }}
             </button>
           </div>
         </div>
@@ -303,14 +303,14 @@ function handleExport() {
           class="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3.5 border border-gray-100 dark:border-gray-700 flex items-center justify-between"
         >
           <div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">Transactions to export</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('export.transactionsToExport') }}</div>
             <div class="text-base font-bold text-gray-800 dark:text-white">
               {{ filteredTransactions.length }}
-              <span class="text-xs font-normal text-gray-500">item{{ filteredTransactions.length === 1 ? '' : 's' }}</span>
+              <span class="text-xs font-normal text-gray-500">{{ $t('export.itemsCount', { count: filteredTransactions.length }) }}</span>
             </div>
           </div>
           <div class="text-right">
-            <div class="text-xs text-gray-500 dark:text-gray-400">Total volume</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('export.totalVolume') }}</div>
             <div class="text-base font-bold money text-gray-800 dark:text-white">
               {{ totalAmount.toFixed(2) }} {{ group?.currency || "" }}
             </div>
@@ -325,7 +325,7 @@ function handleExport() {
           @click="close"
           class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </button>
 
         <button
@@ -341,15 +341,15 @@ function handleExport() {
         >
           <template v-if="exportSuccess">
             <i class="fas fa-check"></i>
-            Downloaded!
+            {{ $t('export.downloaded') }}
           </template>
           <template v-else-if="isExporting">
             <i class="fas fa-spinner fa-spin"></i>
-            Exporting...
+            {{ $t('export.exporting') }}
           </template>
           <template v-else>
             <i class="fas fa-download"></i>
-            Export {{ exportFormat.toUpperCase() }}
+            {{ $t('export.exportButton', { format: exportFormat.toUpperCase() }) }}
           </template>
         </button>
       </div>

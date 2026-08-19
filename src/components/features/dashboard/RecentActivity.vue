@@ -12,11 +12,11 @@ defineEmits(["open"]);
   <div>
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold font-display dark:text-white">
-        Recent activity
+        {{ $t('dashboard.recentActivity') }}
       </h2>
-      <span v-if="loading" class="text-sm text-gray-500 dark:text-gray-400"
-        >Loading...</span
-      >
+      <span v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">
+        {{ $t('common.loading') }}
+      </span>
     </div>
 
     <div
@@ -27,7 +27,7 @@ defineEmits(["open"]);
         class="p-6 text-center text-gray-500 dark:text-gray-400"
       >
         <i class="fas fa-clipboard-list w-8 h-8 mx-auto mb-2 opacity-50"></i>
-        No recent activity
+        {{ $t('dashboard.noRecentActivity') }}
       </div>
 
       <div v-else class="divide-y divide-gray-100 dark:divide-gray-700">

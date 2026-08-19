@@ -27,7 +27,7 @@ const chartOptions = computed(() =>
       v-else
       class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full"
     >
-      No expenses yet
+      {{ $t('charts.noExpenses') }}
     </div>
   </div>
 </template>

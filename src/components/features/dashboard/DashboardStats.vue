@@ -12,21 +12,21 @@ defineProps({
 <template>
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <StatCard
-      label="Total balance across all funds"
+      :label="$t('groups.currentBalance')"
       :value="totalBalance"
       :currency="currency"
       color="primary"
       icon="piggy-bank"
     />
     <StatCard
-      label="Total deposited"
+      :label="$t('groups.totalDeposited')"
       :value="totalDeposited"
       :currency="currency"
       color="success"
       icon="arrow-down"
     />
     <StatCard
-      label="Total spent"
+      :label="$t('groups.totalSpent')"
       :value="totalSpent"
       :currency="currency"
       color="error"

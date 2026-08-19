@@ -109,7 +109,7 @@ const totals = computed(() => {
       <div class="md:col-span-2">
         <ChartCard
           :title="
-            mode === 'split' ? 'Your balance over time' : 'Balance over time'
+            mode === 'split' ? $t('charts.yourBalanceOverTime') : $t('charts.balanceOverTime')
           "
         >
           <BalanceOverTimeChart
@@ -122,7 +122,7 @@ const totals = computed(() => {
         </ChartCard>
       </div>
       <div class="md:col-span-1">
-        <ChartCard title="By category">
+        <ChartCard :title="$t('charts.byCategory')">
           <CategoryBreakdownChart
             :transactions="transactionsStore.transactions"
             :currency="groupsStore.currentGroup.currency"
@@ -130,7 +130,7 @@ const totals = computed(() => {
         </ChartCard>
       </div>
       <div class="md:col-span-1">
-        <ChartCard :title="mode === 'split' ? 'Balances' : 'By member'">
+        <ChartCard :title="mode === 'split' ? $t('charts.balances') : $t('charts.byMember')">
           <BalancesPanel
             v-if="mode === 'split'"
             :transactions="transactionsStore.transactions"
@@ -151,14 +151,14 @@ const totals = computed(() => {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <ChartCard
-        :title="mode === 'split' ? 'Monthly spending' : 'Monthly cash flow'"
+        :title="mode === 'split' ? $t('charts.monthlySpending') : $t('charts.monthlyCashFlow')"
       >
         <MonthlyCashFlowChart
           :transactions="transactionsStore.transactions"
           :currency="groupsStore.currentGroup.currency"
         />
       </ChartCard>
-      <ChartCard title="Spending by category, over time">
+      <ChartCard :title="$t('charts.categoryTrend')">
         <CategoryTrendChart
           :transactions="transactionsStore.transactions"
           :currency="groupsStore.currentGroup.currency"
@@ -167,7 +167,7 @@ const totals = computed(() => {
     </div>
 
     <div v-if="mode === 'split'" class="grid grid-cols-1 gap-4 mb-6">
-      <ChartCard title="Everyone's balance over time">
+      <ChartCard :title="$t('charts.everyonesBalance')">
         <MembersBalanceChart
           :transactions="transactionsStore.transactions"
           :members="groupsStore.currentGroup.members"
@@ -183,7 +183,7 @@ const totals = computed(() => {
           class="w-full mb-3 px-4 py-2 rounded-lg border border-[#C8A5FC] text-[#C8A5FC] hover:bg-[#C8A5FC]/10 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
         >
           <i class="fas fa-camera"></i>
-          Scan a receipt
+          {{ $t('transactions.scanReceipt') }}
         </button>
         <TransactionForm
           :group-id="groupId"

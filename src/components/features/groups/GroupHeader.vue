@@ -14,14 +14,14 @@ defineEmits(["open-settings", "open-export"]);
         <button
           @click="$emit('open-export')"
           class="text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] transition-colors p-1"
-          title="Export fund data"
+          :title="$t('groups.exportTooltip')"
         >
           <i class="fas fa-file-export"></i>
         </button>
         <button
           @click="$emit('open-settings')"
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
-          title="Fund settings"
+          :title="$t('groups.settingsTooltip')"
         >
           <i class="fas fa-cog"></i>
         </button>

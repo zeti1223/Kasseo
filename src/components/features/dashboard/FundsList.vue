@@ -11,11 +11,11 @@ defineEmits(["open"]);
   <div>
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold font-display dark:text-white">
-        Your shared funds
+        {{ $t('dashboard.yourFunds') }}
       </h2>
-      <span class="text-sm text-gray-500 dark:text-gray-400"
-        >{{ groups.length }} fund{{ groups.length !== 1 ? "s" : "" }}</span
-      >
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {{ $t('dashboard.fundsCount', { count: groups.length }) }}
+      </span>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

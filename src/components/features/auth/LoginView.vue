@@ -2,10 +2,13 @@
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useTranslation } from "i18next-vue";
+import LanguageSelector from "@/components/common/LanguageSelector.vue";
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const { t } = useTranslation();
 
 const loading = ref(false);
 const errorMessage = ref("");
@@ -36,7 +39,7 @@ async function handleLogin() {
   } catch (err) {
     console.error("Login error:", err);
     if (err?.code !== "auth/popup-closed-by-user") {
-      errorMessage.value = err?.message || "Could not sign in with Google.";
+      errorMessage.value = err?.message || t("login.errorDefault");
     }
   } finally {
     loading.value = false;
@@ -46,7 +49,7 @@ async function handleLogin() {
 
 <template>
   <div
-    class="flex items-center justify-center"
+    class="flex items-center justify-center relative"
     style="
       min-height: 100vh;
       background: radial-gradient(
@@ -57,6 +60,10 @@ async function handleLogin() {
       );
     "
   >
+    <div class="absolute top-4 right-4 z-10">
+      <LanguageSelector variant="dropdown" />
+    </div>
+
     <div
       class="bg-white dark:bg-surface-dark rounded-lg p-8 shadow-lg max-w-[380px] w-full mx-4"
     >
@@ -68,8 +75,7 @@ async function handleLogin() {
         </div>
         <h1 class="text-xl font-bold font-display dark:text-white">Kasseo</h1>
         <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Log shared deposits and expenses with the people you split a fund
-          with, in real time.
+          {{ $t('landing.tagline') }}
         </p>
       </div>
 
@@ -87,7 +93,7 @@ async function handleLogin() {
       >
         <i v-if="loading" class="fas fa-spinner fa-spin"></i>
         <i v-else class="fab fa-google"></i>
-        Sign in with Google
+        {{ $t('landing.signInWithGoogle') }}
       </button>
     </div>
   </div>

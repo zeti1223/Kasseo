@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
 import SettingsDialog from "../features/settings/SettingsDialog.vue";
+import LanguageSelector from "../common/LanguageSelector.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -41,19 +42,22 @@ async function handleLogout() {
           authStore.userProfile?.nickname || authStore.user?.displayName
         }}</span>
       </div>
+      <div class="mr-2">
+        <LanguageSelector variant="navbar" />
+      </div>
       <button
         @click="showSettingsDialog = true"
         class="text-white hover:bg-primary-dark dark:hover:bg-primary-dark px-3 py-2 rounded-lg transition-colors flex items-center gap-2"
       >
         <i class="fas fa-cog"></i>
-        <span class="hidden sm:inline">Settings</span>
+        <span class="hidden sm:inline">{{ $t('navbar.settings') }}</span>
       </button>
       <button
         @click="handleLogout"
         class="text-white hover:bg-primary-dark dark:hover:bg-primary-dark px-3 py-2 rounded-lg transition-colors flex items-center gap-2"
       >
         <i class="fas fa-sign-out-alt"></i>
-        <span class="hidden sm:inline">Sign out</span>
+        <span class="hidden sm:inline">{{ $t('navbar.signOut') }}</span>
       </button>
     </div>
   </nav>

@@ -1,4 +1,6 @@
 import { areaGradient } from "./chartTheme";
+import i18next from "@/i18n";
+import { getCategoryLabel } from "@/constants/categories";
 
 const PALETTE = [
   "#C8A5FC",
@@ -10,6 +12,10 @@ const PALETTE = [
   "#7A6248",
   "#5C7A99",
 ];
+
+function translate(key, fallback) {
+  return i18next.isInitialized ? i18next.t(key) : fallback;
+}
 
 export function buildBalanceOverTime(transactions) {
   const sorted = [...transactions].sort(
@@ -27,7 +33,7 @@ export function buildBalanceOverTime(transactions) {
     labels,
     datasets: [
       {
-        label: "Balance",
+        label: translate("charts.balance", "Balance"),
         data,
         borderColor: "#C8A5FC",
         backgroundColor: (ctx) =>
@@ -49,7 +55,10 @@ export function buildCategoryBreakdown(transactions) {
     .forEach((t) => {
       totals[t.category] = (totals[t.category] || 0) + t.amount;
     });
-  const labels = Object.keys(totals);
+  const rawLabels = Object.keys(totals);
+  const labels = rawLabels.map((c) =>
+    getCategoryLabel(c, (k, opt) => i18next.t(k, opt)),
+  );
   return {
     labels,
     datasets: [
@@ -96,7 +105,7 @@ export function buildYourBalanceOverTime(transactions, members, userId) {
     labels,
     datasets: [
       {
-        label: "Your balance",
+        label: translate("charts.yourBalance", "Your balance"),
         data,
         borderColor: "#C8A5FC",
         backgroundColor: (ctx) =>
@@ -147,7 +156,8 @@ function monthKey(dateStr) {
 
 function monthLabel(key) {
   const [year, month] = key.split("-").map(Number);
-  return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
+  const lang = i18next.language || undefined;
+  return new Date(year, month - 1, 1).toLocaleDateString(lang, {
     month: "short",
     year: "2-digit",
   });
@@ -192,14 +202,14 @@ export function buildMonthlyCashFlow(transactions) {
     labels: months.map(monthLabel),
     datasets: [
       {
-        label: "Deposited",
+        label: translate("charts.deposited", "Deposited"),
         data: months.map((m) => Number(deposited[m].toFixed(2))),
         backgroundColor: "#A7F49D",
         borderRadius: 4,
         maxBarThickness: 28,
       },
       {
-        label: "Spent",
+        label: translate("charts.spent", "Spent"),
         data: months.map((m) => Number(spent[m].toFixed(2))),
         backgroundColor: "#C1503A",
         borderRadius: 4,
@@ -228,7 +238,7 @@ export function buildCategoryTrend(transactions) {
   return {
     labels: months.map(monthLabel),
     datasets: categories.map((category, i) => ({
-      label: category,
+      label: getCategoryLabel(category, (k, opt) => i18next.t(k, opt)),
       data: months.map((m) => Number(totalsByCategory[category][m].toFixed(2))),
       backgroundColor: PALETTE[i % PALETTE.length],
       borderRadius: 3,
@@ -260,7 +270,7 @@ export function buildAllMembersBalanceOverTime(transactions, members) {
     labels,
     datasets: memberIds.map((id, i) => ({
       label:
-        members[id]?.nickname || members[id]?.displayName || "Someone",
+        members[id]?.nickname || members[id]?.displayName || translate("common.someone", "Someone"),
       data: series[id],
       borderColor: PALETTE[i % PALETTE.length],
       backgroundColor: PALETTE[i % PALETTE.length],
@@ -286,18 +296,18 @@ export function buildMemberBreakdown(transactions, members) {
   );
   return {
     labels: memberIds.map(
-      (uid) => members[uid]?.nickname || members[uid]?.displayName || "Someone",
+      (uid) => members[uid]?.nickname || members[uid]?.displayName || translate("common.someone", "Someone"),
     ),
     datasets: [
       {
-        label: "Deposited",
+        label: translate("charts.deposited", "Deposited"),
         data: deposited,
         backgroundColor: "#A7F49D",
         borderRadius: 4,
         maxBarThickness: 28,
       },
       {
-        label: "Spent",
+        label: translate("charts.spent", "Spent"),
         data: spent,
         backgroundColor: "#C1503A",
         borderRadius: 4,

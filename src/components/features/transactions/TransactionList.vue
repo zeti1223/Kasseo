@@ -2,8 +2,9 @@
 import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
+import { useTranslation } from "i18next-vue";
 import { splitShareAmount } from "@/utils/chartData";
-import { getCategoryIcon } from "@/constants/categories";
+import { getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
@@ -17,6 +18,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["export"]);
+const { t } = useTranslation();
 
 const editingTransaction = ref(null);
 const showEditDialog = ref(false);
@@ -79,7 +81,7 @@ function memberName(uid) {
   return (
     props.members?.[uid]?.nickname ||
     props.members?.[uid]?.displayName ||
-    "Someone"
+    t("common.someone")
   );
 }
 
@@ -127,10 +129,10 @@ function splitInfo(tx) {
   const share = splitShareAmount(tx, uid, participants);
   if (tx.paidBy === uid) {
     const owedToYou = tx.amount - share;
-    if (owedToYou < 0.005) return { text: "Your share only", tone: "muted" };
-    return { text: `You're owed ${owedToYou.toFixed(2)}`, tone: "positive" };
+    if (owedToYou < 0.005) return { text: t("transactions.yourShareOnly"), tone: "muted" };
+    return { text: t("transactions.youAreOwed", { amount: owedToYou.toFixed(2) }), tone: "positive" };
   }
-  return { text: `You owe ${share.toFixed(2)}`, tone: "negative" };
+  return { text: t("transactions.youOwe", { amount: share.toFixed(2) }), tone: "negative" };
 }
 
 // Small note showing the original amount when it differs from the
@@ -149,7 +151,7 @@ function splitBetweenLabel(tx) {
   const uid = authStore.user?.uid;
   return participants
     .map((id) => {
-      const name = id === uid ? "you" : memberName(id);
+      const name = id === uid ? t("common.you").toLowerCase() : memberName(id);
       if (tx.splitType === "percent" && tx.splitShares) {
         const pct = Number(tx.splitShares[id] || 0);
         return `${name} (${pct}%)`;
@@ -167,7 +169,7 @@ function splitBetweenLabel(tx) {
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
         <h3 class="text-base font-semibold font-display dark:text-white">
-          Transactions
+          {{ $t('transactions.title') }}
         </h3>
         <span
           v-if="transactions.length"
@@ -180,10 +182,10 @@ function splitBetweenLabel(tx) {
         v-if="transactions.length"
         @click="$emit('export')"
         class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors font-medium"
-        title="Export transactions"
+        :title="$t('groups.exportTooltip')"
       >
         <i class="fas fa-file-export"></i>
-        <span>Export</span>
+        <span>{{ $t('common.export') }}</span>
       </button>
     </div>
 
@@ -191,8 +193,7 @@ function splitBetweenLabel(tx) {
       v-if="!transactions.length"
       class="bg-[#A5E3FC]/20 border border-[#A5E3FC]/40 text-[#A5E3FC] rounded-xl p-4 text-center text-sm"
     >
-      No transactions yet — log the first
-      {{ mode === "split" ? "expense" : "deposit or expense" }} to get started.
+      {{ $t('transactions.emptyPrompt', { action: mode === "split" ? $t('transactions.expense').toLowerCase() : `${$t('transactions.deposit').toLowerCase()} / ${$t('transactions.expense').toLowerCase()}` }) }}
     </div>
 
     <div v-else class="space-y-3">
@@ -212,7 +213,7 @@ function splitBetweenLabel(tx) {
               <div class="flex-1 min-w-0">
                 <div class="flex items-baseline justify-between gap-2">
                   <span class="font-semibold text-sm dark:text-white truncate">
-                    Product group ({{ entry.items.length }} item{{ entry.items.length === 1 ? "" : "s" }})
+                    {{ $t('transactions.productGroup', { count: entry.items.length }) }}
                   </span>
                   <span class="font-bold text-sm sm:text-base font-mono tabular-nums text-[#C1503A] flex-shrink-0">
                     -{{ entry.totalAmount.toFixed(2) }}
@@ -231,7 +232,7 @@ function splitBetweenLabel(tx) {
                       class="px-2 py-0.5 transition-colors"
                       :class="entry.splitOption === 'whole_group' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
                     >
-                      Whole group
+                      {{ $t('transactions.wholeGroup') }}
                     </button>
                     <button
                       type="button"
@@ -239,7 +240,7 @@ function splitBetweenLabel(tx) {
                       class="px-2 py-0.5 transition-colors"
                       :class="entry.splitOption === 'per_item' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
                     >
-                      Per product
+                      {{ $t('transactions.perProduct') }}
                     </button>
                   </div>
                 </div>
@@ -249,14 +250,14 @@ function splitBetweenLabel(tx) {
                     @click="toggleGroupExpand(entry.receiptId)"
                     class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1.5 transition-colors font-medium"
                   >
-                    <span>{{ isGroupExpanded(entry.receiptId) ? 'Hide' : 'Show' }} items</span>
+                    <span>{{ isGroupExpanded(entry.receiptId) ? $t('transactions.hideItems') : $t('transactions.showItems') }}</span>
                     <i :class="isGroupExpanded(entry.receiptId) ? 'fas fa-chevron-up text-[10px]' : 'fas fa-chevron-down text-[10px]'"></i>
                   </button>
 
                   <button
                     @click="handleDeleteReceiptGroup(entry.receiptId)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                    title="Delete product group"
+                    :title="$t('transactions.deleteProductGroup')"
                   >
                     <i class="fas fa-trash text-xs"></i>
                   </button>
@@ -280,7 +281,7 @@ function splitBetweenLabel(tx) {
                 <div class="flex-1 min-w-0">
                   <div class="flex items-baseline justify-between gap-2">
                     <span class="font-medium text-sm truncate dark:text-white">
-                      {{ tx.description || tx.category }}
+                      {{ tx.description || getCategoryLabel(tx.category, $t) }}
                     </span>
                     <span class="font-semibold text-xs sm:text-sm font-mono tabular-nums text-[#C1503A] flex-shrink-0">
                       -{{ tx.amount.toFixed(2) }}
@@ -288,7 +289,7 @@ function splitBetweenLabel(tx) {
                   </div>
 
                   <div class="text-xs text-gray-400 dark:text-gray-400 mt-0.5">
-                    <span class="dark:text-gray-300">{{ tx.category }}</span>
+                    <span class="dark:text-gray-300">{{ getCategoryLabel(tx.category, $t) }}</span>
                   </div>
 
                   <div
@@ -296,10 +297,10 @@ function splitBetweenLabel(tx) {
                     class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1.5 flex-wrap"
                   >
                     <template v-if="entry.splitOption === 'whole_group'">
-                      <span>Split between everyone</span>
+                      <span>{{ $t('transactions.splitBetweenEveryone') }}</span>
                     </template>
                     <template v-else>
-                      <span>Split: {{ splitBetweenLabel(tx) }}</span>
+                      <span>{{ $t('transactions.splitColon', { summary: splitBetweenLabel(tx) }) }}</span>
                       <span
                         v-if="splitInfo(tx)"
                         class="font-medium px-2 py-0.5 rounded-full text-[11px] whitespace-nowrap"
@@ -319,14 +320,14 @@ function splitBetweenLabel(tx) {
                     @click="handleEdit(tx)"
                     class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     :class="{ 'opacity-40': !canEdit(tx) }"
-                    title="Edit item"
+                    :title="$t('transactions.editItem')"
                   >
                     <i class="fas fa-edit text-xs"></i>
                   </button>
                   <button
                     @click="handleDelete(tx.id)"
                     class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                    title="Delete item"
+                    :title="$t('transactions.deleteItem')"
                   >
                     <i class="fas fa-trash text-xs"></i>
                   </button>
@@ -371,10 +372,10 @@ function splitBetweenLabel(tx) {
               <div class="flex items-baseline justify-between gap-2">
                 <span class="font-semibold text-sm text-gray-900 dark:text-white truncate">
                   <template v-if="entry.tx.type === 'settlement'">
-                    {{ memberName(entry.tx.paidBy) }} paid {{ memberName(entry.tx.to) }}
+                    {{ $t('transactions.paidTo', { payer: memberName(entry.tx.paidBy), recipient: memberName(entry.tx.to) }) }}
                   </template>
                   <template v-else>
-                    {{ entry.tx.description || entry.tx.category }}
+                    {{ entry.tx.description || getCategoryLabel(entry.tx.category, $t) }}
                   </template>
                 </span>
 
@@ -422,7 +423,7 @@ function splitBetweenLabel(tx) {
                   <span class="dark:text-gray-300 font-medium">{{ memberName(entry.tx.paidBy) }}</span>
                   <template v-if="entry.tx.category">
                     <span class="text-gray-300 dark:text-gray-600">·</span>
-                    <span class="dark:text-gray-300">{{ entry.tx.category }}</span>
+                    <span class="dark:text-gray-300">{{ getCategoryLabel(entry.tx.category, $t) }}</span>
                   </template>
                 </template>
               </div>
@@ -434,7 +435,7 @@ function splitBetweenLabel(tx) {
                   class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 flex-wrap"
                 >
                   <span class="truncate max-w-[180px] sm:max-w-xs">
-                    Split: {{ splitBetweenLabel(entry.tx) }}
+                    {{ $t('transactions.splitColon', { summary: splitBetweenLabel(entry.tx) }) }}
                   </span>
                   <span
                     v-if="splitInfo(entry.tx)"
@@ -456,14 +457,14 @@ function splitBetweenLabel(tx) {
                     @click="handleEdit(entry.tx)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     :class="{ 'opacity-40': !canEdit(entry.tx) }"
-                    title="Edit transaction"
+                    :title="$t('transactions.editTransaction')"
                   >
                     <i class="fas fa-edit text-xs"></i>
                   </button>
                   <button
                     @click="handleDelete(entry.tx.id)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                    title="Delete transaction"
+                    :title="$t('transactions.deleteTransaction')"
                   >
                     <i class="fas fa-trash text-xs"></i>
                   </button>
@@ -489,20 +490,16 @@ function splitBetweenLabel(tx) {
     <!-- Permission Alert Dialog -->
     <ConfirmDialog
       v-model="showPermissionAlert"
-      title="Permission Required"
-      confirm-label="Got it"
+      :title="$t('transactions.permissionRequiredTitle')"
+      :confirm-label="$t('transactions.permissionRequiredGotIt')"
       :show-cancel="false"
       @confirm="showPermissionAlert = false"
     >
       <p class="mb-3">
-        You can only edit transactions you created. This transaction was created
-        by <strong>{{ memberName(permissionTx?.paidBy) }}</strong
-        >.
+        {{ $t('transactions.permissionRequiredBody', { name: memberName(permissionTx?.paidBy) }) }}
       </p>
       <p class="text-xs text-gray-500 dark:text-gray-400">
-        If you need to edit this transaction, please ask
-        {{ memberName(permissionTx?.paidBy) }} to make the changes or contact
-        your group administrator.
+        {{ $t('transactions.permissionRequiredHelp', { name: memberName(permissionTx?.paidBy) }) }}
       </p>
     </ConfirmDialog>
   </div>

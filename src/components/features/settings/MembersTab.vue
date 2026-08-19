@@ -29,9 +29,9 @@ function handleCopy() {
     <div class="bg-[#A5E3FC]/20 border border-[#A5E3FC] rounded-lg p-3 mb-4">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-sm font-medium text-[#A5E3FC]">Invite members</div>
+          <div class="text-sm font-medium text-[#A5E3FC]">{{ $t('fundSettings.inviteMembers') }}</div>
           <div class="text-xs text-[#A5E3FC]/80">
-            Share link or scan QR code to join
+            {{ $t('fundSettings.inviteSubtitle') }}
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -44,10 +44,10 @@ function handleCopy() {
                 ? 'bg-[#A5E3FC] text-gray-900 font-medium'
                 : 'bg-[#A5E3FC]/30 hover:bg-[#A5E3FC]/50 text-[#A5E3FC]',
             ]"
-            :title="showQr ? 'Hide QR code' : 'Show QR code'"
+            :title="showQr ? $t('common.hideQr') : $t('common.qrCode')"
           >
             <i class="fas fa-qrcode"></i>
-            {{ showQr ? "Hide QR" : "QR code" }}
+            {{ showQr ? $t('common.hideQr') : $t('common.qrCode') }}
           </button>
           <button
             type="button"
@@ -55,7 +55,7 @@ function handleCopy() {
             class="text-sm px-3 py-1.5 rounded-lg bg-[#A5E3FC]/30 hover:bg-[#A5E3FC]/50 transition-colors text-[#A5E3FC] flex items-center gap-1.5"
           >
             <i :class="copied ? 'fas fa-check' : 'fas fa-link'"></i>
-            {{ copied ? "Copied!" : "Copy link" }}
+            {{ copied ? $t('common.copied') : $t('common.copyLink') }}
           </button>
         </div>
       </div>
@@ -73,7 +73,7 @@ function handleCopy() {
           />
         </div>
         <p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-          Scan with a phone camera to join this fund
+          {{ $t('fundSettings.scanQrHelp') }}
         </p>
       </div>
     </div>
@@ -113,7 +113,7 @@ function handleCopy() {
               v-if="member.id === ownerId"
               class="text-xs text-gray-500 dark:text-gray-400"
             >
-              Owner
+              {{ $t('common.owner') }}
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ function handleCopy() {
           class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
         >
           <i class="fas fa-user-minus"></i>
-          Remove
+          {{ $t('common.remove') }}
         </button>
       </div>
     </div>

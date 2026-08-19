@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
+import i18next, { SUPPORTED_LANGUAGES, initialLanguage } from "@/i18n";
 
 const VALID_MODES = ["light", "system", "dark"];
 const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -8,6 +9,7 @@ export const useSettingsStore = defineStore("settings", () => {
   // "light" | "system" | "dark"
   const themeMode = ref("system");
   const nickname = ref("");
+  const language = ref(initialLanguage);
 
   // Kept in sync via a listener below
   const systemPrefersDark = ref(media.matches);
@@ -27,6 +29,7 @@ export const useSettingsStore = defineStore("settings", () => {
   function loadSettings() {
     const savedThemeMode = localStorage.getItem("themeMode");
     const savedNickname = localStorage.getItem("nickname");
+    const savedLanguage = localStorage.getItem("language");
 
     if (savedThemeMode !== null && VALID_MODES.includes(savedThemeMode)) {
       themeMode.value = savedThemeMode;
@@ -40,6 +43,15 @@ export const useSettingsStore = defineStore("settings", () => {
 
     if (savedNickname !== null) {
       nickname.value = savedNickname;
+    }
+
+    if (
+      savedLanguage !== null &&
+      SUPPORTED_LANGUAGES.some((l) => l.code === savedLanguage)
+    ) {
+      setLanguage(savedLanguage);
+    } else {
+      setLanguage(language.value);
     }
 
     applyTheme(isDarkMode.value);
@@ -56,6 +68,13 @@ export const useSettingsStore = defineStore("settings", () => {
 
   watch(nickname, (newValue) => {
     localStorage.setItem("nickname", newValue);
+  });
+
+  watch(language, (newValue) => {
+    localStorage.setItem("language", newValue);
+    if (i18next.language !== newValue) {
+      i18next.changeLanguage(newValue);
+    }
   });
 
   function applyTheme(dark) {
@@ -76,12 +95,21 @@ export const useSettingsStore = defineStore("settings", () => {
     nickname.value = newNickname;
   }
 
+  function setLanguage(newLanguage) {
+    if (SUPPORTED_LANGUAGES.some((l) => l.code === newLanguage)) {
+      language.value = newLanguage;
+      i18next.changeLanguage(newLanguage);
+    }
+  }
+
   return {
     themeMode,
     isDarkMode,
     nickname,
+    language,
     loadSettings,
     setThemeMode,
     setNickname,
+    setLanguage,
   };
 });

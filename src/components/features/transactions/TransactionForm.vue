@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
-import { CATEGORIES, getCategoryIcon } from "@/constants/categories";
+import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({
@@ -218,7 +218,7 @@ async function handleSubmit() {
     class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
   >
     <div class="text-base font-medium mb-3 font-display dark:text-white">
-      Log a transaction
+      {{ $t('transactions.logTransaction') }}
     </div>
 
     <div
@@ -234,7 +234,7 @@ async function handleSubmit() {
         class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
       >
         <i class="fas fa-arrow-up"></i>
-        Expense
+        {{ $t('transactions.expense') }}
       </button>
 
       <button
@@ -248,7 +248,7 @@ async function handleSubmit() {
         class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
       >
         <i class="fas fa-arrow-down"></i>
-        Deposit
+        {{ $t('transactions.deposit') }}
       </button>
 
       <button
@@ -262,7 +262,7 @@ async function handleSubmit() {
         class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
       >
         <i class="fas fa-handshake"></i>
-        Settle up
+        {{ $t('transactions.settleUp') }}
       </button>
     </div>
 
@@ -270,7 +270,7 @@ async function handleSubmit() {
       <div>
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Amount</label
+          >{{ $t('common.amount') }}</label
         >
         <div class="flex gap-2">
           <input
@@ -293,14 +293,14 @@ async function handleSubmit() {
           v-if="currency !== groupCurrency"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
-          Will be converted to {{ groupCurrency }} at today's rate
+          {{ $t('transactions.currencyConvertNotice', { currency: groupCurrency }) }}
         </p>
       </div>
 
       <div v-if="type === 'expense'">
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Category</label
+          >{{ $t('common.category') }}</label
         >
         <div class="relative flex items-center">
           <div class="absolute left-3 text-gray-500 dark:text-gray-400 text-sm pointer-events-none">
@@ -311,7 +311,7 @@ async function handleSubmit() {
             class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option v-for="cat in allCategories" :key="cat" :value="cat">
-              {{ cat }}
+              {{ getCategoryLabel(cat, $t) }}
             </option>
           </select>
         </div>
@@ -320,7 +320,7 @@ async function handleSubmit() {
       <div v-if="mode === 'split' && type === 'expense'">
         <div class="flex items-center justify-between mb-1">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >Split between</label
+            >{{ $t('transactions.splitBetween') }}</label
           >
           <div class="flex text-xs rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
             <button
@@ -333,7 +333,7 @@ async function handleSubmit() {
                   : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               "
             >
-              Equal
+              {{ $t('transactions.equal') }}
             </button>
             <button
               type="button"
@@ -345,7 +345,7 @@ async function handleSubmit() {
                   : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               "
             >
-              Percent
+              {{ $t('transactions.percent') }}
             </button>
           </div>
         </div>
@@ -363,7 +363,7 @@ async function handleSubmit() {
                 : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
             "
           >
-            {{ m.id === currentUserId ? "You" : m.displayName }}
+            {{ m.id === currentUserId ? $t('common.you') : m.displayName }}
           </button>
         </div>
 
@@ -371,8 +371,7 @@ async function handleSubmit() {
           v-if="splitType === 'equal' && eachShare"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
-          {{ eachShare }} each, split between {{ selectedSplit.length }}
-          {{ selectedSplit.length === 1 ? "person" : "people" }}
+          {{ $t('transactions.eachShare', { amount: eachShare, count: selectedSplit.length }) }}
         </p>
 
         <div v-if="splitType === 'percent'" class="mt-2 space-y-1.5">
@@ -382,7 +381,7 @@ async function handleSubmit() {
             class="flex items-center gap-2"
           >
             <span class="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate">
-              {{ id === currentUserId ? "You" : memberName(id) }}
+              {{ id === currentUserId ? $t('common.you') : memberName(id) }}
             </span>
             <input
               v-model="splitPercents[id]"
@@ -406,7 +405,7 @@ async function handleSubmit() {
               @click="splitPercentsEvenly"
               class="text-xs text-[#8A5FBF] dark:text-[#C8A5FC] hover:underline"
             >
-              Split evenly
+              {{ $t('transactions.splitEvenly') }}
             </button>
             <span
               class="text-xs"
@@ -416,7 +415,7 @@ async function handleSubmit() {
                   : 'text-[#C1503A] font-medium'
               "
             >
-              Total: {{ totalPercent.toFixed(2) }}%
+              {{ $t('common.total') }}: {{ totalPercent.toFixed(2) }}%
             </span>
           </div>
         </div>
@@ -425,7 +424,7 @@ async function handleSubmit() {
       <div v-if="mode === 'split' && type === 'settlement'">
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Pay to</label
+          >{{ $t('transactions.payTo') }}</label
         >
         <select
           v-model="recipient"
@@ -439,14 +438,14 @@ async function handleSubmit() {
           v-if="!otherMembers.length"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
-          Invite another member before you can settle up.
+          {{ $t('transactions.inviteToSettle') }}
         </p>
       </div>
 
       <div>
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Description (optional)</label
+          >{{ $t('common.descriptionOptional') }}</label
         >
         <input
           v-model="description"
@@ -457,7 +456,7 @@ async function handleSubmit() {
       <div>
         <label
           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >Date</label
+          >{{ $t('common.date') }}</label
         >
         <input
           v-model="date"
@@ -473,7 +472,7 @@ async function handleSubmit() {
       class="w-full mt-4 px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
     >
       <i v-if="loading" class="fas fa-spinner fa-spin h-4 w-4"></i>
-      {{ type === "settlement" ? "Record settlement" : "Add transaction" }}
+      {{ type === "settlement" ? $t('transactions.recordSettlement') : $t('transactions.addTransaction') }}
     </button>
   </div>
 </template>

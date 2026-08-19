@@ -20,9 +20,7 @@ function formatCurrency(amount, currency) {
           {{ group.name }}
         </div>
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ group.currency }} • {{ group.memberCount }} member{{
-            group.memberCount !== 1 ? "s" : ""
-          }}
+          {{ group.currency }} • {{ $t('dashboard.membersCount', { count: group.memberCount }) }}
         </div>
       </div>
       <div class="text-right">
@@ -33,7 +31,7 @@ function formatCurrency(amount, currency) {
           {{ formatCurrency(group.balance, group.currency) }}
         </div>
         <div class="text-xs text-gray-500 dark:text-gray-400">
-          Current balance
+          {{ $t('dashboard.currentBalance') }}
         </div>
       </div>
     </div>
@@ -45,7 +43,7 @@ function formatCurrency(amount, currency) {
         class="w-full text-sm px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
       >
         <i class="fas fa-arrow-right w-4 h-4"></i>
-        Open
+        {{ $t('dashboard.open') }}
       </button>
     </div>
   </div>
