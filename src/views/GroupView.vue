@@ -21,6 +21,7 @@ import TransactionForm from "@/components/features/transactions/TransactionForm.
 import TransactionList from "@/components/features/transactions/TransactionList.vue";
 import FundSettingsDialog from "@/components/features/settings/FundSettingsDialog.vue";
 import ReceiptScanDialog from "@/components/features/transactions/ReceiptScanDialog.vue";
+import ExportDialog from "@/components/features/export/ExportDialog.vue";
 
 const route = useRoute();
 const groupsStore = useGroupsStore();
@@ -30,6 +31,7 @@ const authStore = useAuthStore();
 const groupId = computed(() => route.params.id);
 const showSettings = ref(false);
 const showScan = ref(false);
+const showExport = ref(false);
 const customCategories = ref([]);
 const settleTarget = ref(null); // member id prefilled into the "Settle up" form
 
@@ -94,6 +96,7 @@ const totals = computed(() => {
       :name="groupsStore.currentGroup.name"
       :currency="groupsStore.currentGroup.currency"
       @open-settings="showSettings = true"
+      @open-export="showExport = true"
     />
 
     <GroupStats
@@ -201,6 +204,7 @@ const totals = computed(() => {
           :members="groupsStore.currentGroup.members"
           :custom-categories="customCategories"
           :mode="mode"
+          @export="showExport = true"
         />
       </div>
     </div>
@@ -223,5 +227,14 @@ const totals = computed(() => {
     :mode="mode"
     :members="groupsStore.currentGroup.members"
     :current-user-id="authStore.user?.uid"
+  />
+  <ExportDialog
+    v-if="groupsStore.currentGroup"
+    v-model="showExport"
+    :group="groupsStore.currentGroup"
+    :transactions="transactionsStore.transactions"
+    :members="groupsStore.currentGroup.members"
+    :custom-categories="customCategories"
+    :mode="mode"
   />
 </template>
