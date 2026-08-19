@@ -21,7 +21,7 @@ function selectLanguage(code) {
 
 <template>
   <!-- Pills Variant (e.g. in Settings modal) -->
-  <div v-if="variant === 'pills'" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+  <div v-if="variant === 'pills'" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
     <button
       v-for="lang in SUPPORTED_LANGUAGES"
       :key="lang.code"

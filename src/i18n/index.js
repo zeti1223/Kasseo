@@ -4,6 +4,7 @@ import hu from "./locales/hu.json";
 import de from "./locales/de.json";
 import fr from "./locales/fr.json";
 import es from "./locales/es.json";
+import zh from "./locales/zh.json";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", name: "English", flagClass: "fi fi-gb" },
@@ -11,6 +12,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: "fr", name: "Français", flagClass: "fi fi-fr" },
   { code: "es", name: "Español", flagClass: "fi fi-es" },
   { code: "hu", name: "Magyar", flagClass: "fi fi-hu" },
+  { code: "zh", name: "中文", flagClass: "fi fi-cn" },
 ];
 
 export function getInitialLanguage() {
@@ -37,6 +39,7 @@ i18next.init({
     de: { translation: de },
     fr: { translation: fr },
     es: { translation: es },
+    zh: { translation: zh },
   },
   interpolation: {
     escapeValue: false,
