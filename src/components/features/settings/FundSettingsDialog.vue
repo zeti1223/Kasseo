@@ -189,10 +189,14 @@ async function confirmRemoveMember() {
   }
 }
 
+const inviteUrl = computed(() => {
+  if (!props.group?.id) return "";
+  return `${window.location.origin}/join/${props.group.id}`;
+});
+
 function copyInviteLink() {
   if (!props.group?.id) return;
-  const url = `${window.location.origin}/join/${props.group.id}`;
-  navigator.clipboard.writeText(url);
+  navigator.clipboard.writeText(inviteUrl.value);
 }
 </script>
 
@@ -256,6 +260,7 @@ function copyInviteLink() {
         :owner-id="props.group?.ownerId"
         :current-user-id="authStore.user?.uid"
         :is-owner="isOwner"
+        :invite-url="inviteUrl"
         @copy-invite="copyInviteLink"
         @remove="(id) => (removeMemberTarget = id)"
       />

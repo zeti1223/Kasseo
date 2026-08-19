@@ -14,7 +14,6 @@ const router = useRouter();
 const groupsStore = useGroupsStore();
 const transactionsStore = useTransactionsStore();
 const showCreateDialog = ref(false);
-const copiedId = ref(null);
 const recentTransactions = ref([]);
 // Holds every transaction across every fund (unlike recentTransactions,
 // which is just the top 5) so the chart has full history to plot.
@@ -89,13 +88,6 @@ const groupStats = computed(() => {
 function openGroup(id) {
   router.push({ name: "group", params: { id } });
 }
-
-async function copyInviteLink(id) {
-  const url = `${window.location.origin}/join/${id}`;
-  await navigator.clipboard.writeText(url);
-  copiedId.value = id;
-  setTimeout(() => (copiedId.value = null), 2000);
-}
 </script>
 
 <template>
@@ -129,9 +121,7 @@ async function copyInviteLink(id) {
         <div class="lg:col-span-2">
           <FundsList
             :groups="groupStats"
-            :copied-id="copiedId"
             @open="openGroup"
-            @copy-invite="copyInviteLink"
           />
         </div>
 

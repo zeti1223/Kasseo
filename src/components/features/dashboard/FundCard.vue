@@ -1,9 +1,8 @@
 <script setup>
 defineProps({
   group: { type: Object, required: true },
-  copied: { type: Boolean, default: false },
 });
-defineEmits(["open", "copy-invite"]);
+defineEmits(["open"]);
 
 function formatCurrency(amount, currency) {
   return `${amount.toFixed(2)} ${currency}`;
@@ -40,17 +39,10 @@ function formatCurrency(amount, currency) {
     </div>
 
     <div class="flex-1" />
-    <div class="flex items-center gap-2 mt-3">
-      <button
-        @click.stop="$emit('copy-invite')"
-        class="flex-1 text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 dark:text-white"
-      >
-        <i class="fas fa-link w-4 h-4"></i>
-        {{ copied ? "Copied!" : "Share" }}
-      </button>
+    <div class="mt-3">
       <button
         @click.stop="$emit('open')"
-        class="flex-1 text-sm px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+        class="w-full text-sm px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
       >
         <i class="fas fa-arrow-right w-4 h-4"></i>
         Open
