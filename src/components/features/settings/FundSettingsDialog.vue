@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { CURRENCIES } from "@/constants/currencies";
+import { useTranslation } from "i18next-vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 import CurrencyTab from "./CurrencyTab.vue";
 import ModeTab from "./ModeTab.vue";
@@ -14,36 +15,35 @@ import CategoriesTab from "./CategoriesTab.vue";
 
 const props = defineProps({ modelValue: Boolean, group: Object });
 const emit = defineEmits(["update:modelValue"]);
+const { t } = useTranslation();
 
 const groupsStore = useGroupsStore();
 const transactionsStore = useTransactionsStore();
 const authStore = useAuthStore();
 
-const tabs = [
-  { id: "currency", label: "Currency" },
-  { id: "mode", label: "Mode" },
-  { id: "members", label: "Members" },
-  { id: "categories", label: "Categories" },
-];
+const tabs = computed(() => [
+  { id: "currency", label: t("fundSettings.tabCurrency") },
+  { id: "mode", label: t("fundSettings.tabMode") },
+  { id: "members", label: t("fundSettings.tabMembers") },
+  { id: "categories", label: t("fundSettings.tabCategories") },
+]);
 const activeTab = ref("currency");
 
 const currency = ref("USD");
 const currencies = CURRENCIES;
 const mode = ref("kitty");
-const modes = [
+const modes = computed(() => [
   {
     value: "kitty",
-    label: "Kitty",
-    description:
-      "Everyone deposits money into one shared pot. Expenses come out of that pot, and the fund tracks a single running balance.",
+    label: t("fundSettings.modeKittyLabel"),
+    description: t("fundSettings.modeKittyDesc"),
   },
   {
     value: "split",
-    label: "Split",
-    description:
-      "No deposits. Every expense is split between members automatically, and members settle up directly with each other.",
+    label: t("fundSettings.modeSplitLabel"),
+    description: t("fundSettings.modeSplitDesc"),
   },
-];
+]);
 const loading = ref(false);
 const recalcProgress = ref(null); // { done, total } while reconverting transactions
 const recalcFailedCount = ref(0); // set after a run that left some transactions unconverted
@@ -214,7 +214,7 @@ function copyInviteLink() {
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
-        Fund Settings
+        {{ $t('fundSettings.title') }}
       </h2>
 
       <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
@@ -282,7 +282,7 @@ function copyInviteLink() {
           class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
         >
           <i class="fas fa-times"></i>
-          Close
+          {{ $t('common.close') }}
         </button>
       </div>
     </div>
@@ -290,25 +290,25 @@ function copyInviteLink() {
     <ConfirmDialog
       :model-value="!!removeMemberTarget"
       @update:model-value="removeMemberTarget = null"
-      title="Remove member?"
-      confirm-label="Remove"
+      :title="$t('fundSettings.removeMemberTitle')"
+      :confirm-label="$t('common.remove')"
       danger
       :loading="loading"
       @confirm="confirmRemoveMember"
     >
-      This member will lose access to this fund.
+      {{ $t('fundSettings.removeMemberConfirm') }}
     </ConfirmDialog>
 
     <ConfirmDialog
       :model-value="!!removeCategoryTarget"
       @update:model-value="removeCategoryTarget = null"
-      title="Remove category?"
-      confirm-label="Remove"
+      :title="$t('fundSettings.removeCategoryTitle')"
+      :confirm-label="$t('common.remove')"
       danger
       :loading="loading"
       @confirm="confirmRemoveCategory"
     >
-      This category will be removed from the fund.
+      {{ $t('fundSettings.removeCategoryConfirm') }}
     </ConfirmDialog>
   </div>
 </template>

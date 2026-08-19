@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue";
+import { useTranslation } from "i18next-vue";
 import { computeSplitBalances } from "@/utils/chartData";
 
 const props = defineProps({
@@ -9,13 +10,14 @@ const props = defineProps({
   currency: { type: String, default: "" },
 });
 const emit = defineEmits(["settle"]);
+const { t } = useTranslation();
 
 const rows = computed(() => {
   const balances = computeSplitBalances(props.transactions, props.members);
   return Object.entries(props.members || {})
     .map(([id, member]) => ({
       id,
-      displayName: member.nickname || member.displayName || "Someone",
+      displayName: member.nickname || member.displayName || t("common.someone"),
       photoURL: member.photoURL,
       balance: balances[id] || 0,
       isYou: id === props.currentUserId,
@@ -24,8 +26,8 @@ const rows = computed(() => {
 });
 
 function amountLabel(balance) {
-  if (Math.abs(balance) < 0.005) return "Settled up";
-  return balance > 0 ? "is owed" : "owes";
+  if (Math.abs(balance) < 0.005) return t("groups.settledUp");
+  return balance > 0 ? t("groups.isOwed") : t("groups.owes");
 }
 </script>
 
@@ -55,7 +57,7 @@ function amountLabel(balance) {
         </div>
         <div class="min-w-0 flex-1">
           <div class="text-sm font-medium dark:text-white truncate">
-            {{ row.isYou ? "You" : row.displayName }}
+            {{ row.isYou ? $t('common.you') : row.displayName }}
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400">
             {{ amountLabel(row.balance) }}
@@ -81,7 +83,7 @@ function amountLabel(balance) {
           @click="emit('settle', row.id)"
           class="text-xs px-2 py-0.5 rounded-md bg-[#C8A5FC]/20 hover:bg-[#C8A5FC]/40 text-[#8A5FBF] dark:text-[#C8A5FC] font-medium transition-colors whitespace-nowrap"
         >
-          Settle up
+          {{ $t('groups.settleUp') }}
         </button>
       </div>
     </div>
@@ -90,7 +92,7 @@ function amountLabel(balance) {
       v-if="!rows.length"
       class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
     >
-      No members yet
+      {{ $t('groups.noMembers') }}
     </div>
   </div>
 </template>

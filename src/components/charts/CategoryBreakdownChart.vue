@@ -29,7 +29,7 @@ const total = computed(() =>
       class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
       style="padding-bottom: 34px"
     >
-      <span class="text-xs text-gray-500 dark:text-gray-400">Total</span>
+      <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('common.total') }}</span>
       <span class="text-sm font-semibold dark:text-white">
         {{ total.toFixed(2) }} {{ currency }}
       </span>
@@ -38,7 +38,7 @@ const total = computed(() =>
       v-else
       class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full"
     >
-      No expenses yet
+      {{ $t('charts.noExpenses') }}
     </div>
   </div>
 </template>

@@ -12,21 +12,21 @@ defineProps({
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <template v-if="mode === 'split'">
       <StatCard
-        label="Your balance"
+        :label="$t('groups.yourBalance')"
         :value="totals.yourBalance"
         :currency="currency"
         :color="totals.yourBalance >= 0 ? 'success' : 'error'"
         icon="piggy-bank"
       />
       <StatCard
-        label="You paid"
+        :label="$t('groups.youPaid')"
         :value="totals.youPaid"
         :currency="currency"
         color="primary"
         icon="arrow-up"
       />
       <StatCard
-        label="Total spent"
+        :label="$t('groups.totalSpent')"
         :value="totals.totalSpent"
         :currency="currency"
         color="warning"
@@ -35,21 +35,21 @@ defineProps({
     </template>
     <template v-else>
       <StatCard
-        label="Current balance"
+        :label="$t('groups.currentBalance')"
         :value="totals.balance"
         :currency="currency"
         color="primary"
         icon="piggy-bank"
       />
       <StatCard
-        label="Total deposited"
+        :label="$t('groups.totalDeposited')"
         :value="totals.deposited"
         :currency="currency"
         color="success"
         icon="arrow-down"
       />
       <StatCard
-        label="Total spent"
+        :label="$t('groups.totalSpent')"
         :value="totals.spent"
         :currency="currency"
         color="error"

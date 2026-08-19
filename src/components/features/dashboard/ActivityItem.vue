@@ -1,5 +1,5 @@
 <script setup>
-import { getCategoryIcon } from "@/constants/categories";
+import { getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 
 defineProps({
   tx: { type: Object, required: true },
@@ -41,7 +41,7 @@ function formatCurrency(amount, currency) {
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between mb-1">
           <div class="font-medium text-sm dark:text-white truncate">
-            {{ tx.description || tx.category }}
+            {{ tx.description || getCategoryLabel(tx.category, $t) }}
           </div>
           <div
             class="text-sm font-semibold dark:text-white shrink-0 ml-2 font-mono tabular-nums"
@@ -56,7 +56,7 @@ function formatCurrency(amount, currency) {
         >
           <div class="truncate flex items-center gap-1.5">
             <span>{{ tx.groupName }}</span>
-            <span v-if="tx.category && tx.type === 'expense'" class="text-gray-400 dark:text-gray-500">· {{ tx.category }}</span>
+            <span v-if="tx.category && tx.type === 'expense'" class="text-gray-400 dark:text-gray-500">· {{ getCategoryLabel(tx.category, $t) }}</span>
           </div>
           <div>{{ new Date(tx.date).toLocaleDateString() }}</div>
         </div>

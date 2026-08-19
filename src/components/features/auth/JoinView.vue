@@ -3,18 +3,21 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth";
+import { useTranslation } from "i18next-vue";
+import LanguageSelector from "@/components/common/LanguageSelector.vue";
 
 const route = useRoute();
 const router = useRouter();
 const groupsStore = useGroupsStore();
 const authStore = useAuthStore();
+const { t } = useTranslation();
 
 const loading = ref(false);
 const error = ref("");
 
 onMounted(() => {
   if (!authStore.user) {
-    error.value = "You need to be signed in to join a fund.";
+    error.value = t("join.signInRequired");
     setTimeout(() => {
       router.push({ name: "login", query: { redirect: route.fullPath } });
     }, 2000);
@@ -23,20 +26,18 @@ onMounted(() => {
 
 async function handleJoin() {
   if (!authStore.user) {
-    error.value = "You need to be signed in to join a fund.";
+    error.value = t("join.signInRequired");
     return;
   }
 
   loading.value = true;
   error.value = "";
   try {
-    console.log("Attempting to join group:", route.params.id);
-    console.log("User:", authStore.user);
     await groupsStore.joinGroup(route.params.id);
     router.push({ name: "group", params: { id: route.params.id } });
   } catch (e) {
     console.error("Join error:", e);
-    error.value = "Could not join this fund. The invite link may be invalid.";
+    error.value = t("join.invalidLink");
   } finally {
     loading.value = false;
   }
@@ -44,7 +45,11 @@ async function handleJoin() {
 </script>
 
 <template>
-  <div class="flex items-center justify-center" style="min-height: 80vh">
+  <div class="flex items-center justify-center relative" style="min-height: 80vh">
+    <div class="absolute top-4 right-4 z-10">
+      <LanguageSelector variant="dropdown" />
+    </div>
+
     <div
       class="bg-white dark:bg-surface-dark rounded-lg p-8 text-center shadow-lg max-w-[380px] w-full mx-4"
     >
@@ -54,10 +59,10 @@ async function handleJoin() {
         <i class="fas fa-user-plus text-white"></i>
       </div>
       <h1 class="text-lg font-semibold mb-2 font-display dark:text-white">
-        You've been invited to join a shared fund
+        {{ $t('join.title') }}
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Joining lets you see and log transactions in this fund together.
+        {{ $t('join.subtitle') }}
       </p>
       <div
         v-if="error"
@@ -71,7 +76,7 @@ async function handleJoin() {
         class="w-full px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         <i v-if="loading" class="fas fa-spinner fa-spin"></i>
-        Join fund
+        {{ $t('join.joinFund') }}
       </button>
     </div>
   </div>

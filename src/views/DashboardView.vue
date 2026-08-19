@@ -96,10 +96,10 @@ function openGroup(id) {
     <div class="flex justify-between items-center mb-6 flex-wrap gap-2">
       <div>
         <h1 class="text-2xl font-bold font-display dark:text-white">
-          Welcome back!
+          {{ $t('dashboard.welcome') }}
         </h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Here's what's happening with your shared funds
+          {{ $t('dashboard.subtitle') }}
         </p>
       </div>
       <button
@@ -107,7 +107,7 @@ function openGroup(id) {
         class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
       >
         <i class="fas fa-plus"></i>
-        New fund
+        {{ $t('dashboard.newFund') }}
       </button>
     </div>
 

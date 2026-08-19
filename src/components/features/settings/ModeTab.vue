@@ -28,7 +28,7 @@ defineEmits(["change"]);
         <span
           v-if="mode === opt.value"
           class="text-xs font-medium text-[#C8A5FC]"
-          >Selected</span
+          >{{ $t('common.selected') }}</span
         >
       </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -36,11 +36,10 @@ defineEmits(["change"]);
       </p>
     </button>
     <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400">
-      Only the owner can change the fund's mode
+      {{ $t('fundSettings.ownerOnlyMode') }}
     </p>
     <p class="text-xs text-gray-500 dark:text-gray-400">
-      Switching modes doesn't delete any transactions — it only changes how new
-      ones are logged and how balances are calculated.
+      {{ $t('fundSettings.modeSwitchNote') }}
     </p>
   </div>
 </template>

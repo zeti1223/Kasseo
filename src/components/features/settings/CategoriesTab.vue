@@ -30,7 +30,7 @@ function handleAdd() {
   <div class="space-y-4">
     <div v-if="isOwner" class="space-y-2">
       <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
-        New category (choose icon & name)
+        {{ $t('fundSettings.newCategoryLabel') }}
       </label>
       <div class="flex gap-2">
         <div class="relative">
@@ -38,7 +38,7 @@ function handleAdd() {
             type="button"
             @click="showIconPicker = !showIconPicker"
             class="w-11 h-[42px] border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-            title="Click to choose icon"
+            :title="$t('fundSettings.chooseIconTooltip')"
           >
             <i :class="selectedIcon" class="text-base"></i>
           </button>
@@ -76,7 +76,7 @@ function handleAdd() {
           :value="newCategory"
           @input="$emit('update:newCategory', $event.target.value)"
           type="text"
-          placeholder="Category name"
+          :placeholder="$t('fundSettings.categoryNamePlaceholder')"
           class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
           @keyup.enter="handleAdd"
         />
@@ -85,12 +85,12 @@ function handleAdd() {
           :disabled="!newCategory.trim() || loading"
           class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
-          Add
+          {{ $t('common.add') }}
         </button>
       </div>
     </div>
     <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400">
-      Only the owner can add categories
+      {{ $t('fundSettings.ownerOnlyCategories') }}
     </p>
 
     <div class="space-y-2 max-h-60 overflow-y-auto">
@@ -115,14 +115,14 @@ function handleAdd() {
           class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
         >
           <i class="fas fa-trash"></i>
-          Remove
+          {{ $t('common.remove') }}
         </button>
       </div>
       <div
         v-if="categories.length === 0"
         class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
       >
-        No custom categories yet
+        {{ $t('fundSettings.noCustomCategories') }}
       </div>
     </div>
   </div>

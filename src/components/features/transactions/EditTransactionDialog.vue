@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, nextTick, computed } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
-import { CATEGORIES, getCategoryIcon } from "@/constants/categories";
+import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({
@@ -124,7 +124,7 @@ watch(
 
 function toggleSplitMember(id) {
   if (selectedSplit.value.includes(id)) {
-    if (selectedSplit.value.length === 1) return;
+    if (selectedSplit.value.length === 1) return; // keep at least one payer
     selectedSplit.value = selectedSplit.value.filter((m) => m !== id);
   } else {
     selectedSplit.value = [...selectedSplit.value, id];
@@ -212,7 +212,7 @@ async function handleUpdate() {
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[420px] mx-4"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
-        Edit transaction
+        {{ $t('transactions.editTransaction') }}
       </h2>
 
       <div
@@ -228,7 +228,7 @@ async function handleUpdate() {
           "
         >
           <i class="fas fa-arrow-up"></i>
-          Expense
+          {{ $t('transactions.expense') }}
         </button>
 
         <button
@@ -242,7 +242,7 @@ async function handleUpdate() {
           "
         >
           <i class="fas fa-arrow-down"></i>
-          Deposit
+          {{ $t('transactions.deposit') }}
         </button>
 
         <button
@@ -256,7 +256,7 @@ async function handleUpdate() {
           "
         >
           <i class="fas fa-handshake"></i>
-          Settle up
+          {{ $t('transactions.settleUp') }}
         </button>
       </div>
 
@@ -264,7 +264,7 @@ async function handleUpdate() {
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Amount</label
+            >{{ $t('common.amount') }}</label
           >
           <div class="flex gap-2">
             <input
@@ -288,13 +288,13 @@ async function handleUpdate() {
             v-if="currency !== groupCurrency"
             class="text-xs text-gray-500 dark:text-gray-400 mt-1"
           >
-            Will be converted to {{ groupCurrency }}
+            {{ $t('transactions.currencyReconvertNotice', { currency: groupCurrency }) }}
           </p>
         </div>
         <div v-if="type === 'expense'">
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Category</label
+            >{{ $t('common.category') }}</label
           >
           <div class="relative flex items-center">
             <div class="absolute left-3 text-gray-500 dark:text-gray-400 text-sm pointer-events-none">
@@ -305,7 +305,7 @@ async function handleUpdate() {
               class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
               <option v-for="cat in allCategories" :key="cat" :value="cat">
-                {{ cat }}
+                {{ getCategoryLabel(cat, $t) }}
               </option>
             </select>
           </div>
@@ -314,7 +314,7 @@ async function handleUpdate() {
         <div v-if="mode === 'split' && type === 'expense'">
           <div class="flex items-center justify-between mb-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Split between</label
+              >{{ $t('transactions.splitBetween') }}</label
             >
             <div class="flex text-xs rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
               <button
@@ -327,7 +327,7 @@ async function handleUpdate() {
                     : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 "
               >
-                Equal
+                {{ $t('transactions.equal') }}
               </button>
               <button
                 type="button"
@@ -339,7 +339,7 @@ async function handleUpdate() {
                     : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 "
               >
-                Percent
+                {{ $t('transactions.percent') }}
               </button>
             </div>
           </div>
@@ -357,7 +357,7 @@ async function handleUpdate() {
                   : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
               "
             >
-              {{ m.id === currentUserId ? "You" : m.displayName }}
+              {{ m.id === currentUserId ? $t('common.you') : m.displayName }}
             </button>
           </div>
 
@@ -365,8 +365,7 @@ async function handleUpdate() {
             v-if="splitType === 'equal' && eachShare"
             class="text-xs text-gray-500 dark:text-gray-400 mt-1"
           >
-            {{ eachShare }} each, split between {{ selectedSplit.length }}
-            {{ selectedSplit.length === 1 ? "person" : "people" }}
+            {{ $t('transactions.eachShare', { amount: eachShare, count: selectedSplit.length }) }}
           </p>
 
           <div v-if="splitType === 'percent'" class="mt-2 space-y-1.5">
@@ -376,7 +375,7 @@ async function handleUpdate() {
               class="flex items-center gap-2"
             >
               <span class="text-xs text-gray-600 dark:text-gray-300 flex-1 truncate">
-                {{ id === currentUserId ? "You" : memberName(id) }}
+                {{ id === currentUserId ? $t('common.you') : memberName(id) }}
               </span>
               <input
                 v-model="splitPercents[id]"
@@ -400,7 +399,7 @@ async function handleUpdate() {
                 @click="splitPercentsEvenly"
                 class="text-xs text-[#8A5FBF] dark:text-[#C8A5FC] hover:underline"
               >
-                Split evenly
+                {{ $t('transactions.splitEvenly') }}
               </button>
               <span
                 class="text-xs"
@@ -410,7 +409,7 @@ async function handleUpdate() {
                     : 'text-[#C1503A] font-medium'
                 "
               >
-                Total: {{ totalPercent.toFixed(2) }}%
+                {{ $t('common.total') }}: {{ totalPercent.toFixed(2) }}%
               </span>
             </div>
           </div>
@@ -419,7 +418,7 @@ async function handleUpdate() {
         <div v-if="mode === 'split' && type === 'settlement'">
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Paid to</label
+            >{{ $t('transactions.payTo') }}</label
           >
           <select
             v-model="recipient"
@@ -434,7 +433,7 @@ async function handleUpdate() {
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Description (optional)</label
+            >{{ $t('common.descriptionOptional') }}</label
           >
           <input
             v-model="description"
@@ -445,7 +444,7 @@ async function handleUpdate() {
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >Date</label
+            >{{ $t('common.date') }}</label
           >
           <input
             v-model="date"
@@ -460,7 +459,7 @@ async function handleUpdate() {
           @click="emit('update:modelValue', false)"
           class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
-          Cancel
+          {{ $t('common.cancel') }}
         </button>
         <button
           @click="handleUpdate"
@@ -468,7 +467,7 @@ async function handleUpdate() {
           class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin"></i>
-          Update
+          {{ $t('common.update') }}
         </button>
       </div>
     </div>

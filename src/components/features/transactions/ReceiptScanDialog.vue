@@ -3,8 +3,9 @@ import { ref, computed, watch } from "vue";
 import { ref as dbRef, onValue, get, runTransaction, set } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { useTransactionsStore } from "@/stores/transactions";
-import { CATEGORIES, getCategoryIcon } from "@/constants/categories";
+import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import { scanReceiptImage, ScanError } from "@/utils/receiptScan";
+import { useTranslation } from "i18next-vue";
 
 const props = defineProps({
   modelValue: Boolean,
@@ -16,6 +17,7 @@ const props = defineProps({
   currentUserId: { type: String, default: "" },
 });
 const emit = defineEmits(["update:modelValue"]);
+const { t } = useTranslation();
 
 function itemCategoryIcon(catName) {
   const customCat = props.customCategories.find((c) => c.name === catName);
@@ -89,7 +91,7 @@ async function reserveScanSlot() {
   });
   if (!result.committed) {
     throw new ScanError(
-      "You've reached today's limit of 3 receipt scans for this fund.",
+      t("receiptScan.noScansLeft"),
       "resource-exhausted",
     );
   }
@@ -168,7 +170,7 @@ async function handleFileSelected(event) {
     compressedBase64.value = dataUrl.split(",")[1] || "";
     step.value = "preview";
   } catch (err) {
-    errorMessage.value = "Couldn't read that image — try another photo.";
+    errorMessage.value = t("receiptScan.errorReadFailed");
     step.value = "error";
   }
 }
@@ -192,8 +194,7 @@ async function submitScan() {
     );
 
     if (!scanned.length) {
-      errorMessage.value =
-        "No items were recognized on that receipt. Try a clearer, well-lit photo.";
+      errorMessage.value = t("receiptScan.errorNoItems");
       step.value = "error";
       return;
     }
@@ -208,7 +209,7 @@ async function submitScan() {
     errorMessage.value =
       err instanceof ScanError
         ? err.message
-        : "Something went wrong scanning that receipt. Please try again.";
+        : t("receiptScan.errorGeneric");
     step.value = "error";
   }
 }
@@ -275,10 +276,6 @@ async function approveAndSave() {
       const splitAmong =
         props.mode === "split"
           ? splitOption.value === "whole_group"
-            ? allMemberIds
-            : it.splitAmong?.length
-              ? it.splitAmong
-              : allMemberIds
           : undefined;
 
       await transactionsStore.addTransaction(props.groupId, props.groupCurrency, {
@@ -289,7 +286,14 @@ async function approveAndSave() {
         categoryIcon: itemCategoryIcon(it.category),
         description: label,
         date: date.value,
-        splitAmong,
+        splitAmong:
+          props.mode === "split"
+            ? splitOption.value === "whole_group"
+              ? allMemberIds
+              : it.splitAmong?.length
+                ? it.splitAmong
+                : allMemberIds
+            : undefined,
         receiptId,
         splitOption: props.mode === "split" ? splitOption.value : undefined,
       });
@@ -313,7 +317,7 @@ async function approveAndSave() {
     >
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold font-display dark:text-white">
-          Scan a receipt
+          {{ $t('receiptScan.title') }}
         </h2>
         <button
           @click="close"
@@ -326,12 +330,10 @@ async function approveAndSave() {
       <!-- CAPTURE -->
       <div v-if="step === 'capture'">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-          Take a photo of a receipt and Kasseo will read the items and
-          categorize them for you.
+          {{ $t('receiptScan.description') }}
         </p>
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">
-          {{ scansRemaining }}/{{ DAILY_SCAN_LIMIT }} scans left today for
-          this fund
+          {{ $t('receiptScan.scansLeft', { remaining: scansRemaining, limit: DAILY_SCAN_LIMIT }) }}
         </p>
 
         <input
@@ -348,7 +350,7 @@ async function approveAndSave() {
           class="w-full px-4 py-3 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <i class="fas fa-camera"></i>
-          {{ scansRemaining > 0 ? "Take a photo" : "No scans left today" }}
+          {{ scansRemaining > 0 ? $t('receiptScan.takePhoto') : $t('receiptScan.noScansLeft') }}
         </button>
       </div>
 
@@ -364,13 +366,13 @@ async function approveAndSave() {
             @click="step = 'capture'"
             class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
-            Retake
+            {{ $t('receiptScan.retake') }}
           </button>
           <button
             @click="submitScan"
             class="flex-1 px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors"
           >
-            Scan receipt
+            {{ $t('receiptScan.scanReceiptButton') }}
           </button>
         </div>
       </div>
@@ -379,7 +381,7 @@ async function approveAndSave() {
       <div v-else-if="step === 'processing'" class="py-10 text-center">
         <i class="fas fa-spinner fa-spin text-3xl text-[#C8A5FC] mb-3"></i>
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Reading the receipt…
+          {{ $t('receiptScan.readingReceipt') }}
         </p>
       </div>
 
@@ -390,21 +392,20 @@ async function approveAndSave() {
           @click="step = 'capture'"
           class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
-          Try again
+          {{ $t('receiptScan.tryAgain') }}
         </button>
       </div>
 
       <!-- REVIEW -->
       <div v-else-if="step === 'review'">
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          Check the items below before adding them — you can edit or remove
-          anything that wasn't read correctly.
+          {{ $t('receiptScan.reviewHint') }}
         </p>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Date
+              {{ $t('common.date') }}
             </label>
             <input
               v-model="date"
@@ -415,7 +416,7 @@ async function approveAndSave() {
 
           <div v-if="props.mode === 'split'">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Split method
+              {{ $t('receiptScan.splitMethod') }}
             </label>
             <div class="flex text-xs rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 h-[38px] p-0.5 bg-gray-50 dark:bg-gray-700">
               <button
@@ -429,7 +430,7 @@ async function approveAndSave() {
                 "
               >
                 <i class="fas fa-users text-xs"></i>
-                Whole group
+                {{ $t('transactions.wholeGroup') }}
               </button>
               <button
                 type="button"
@@ -441,8 +442,8 @@ async function approveAndSave() {
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 "
               >
-                <i class="fas fa-[#C8A5FC] fa-list-check text-xs"></i>
-                Per product
+                <i class="fas fa-list-check text-xs"></i>
+                {{ $t('transactions.perProduct') }}
               </button>
             </div>
           </div>
@@ -463,7 +464,7 @@ async function approveAndSave() {
               <button
                 @click="removeItem(index)"
                 class="text-gray-400 hover:text-red-500 shrink-0 px-1"
-                title="Remove item"
+                :title="$t('receiptScan.removeItem')"
               >
                 <i class="fas fa-times"></i>
               </button>
@@ -471,7 +472,7 @@ async function approveAndSave() {
             <div class="grid grid-cols-2 gap-2 mb-2">
               <div>
                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  Qty
+                  {{ $t('receiptScan.qty') }}
                 </label>
                 <input
                   v-model.number="item.quantity"
@@ -483,7 +484,7 @@ async function approveAndSave() {
               </div>
               <div>
                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  Total price
+                  {{ $t('receiptScan.totalPrice') }}
                 </label>
                 <input
                   v-model.number="item.totalPrice"
@@ -496,7 +497,7 @@ async function approveAndSave() {
             </div>
             <div>
               <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                Category
+                {{ $t('common.category') }}
               </label>
               <div class="relative flex items-center">
                 <div class="absolute left-2.5 text-gray-500 dark:text-gray-400 text-xs pointer-events-none">
@@ -507,7 +508,7 @@ async function approveAndSave() {
                   class="w-full pl-8 pr-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] dark:bg-gray-700 dark:text-white"
                 >
                   <option v-for="cat in allCategories" :key="cat" :value="cat">
-                    {{ cat }}
+                    {{ getCategoryLabel(cat, $t) }}
                   </option>
                 </select>
               </div>
@@ -518,7 +519,7 @@ async function approveAndSave() {
               class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700"
             >
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Split between
+                {{ $t('transactions.splitBetween') }}
               </label>
               <div class="flex flex-wrap gap-1.5">
                 <button
@@ -533,11 +534,11 @@ async function approveAndSave() {
                       : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                   "
                 >
-                  {{ m.id === currentUserId ? "You" : m.displayName }}
+                  {{ m.id === currentUserId ? $t('common.you') : m.displayName }}
                 </button>
               </div>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                {{ itemPerShare(item) }} each (split between {{ (item.splitAmong || []).length }} {{ (item.splitAmong || []).length === 1 ? 'person' : 'people' }})
+                {{ $t('receiptScan.eachPerShare', { amount: itemPerShare(item), count: (item.splitAmong || []).length }) }}
               </p>
             </div>
           </div>
@@ -545,9 +546,9 @@ async function approveAndSave() {
 
         <div class="flex items-center justify-between mt-4 mb-4 text-sm">
           <span class="text-gray-500 dark:text-gray-400">
-            {{ items.length }} item{{ items.length === 1 ? "" : "s" }}
+            {{ $t('receiptScan.itemsSummary', { count: items.length }) }}
           </span>
-          <span class="font-medium dark:text-white">Total: {{ total.toFixed(2) }}</span>
+          <span class="font-medium dark:text-white">{{ $t('common.total') }}: {{ total.toFixed(2) }}</span>
         </div>
 
         <button
@@ -556,7 +557,7 @@ async function approveAndSave() {
           class="w-full px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <i v-if="saving" class="fas fa-spinner fa-spin"></i>
-          Add {{ items.length }} transaction{{ items.length === 1 ? "" : "s" }}
+          {{ $t('receiptScan.addTransactionsButton', { count: items.length }) }}
         </button>
       </div>
     </div>

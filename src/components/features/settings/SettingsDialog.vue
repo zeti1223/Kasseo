@@ -1,8 +1,10 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useAuthStore } from "@/stores/auth";
+import { useTranslation } from "i18next-vue";
+import LanguageSelector from "@/components/common/LanguageSelector.vue";
 
 const props = defineProps({ modelValue: Boolean });
 const emit = defineEmits(["update:modelValue"]);
@@ -10,16 +12,17 @@ const emit = defineEmits(["update:modelValue"]);
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const authStore = useAuthStore();
+const { t } = useTranslation();
 
 const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
 
-const themeOptions = [
-  { value: "light", label: "Light" },
-  { value: "system", label: "Auto" },
-  { value: "dark", label: "Dark" },
-];
+const themeOptions = computed(() => [
+  { value: "light", label: t("settings.themeLight") },
+  { value: "system", label: t("settings.themeAuto") },
+  { value: "dark", label: t("settings.themeDark") },
+]);
 
 watch(
   () => props.modelValue,
@@ -37,7 +40,7 @@ async function saveNickname() {
     await authStore.updateNickname(nickname.value.trim());
     settingsStore.setNickname(nickname.value.trim());
     isEditingNickname.value = false;
-    saveMessage.value = "Nickname saved!";
+    saveMessage.value = t("settings.nicknameSaved");
     setTimeout(() => (saveMessage.value = ""), 2000);
   }
 }
@@ -67,20 +70,20 @@ async function handleSignOut() {
       class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4 max-h-[90vh] overflow-y-auto"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
-        Settings
+        {{ $t('settings.title') }}
       </h2>
 
       <div class="space-y-4">
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
           <h3 class="text-md font-semibold mb-3 font-display dark:text-white">
-            Appearance
+            {{ $t('settings.appearance') }}
           </h3>
 
           <div class="flex items-center justify-between">
             <div>
-              <div class="font-medium dark:text-white">Theme</div>
+              <div class="font-medium dark:text-white">{{ $t('settings.theme') }}</div>
               <div class="text-sm text-gray-500 dark:text-gray-400">
-                Light, dark, or match your system
+                {{ $t('settings.themeDescription') }}
               </div>
             </div>
             <div
@@ -106,9 +109,10 @@ async function handleSignOut() {
           </div>
         </div>
 
+        <!-- Profile -->
         <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
           <h3 class="text-md font-semibold mb-3 font-display dark:text-white">
-            Profile
+            {{ $t('settings.profile') }}
           </h3>
 
           <div class="flex items-center gap-3 mb-4">
@@ -134,9 +138,9 @@ async function handleSignOut() {
           <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
             <div class="flex items-center justify-between mb-2">
               <div>
-                <div class="font-medium dark:text-white">Nickname</div>
+                <div class="font-medium dark:text-white">{{ $t('settings.nickname') }}</div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  How others see you in the app
+                  {{ $t('settings.nicknameDescription') }}
                 </div>
               </div>
               <button
@@ -144,7 +148,7 @@ async function handleSignOut() {
                 @click="isEditingNickname = true"
                 class="text-primary hover:text-primary-dark dark:hover:text-primary-dark-dark px-3 py-1 rounded-lg transition-colors"
               >
-                Edit
+                {{ $t('common.edit') }}
               </button>
             </div>
 
@@ -153,20 +157,20 @@ async function handleSignOut() {
                 v-model="nickname"
                 type="text"
                 class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
-                placeholder="Enter your nickname"
+                :placeholder="$t('settings.nicknamePlaceholder')"
                 @keyup.enter="saveNickname"
               />
               <button
                 @click="saveNickname"
                 class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark dark:hover:bg-primary-dark-dark transition-colors"
               >
-                Save
+                {{ $t('common.save') }}
               </button>
               <button
                 @click="cancelEdit"
                 class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white"
               >
-                Cancel
+                {{ $t('common.cancel') }}
               </button>
             </div>
             <div v-else class="mt-2">
@@ -189,14 +193,14 @@ async function handleSignOut() {
           class="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex items-center gap-2"
         >
           <i class="fas fa-sign-out-alt"></i>
-          Sign Out
+          {{ $t('navbar.signOut') }}
         </button>
         <button
           @click="emit('update:modelValue', false)"
           class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
         >
           <i class="fas fa-times"></i>
-          Close
+          {{ $t('common.close') }}
         </button>
       </div>
     </div>
