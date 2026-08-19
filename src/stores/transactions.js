@@ -94,6 +94,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
       splitType,
       splitShares,
       to,
+      receiptId,
+      splitOption,
     },
   ) {
     const authStore = useAuthStore();
@@ -113,6 +115,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
       date,
       createdAt: serverTimestamp(),
     };
+    if (receiptId) payload.receiptId = receiptId;
+    if (splitOption) payload.splitOption = splitOption;
     // Split-mode expense: who the cost is split between, and how
     // (evenly, or by `splitShares` percentages).
     if (type === "expense" && splitAmong?.length) {
@@ -133,6 +137,35 @@ export const useTransactionsStore = defineStore("transactions", () => {
     await remove(dbRef(db, `transactions/${groupId}/${txId}`));
   }
 
+  async function deleteReceiptGroup(groupId, receiptId) {
+    const matched = transactions.value.filter((t) => t.receiptId === receiptId);
+    if (!matched.length) return;
+    const updates = {};
+    for (const tx of matched) {
+      updates[tx.id] = null;
+    }
+    await update(dbRef(db, `transactions/${groupId}`), updates);
+  }
+
+  async function updateReceiptGroupSplitOption(
+    groupId,
+    receiptId,
+    newSplitOption,
+    members,
+  ) {
+    const matched = transactions.value.filter((t) => t.receiptId === receiptId);
+    if (!matched.length) return;
+    const allMemberIds = Object.keys(members || {});
+    const updates = {};
+    for (const tx of matched) {
+      updates[`${tx.id}/splitOption`] = newSplitOption;
+      if (newSplitOption === "whole_group") {
+        updates[`${tx.id}/splitAmong`] = allMemberIds;
+      }
+    }
+    await update(dbRef(db, `transactions/${groupId}`), updates);
+  }
+
   async function updateTransaction(
     groupId,
     txId,
@@ -149,6 +182,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
       splitType,
       splitShares,
       to,
+      receiptId,
+      splitOption,
     },
   ) {
     const conversion = await buildConversionFields(
@@ -165,6 +200,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
       paidBy,
       date,
     };
+    if (receiptId) payload.receiptId = receiptId;
+    if (splitOption) payload.splitOption = splitOption;
     if (type === "expense" && splitAmong?.length) {
       payload.splitAmong = splitAmong;
       if (splitType === "percent" && splitShares) {
@@ -238,6 +275,8 @@ export const useTransactionsStore = defineStore("transactions", () => {
     stop,
     addTransaction,
     deleteTransaction,
+    deleteReceiptGroup,
+    updateReceiptGroupSplitOption,
     updateTransaction,
     recalculateForCurrency,
   };
