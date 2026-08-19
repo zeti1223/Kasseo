@@ -15,7 +15,7 @@ const rows = computed(() => {
   return Object.entries(props.members || {})
     .map(([id, member]) => ({
       id,
-      displayName: member.displayName,
+      displayName: member.nickname || member.displayName || "Someone",
       photoURL: member.photoURL,
       balance: balances[id] || 0,
       isYou: id === props.currentUserId,

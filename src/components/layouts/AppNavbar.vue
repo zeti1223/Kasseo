@@ -34,7 +34,7 @@ async function handleLogout() {
       <div class="flex items-center gap-2 mr-3">
         <img
           :src="authStore.user?.photoURL"
-          :alt="authStore.user?.displayName"
+          :alt="authStore.userProfile?.nickname || authStore.user?.displayName"
           class="w-8 h-8 rounded-full object-cover"
         />
         <span class="text-sm hidden sm:inline dark:text-white">{{

@@ -76,7 +76,11 @@ const displayEntries = computed(() => {
 });
 
 function memberName(uid) {
-  return props.members?.[uid]?.displayName || "Someone";
+  return (
+    props.members?.[uid]?.nickname ||
+    props.members?.[uid]?.displayName ||
+    "Someone"
+  );
 }
 
 function handleDelete(txId) {
@@ -158,16 +162,24 @@ function splitBetweenLabel(tx) {
 
 <template>
   <div
-    class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+    class="bg-white dark:bg-surface-dark rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 dark:border-gray-700"
   >
-    <div class="flex items-center justify-between mb-3">
-      <div class="text-base font-medium font-display dark:text-white">
-        Transactions
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <h3 class="text-base font-semibold font-display dark:text-white">
+          Transactions
+        </h3>
+        <span
+          v-if="transactions.length"
+          class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
+        >
+          {{ transactions.length }}
+        </span>
       </div>
       <button
         v-if="transactions.length"
         @click="$emit('export')"
-        class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+        class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors font-medium"
         title="Export transactions"
       >
         <i class="fas fa-file-export"></i>
@@ -177,7 +189,7 @@ function splitBetweenLabel(tx) {
 
     <div
       v-if="!transactions.length"
-      class="bg-[#A5E3FC]/20 border border-[#A5E3FC] text-[#A5E3FC] rounded-lg p-3"
+      class="bg-[#A5E3FC]/20 border border-[#A5E3FC]/40 text-[#A5E3FC] rounded-xl p-4 text-center text-sm"
     >
       No transactions yet — log the first
       {{ mode === "split" ? "expense" : "deposit or expense" }} to get started.
@@ -188,123 +200,137 @@ function splitBetweenLabel(tx) {
         <!-- PRODUCT GROUP (RECEIPT) CARD -->
         <div
           v-if="entry.isGroup"
-          class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50/50 dark:bg-gray-800/30"
+          class="border border-gray-200/80 dark:border-gray-700/80 rounded-xl overflow-hidden bg-gray-50/30 dark:bg-surface-dark shadow-xs"
         >
           <!-- Group Header -->
-          <div class="flex items-center gap-3 p-3 bg-white dark:bg-surface-dark border-b border-gray-100 dark:border-gray-700/50">
-            <div class="w-9 h-9 rounded-full bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-receipt"></i>
-            </div>
-
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start">
-                <span class="font-medium truncate dark:text-white flex items-center gap-2">
-                  Product group ({{ entry.items.length }} item{{ entry.items.length === 1 ? "" : "s" }})
-                </span>
-                <span class="font-bold money text-[#C1503A]">
-                  -{{ entry.totalAmount.toFixed(2) }}
-                </span>
+          <div class="p-3 sm:p-3.5 bg-white dark:bg-surface-dark border-b border-gray-100 dark:border-gray-700/50">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fas fa-receipt text-sm"></i>
               </div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                <span>{{ entry.date }} · <span class="dark:text-gray-300">{{ memberName(entry.paidBy) }}</span></span>
 
-                <div v-if="mode === 'split'" class="inline-flex text-[11px] rounded border border-gray-200 dark:border-gray-600 overflow-hidden ml-1">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between gap-2">
+                  <span class="font-semibold text-sm dark:text-white truncate">
+                    Product group ({{ entry.items.length }} item{{ entry.items.length === 1 ? "" : "s" }})
+                  </span>
+                  <span class="font-bold text-sm sm:text-base font-mono tabular-nums text-[#C1503A] flex-shrink-0">
+                    -{{ entry.totalAmount.toFixed(2) }}
+                  </span>
+                </div>
+
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
+                  <span>{{ entry.date }}</span>
+                  <span class="text-gray-300 dark:text-gray-600">·</span>
+                  <span class="dark:text-gray-300 font-medium">{{ memberName(entry.paidBy) }}</span>
+
+                  <div v-if="mode === 'split'" class="inline-flex text-[11px] rounded-md border border-gray-200 dark:border-gray-600 overflow-hidden ml-1">
+                    <button
+                      type="button"
+                      @click="setGroupSplitOption(entry.receiptId, 'whole_group')"
+                      class="px-2 py-0.5 transition-colors"
+                      :class="entry.splitOption === 'whole_group' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    >
+                      Whole group
+                    </button>
+                    <button
+                      type="button"
+                      @click="setGroupSplitOption(entry.receiptId, 'per_item')"
+                      class="px-2 py-0.5 transition-colors"
+                      :class="entry.splitOption === 'per_item' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    >
+                      Per product
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-2.5 pt-2 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-2">
                   <button
-                    type="button"
-                    @click="setGroupSplitOption(entry.receiptId, 'whole_group')"
-                    class="px-2 py-0.5 transition-colors"
-                    :class="entry.splitOption === 'whole_group' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    @click="toggleGroupExpand(entry.receiptId)"
+                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1.5 transition-colors font-medium"
                   >
-                    Whole group
+                    <span>{{ isGroupExpanded(entry.receiptId) ? 'Hide' : 'Show' }} items</span>
+                    <i :class="isGroupExpanded(entry.receiptId) ? 'fas fa-chevron-up text-[10px]' : 'fas fa-chevron-down text-[10px]'"></i>
                   </button>
+
                   <button
-                    type="button"
-                    @click="setGroupSplitOption(entry.receiptId, 'per_item')"
-                    class="px-2 py-0.5 transition-colors"
-                    :class="entry.splitOption === 'per_item' ? 'bg-[#C8A5FC] text-white font-medium' : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    @click="handleDeleteReceiptGroup(entry.receiptId)"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                    title="Delete product group"
                   >
-                    Per product
+                    <i class="fas fa-trash text-xs"></i>
                   </button>
                 </div>
               </div>
-            </div>
-
-            <div class="flex items-center gap-1 ml-1">
-              <button
-                @click="toggleGroupExpand(entry.receiptId)"
-                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1"
-                :title="isGroupExpanded(entry.receiptId) ? 'Collapse group' : 'Expand group'"
-              >
-                <i :class="isGroupExpanded(entry.receiptId) ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
-              </button>
-              <button
-                @click="handleDeleteReceiptGroup(entry.receiptId)"
-                class="text-gray-400 hover:text-red-500 transition-colors p-1"
-                title="Delete product group"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
             </div>
           </div>
 
           <!-- Group Items -->
-          <div v-if="isGroupExpanded(entry.receiptId)" class="divide-y divide-gray-100 dark:divide-gray-700/50">
+          <div v-if="isGroupExpanded(entry.receiptId)" class="divide-y divide-gray-100 dark:divide-gray-700/40 bg-gray-50/20 dark:bg-gray-850/30">
             <div
               v-for="tx in entry.items"
               :key="tx.id"
-              class="flex items-center gap-3 p-2.5 pl-6 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-colors text-sm"
+              class="p-2.5 sm:p-3 pl-4 sm:pl-6 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-colors"
             >
-              <div class="w-6 h-6 rounded-full bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0 text-xs">
-                <i :class="categoryIcon(tx.category)"></i>
-              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-lg bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                  <i :class="categoryIcon(tx.category)"></i>
+                </div>
 
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-start">
-                  <span class="font-medium truncate dark:text-white">
-                    {{ tx.description || tx.category }}
-                  </span>
-                  <span class="font-semibold text-xs money text-[#C1503A]">
-                    -{{ tx.amount.toFixed(2) }}
-                  </span>
-                </div>
-                <div class="text-xs text-gray-400 dark:text-gray-400">
-                  <span class="dark:text-gray-300">{{ tx.category }}</span>
-                </div>
-                <div
-                  v-if="mode === 'split'"
-                  class="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5"
-                >
-                  <template v-if="entry.splitOption === 'whole_group'">
-                    Split between everyone
-                  </template>
-                  <template v-else>
-                    Split between {{ splitBetweenLabel(tx) }}
-                    <span
-                      v-if="splitInfo(tx)"
-                      class="ml-1 font-medium"
-                      :class="{
-                        'text-[#3FA34D] dark:text-[#A7F49D]': splitInfo(tx).tone === 'positive',
-                        'text-[#C1503A]': splitInfo(tx).tone === 'negative',
-                      }"
-                    >· {{ splitInfo(tx).text }}</span>
-                  </template>
-                </div>
-              </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="font-medium text-sm truncate dark:text-white">
+                      {{ tx.description || tx.category }}
+                    </span>
+                    <span class="font-semibold text-xs sm:text-sm font-mono tabular-nums text-[#C1503A] flex-shrink-0">
+                      -{{ tx.amount.toFixed(2) }}
+                    </span>
+                  </div>
 
-              <div class="flex items-center gap-1">
-                <button
-                  @click="handleEdit(tx)"
-                  class="text-gray-400 hover:text-[#C8A5FC] transition-colors p-1"
-                  :class="{ 'opacity-50': !canEdit(tx) }"
-                >
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  @click="handleDelete(tx.id)"
-                  class="text-gray-400 hover:text-red-500 transition-colors p-1"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
+                  <div class="text-xs text-gray-400 dark:text-gray-400 mt-0.5">
+                    <span class="dark:text-gray-300">{{ tx.category }}</span>
+                  </div>
+
+                  <div
+                    v-if="mode === 'split'"
+                    class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1.5 flex-wrap"
+                  >
+                    <template v-if="entry.splitOption === 'whole_group'">
+                      <span>Split between everyone</span>
+                    </template>
+                    <template v-else>
+                      <span>Split: {{ splitBetweenLabel(tx) }}</span>
+                      <span
+                        v-if="splitInfo(tx)"
+                        class="font-medium px-2 py-0.5 rounded-full text-[11px] whitespace-nowrap"
+                        :class="{
+                          'bg-emerald-500/15 text-emerald-600 dark:text-[#A7F49D]': splitInfo(tx).tone === 'positive',
+                          'bg-rose-500/15 text-rose-600 dark:text-[#C1503A]': splitInfo(tx).tone === 'negative',
+                        }"
+                      >
+                        {{ splitInfo(tx).text }}
+                      </span>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1 flex-shrink-0 self-center sm:self-start">
+                  <button
+                    @click="handleEdit(tx)"
+                    class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-40': !canEdit(tx) }"
+                    title="Edit item"
+                  >
+                    <i class="fas fa-edit text-xs"></i>
+                  </button>
+                  <button
+                    @click="handleDelete(tx.id)"
+                    class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                    title="Delete item"
+                  >
+                    <i class="fas fa-trash text-xs"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -313,108 +339,137 @@ function splitBetweenLabel(tx) {
         <!-- STANDALONE TRANSACTION -->
         <div
           v-else
-          class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          class="p-3 sm:p-3.5 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/40 dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors shadow-xs"
         >
-          <div
-            :class="
-              entry.tx.type === 'deposit'
-                ? 'bg-[#A7F49D]'
-                : entry.tx.type === 'settlement'
-                  ? 'bg-[#A5E3FC]'
-                  : 'bg-[#C1503A]'
-            "
-            class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-          >
-            <i
-              :class="[
-                'text-white text-sm',
+          <div class="flex items-start gap-3">
+            <!-- Type / Category Icon -->
+            <div
+              :class="
                 entry.tx.type === 'deposit'
-                  ? 'fas fa-arrow-down'
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-[#A7F49D]'
                   : entry.tx.type === 'settlement'
-                    ? 'fas fa-handshake'
-                    : categoryIcon(entry.tx.category),
-              ]"
-            ></i>
-          </div>
+                    ? 'bg-sky-500/15 text-sky-600 dark:text-[#A5E3FC]'
+                    : 'bg-rose-500/15 text-[#C1503A]'
+              "
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+            >
+              <i
+                :class="[
+                  'text-sm',
+                  entry.tx.type === 'deposit'
+                    ? 'fas fa-arrow-down'
+                    : entry.tx.type === 'settlement'
+                      ? 'fas fa-handshake'
+                      : categoryIcon(entry.tx.category),
+                ]"
+              ></i>
+            </div>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start">
-              <span class="font-medium truncate dark:text-white">
+            <!-- Content Area -->
+            <div class="flex-1 min-w-0">
+              <!-- Row 1: Title & Amount -->
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                  <template v-if="entry.tx.type === 'settlement'">
+                    {{ memberName(entry.tx.paidBy) }} paid {{ memberName(entry.tx.to) }}
+                  </template>
+                  <template v-else>
+                    {{ entry.tx.description || entry.tx.category }}
+                  </template>
+                </span>
+
+                <!-- Amount Block with Dedicated Right-Aligned Currency Display -->
+                <div class="flex-shrink-0 text-right">
+                  <span
+                    class="font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight"
+                    :class="
+                      entry.tx.type === 'deposit'
+                        ? 'text-emerald-600 dark:text-[#A7F49D]'
+                        : entry.tx.type === 'settlement'
+                          ? 'text-sky-600 dark:text-[#A5E3FC]'
+                          : 'text-[#C1503A]'
+                    "
+                  >
+                    {{
+                      entry.tx.type === "deposit"
+                        ? "+"
+                        : entry.tx.type === "settlement"
+                          ? ""
+                          : "-"
+                    }}{{ entry.tx.amount.toFixed(2) }}
+                  </span>
+                  <div
+                    v-if="originalAmountLabel(entry.tx)"
+                    class="text-[11px] text-gray-400 dark:text-gray-500 font-normal leading-tight mt-0.5 text-right whitespace-nowrap"
+                  >
+                    ({{ originalAmountLabel(entry.tx) }})
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 2: Metadata (Date · Paid by · Category) -->
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
                 <template v-if="entry.tx.type === 'settlement'">
-                  {{ memberName(entry.tx.paidBy) }} paid {{ memberName(entry.tx.to) }}
+                  <span>{{ entry.tx.date }}</span>
+                  <template v-if="entry.tx.description">
+                    <span class="text-gray-300 dark:text-gray-600">·</span>
+                    <span class="dark:text-gray-300">{{ entry.tx.description }}</span>
+                  </template>
                 </template>
                 <template v-else>
-                  {{ entry.tx.description || entry.tx.category }}
+                  <span>{{ entry.tx.date }}</span>
+                  <span class="text-gray-300 dark:text-gray-600">·</span>
+                  <span class="dark:text-gray-300 font-medium">{{ memberName(entry.tx.paidBy) }}</span>
+                  <template v-if="entry.tx.category">
+                    <span class="text-gray-300 dark:text-gray-600">·</span>
+                    <span class="dark:text-gray-300">{{ entry.tx.category }}</span>
+                  </template>
                 </template>
-              </span>
-              <span
-                class="font-bold money dark:text-white"
-                :class="
-                  entry.tx.type === 'deposit'
-                    ? 'text-[#A7F49D]'
-                    : entry.tx.type === 'settlement'
-                      ? 'text-[#5C7A99] dark:text-[#A5E3FC]'
-                      : 'text-[#C1503A]'
-                "
-              >
-                {{
-                  entry.tx.type === "deposit"
-                    ? "+"
-                    : entry.tx.type === "settlement"
-                      ? ""
-                      : "-"
-                }}{{ entry.tx.amount.toFixed(2) }}
-                <span
-                  v-if="originalAmountLabel(entry.tx)"
-                  class="font-normal text-xs text-gray-400 dark:text-gray-500"
-                  >({{ originalAmountLabel(entry.tx) }})</span
-                >
-              </span>
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-              <template v-if="entry.tx.type === 'settlement'">
-                {{ entry.tx.date }}{{ entry.tx.description ? ` · ${entry.tx.description}` : "" }}
-              </template>
-              <template v-else>
-                {{ entry.tx.date }} ·
-                <span class="dark:text-gray-300">{{
-                  memberName(entry.tx.paidBy)
-                }}</span>
-                · <span class="dark:text-gray-300">{{ entry.tx.category }}</span>
-              </template>
-            </div>
-            <div
-              v-if="mode === 'split' && entry.tx.type === 'expense'"
-              class="text-xs text-gray-400 dark:text-gray-500 mt-0.5"
-            >
-              Split between {{ splitBetweenLabel(entry.tx) }}
-              <span
-                v-if="splitInfo(entry.tx)"
-                class="ml-1 font-medium"
-                :class="{
-                  'text-[#3FA34D] dark:text-[#A7F49D]':
-                    splitInfo(entry.tx).tone === 'positive',
-                  'text-[#C1503A]': splitInfo(entry.tx).tone === 'negative',
-                }"
-                >· {{ splitInfo(entry.tx).text }}</span
-              >
-            </div>
-          </div>
+              </div>
 
-          <div class="flex items-center gap-1">
-            <button
-              @click="handleEdit(entry.tx)"
-              class="text-gray-400 hover:text-[#C8A5FC] transition-colors p-1"
-              :class="{ 'opacity-50': !canEdit(entry.tx) }"
-            >
-              <i class="fas fa-edit"></i>
-            </button>
-            <button
-              @click="handleDelete(entry.tx.id)"
-              class="text-gray-400 hover:text-red-500 transition-colors p-1"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
+              <!-- Row 3: Split info and Actions -->
+              <div class="mt-2.5 pt-2 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-2 flex-wrap">
+                <div
+                  v-if="mode === 'split' && entry.tx.type === 'expense'"
+                  class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 flex-wrap"
+                >
+                  <span class="truncate max-w-[180px] sm:max-w-xs">
+                    Split: {{ splitBetweenLabel(entry.tx) }}
+                  </span>
+                  <span
+                    v-if="splitInfo(entry.tx)"
+                    class="font-medium px-2 py-0.5 rounded-full text-[11px] whitespace-nowrap"
+                    :class="{
+                      'bg-emerald-500/15 text-emerald-600 dark:text-[#A7F49D]': splitInfo(entry.tx).tone === 'positive',
+                      'bg-rose-500/15 text-rose-600 dark:text-[#C1503A]': splitInfo(entry.tx).tone === 'negative',
+                      'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400': splitInfo(entry.tx).tone === 'muted',
+                    }"
+                  >
+                    {{ splitInfo(entry.tx).text }}
+                  </span>
+                </div>
+                <div v-else class="text-[11px] text-gray-400"></div>
+
+                <!-- Action buttons -->
+                <div class="flex items-center gap-1 ml-auto">
+                  <button
+                    @click="handleEdit(entry.tx)"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    :class="{ 'opacity-40': !canEdit(entry.tx) }"
+                    title="Edit transaction"
+                  >
+                    <i class="fas fa-edit text-xs"></i>
+                  </button>
+                  <button
+                    @click="handleDelete(entry.tx.id)"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                    title="Delete transaction"
+                  >
+                    <i class="fas fa-trash text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </template>

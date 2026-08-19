@@ -31,7 +31,12 @@ export function downloadFile(content, filename, mimeType = "text/plain;charset=u
  */
 function getMemberName(uid, members = {}) {
   if (!uid) return "";
-  return members[uid]?.displayName || members[uid]?.email || uid;
+  return (
+    members[uid]?.nickname ||
+    members[uid]?.displayName ||
+    members[uid]?.email ||
+    uid
+  );
 }
 
 /**
@@ -158,7 +163,7 @@ export function exportTransactionsToCSV(group, transactions, members = {}) {
 export function exportGroupToJSON(group, transactions, members = {}, categories = []) {
   const memberList = Object.entries(members).map(([id, m]) => ({
     id,
-    displayName: m.displayName || "",
+    displayName: m.nickname || m.displayName || "",
     email: m.email || "",
     role: m.role || "member",
   }));

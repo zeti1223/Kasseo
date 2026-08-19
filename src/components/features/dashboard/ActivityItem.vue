@@ -44,7 +44,7 @@ function formatCurrency(amount, currency) {
             {{ tx.description || tx.category }}
           </div>
           <div
-            class="text-sm font-semibold dark:text-white"
+            class="text-sm font-semibold dark:text-white shrink-0 ml-2 font-mono tabular-nums"
             :class="tx.type === 'deposit' ? 'text-[#A7F49D]' : 'text-[#C1503A]'"
           >
             {{ tx.type === "deposit" ? "+" : "-"

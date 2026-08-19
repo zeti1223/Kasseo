@@ -42,7 +42,11 @@ const allCategories = computed(() => {
 });
 
 const memberEntries = computed(() =>
-  Object.entries(props.members).map(([id, m]) => ({ id, ...m })),
+  Object.entries(props.members).map(([id, m]) => ({
+    id,
+    ...m,
+    displayName: m.nickname || m.displayName || "Someone",
+  })),
 );
 const otherMembers = computed(() =>
   memberEntries.value.filter((m) => m.id !== props.currentUserId),
@@ -143,7 +147,11 @@ function toggleSplitMember(id) {
 }
 
 function memberName(id) {
-  return props.members?.[id]?.displayName || "Someone";
+  return (
+    props.members?.[id]?.nickname ||
+    props.members?.[id]?.displayName ||
+    "Someone"
+  );
 }
 
 const canSubmit = computed(() => {
