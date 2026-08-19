@@ -28,7 +28,7 @@ defineEmits(["copy-invite", "remove"]);
       </div>
     </div>
 
-    <div class="space-y-2">
+    <div class="space-y-2 max-h-60 overflow-y-auto">
       <div
         v-for="member in members"
         :key="member.id"

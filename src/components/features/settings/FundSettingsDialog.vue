@@ -206,7 +206,7 @@ function copyInviteLink() {
       @click="!loading && emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4 max-h-[90vh] overflow-y-auto"
+      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4"
     >
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         Fund Settings
