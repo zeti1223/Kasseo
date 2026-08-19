@@ -203,7 +203,13 @@
     "add": "Hinzufügen",
     "ownerOnlyCategories": "Nur der Eigentümer kann Kategorien hinzufügen",
     "noCustomCategories": "Noch keine benutzerdefinierten Kategorien",
-    "clickChooseIcon": "Klicken, um Symbol zu wählen"
+    "clickChooseIcon": "Klicken, um Symbol zu wählen",
+    "tabStyle": "Stil",
+    "styleColorTitle": "Meine Farbe",
+    "styleColorHelp": "Nur für dich sichtbar — wähle eine Farbe für diese Kasse.",
+    "styleIconTitle": "Kassen-Symbol",
+    "styleIconHelp": "Wird allen in dieser Kasse angezeigt.",
+    "ownerOnlyIcon": "Nur der Eigentümer kann das Symbol ändern"
   },
   "export": {
     "title": "Transaktionen exportieren",

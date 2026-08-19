@@ -160,6 +160,23 @@ export const useGroupsStore = defineStore("groups", () => {
     await remove(dbRef(db, `groups/${groupId}/categories/${categoryId}`));
   }
 
+  // The fund's "central" icon — shared by everyone, meant to be set by the
+  // owner only (enforced in the UI, same convention as currency/mode/categories).
+  async function setGroupIcon(groupId, icon) {
+    await set(dbRef(db, `groups/${groupId}/icon`), icon);
+  }
+
+  // Personal per-fund color — each member sets their own, stored on their
+  // own member entry so it never affects what other members see.
+  async function setMyColor(groupId, color) {
+    const authStore = useAuthStore();
+    if (!authStore.user) return;
+    await set(
+      dbRef(db, `groups/${groupId}/members/${authStore.user.uid}/color`),
+      color,
+    );
+  }
+
   return {
     groups,
     currentGroup,
@@ -172,5 +189,7 @@ export const useGroupsStore = defineStore("groups", () => {
     removeMember,
     addCategory,
     removeCategory,
+    setGroupIcon,
+    setMyColor,
   };
 });

@@ -22,6 +22,7 @@ import TransactionList from "@/components/features/transactions/TransactionList.
 import FundSettingsDialog from "@/components/features/settings/FundSettingsDialog.vue";
 import ReceiptScanDialog from "@/components/features/transactions/ReceiptScanDialog.vue";
 import ExportDialog from "@/components/features/export/ExportDialog.vue";
+import { getMyFundColor, getFundIcon } from "@/constants/fundStyle";
 
 const route = useRoute();
 const groupsStore = useGroupsStore();
@@ -36,6 +37,10 @@ const customCategories = ref([]);
 const settleTarget = ref(null); // member id prefilled into the "Settle up" form
 
 const mode = computed(() => groupsStore.currentGroup?.mode || "kitty");
+const myColor = computed(() =>
+  getMyFundColor(groupsStore.currentGroup, authStore.user?.uid),
+);
+const groupIcon = computed(() => getFundIcon(groupsStore.currentGroup));
 
 function handleSettle(memberId) {
   settleTarget.value = memberId;
@@ -95,6 +100,8 @@ const totals = computed(() => {
     <GroupHeader
       :name="groupsStore.currentGroup.name"
       :currency="groupsStore.currentGroup.currency"
+      :icon="groupIcon"
+      :color="myColor"
       @open-settings="showSettings = true"
       @open-export="showExport = true"
     />

@@ -203,7 +203,13 @@
     "add": "Ajouter",
     "ownerOnlyCategories": "Seul le propriétaire peut ajouter des catégories",
     "noCustomCategories": "Aucune catégorie personnalisée",
-    "clickChooseIcon": "Cliquer pour choisir une icône"
+    "clickChooseIcon": "Cliquer pour choisir une icône",
+    "tabStyle": "Style",
+    "styleColorTitle": "Ma couleur",
+    "styleColorHelp": "Visible uniquement par toi — choisis une couleur pour cette cagnotte.",
+    "styleIconTitle": "Icône de la cagnotte",
+    "styleIconHelp": "Visible par tous les membres de cette cagnotte.",
+    "ownerOnlyIcon": "Seul le propriétaire peut changer l'icône"
   },
   "export": {
     "title": "Exporter les transactions",

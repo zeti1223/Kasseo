@@ -203,7 +203,13 @@
     "add": "Hozzáadás",
     "ownerOnlyCategories": "Csak a tulajdonos adhat hozzá kategóriákat",
     "noCustomCategories": "Még nincsenek egyéni kategóriák",
-    "clickChooseIcon": "Kattints az ikon kiválasztásához"
+    "clickChooseIcon": "Kattints az ikon kiválasztásához",
+    "tabStyle": "Megjelenés",
+    "styleColorTitle": "Saját szín",
+    "styleColorHelp": "Csak neked látszik — válassz egy színt ehhez a kasszához.",
+    "styleIconTitle": "Kassza ikonja",
+    "styleIconHelp": "Mindenki ezt látja ebben a kasszában.",
+    "ownerOnlyIcon": "Csak a tulajdonos módosíthatja az ikont"
   },
   "export": {
     "title": "Tranzakciók exportálása",
