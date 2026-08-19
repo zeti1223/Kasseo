@@ -61,6 +61,7 @@ const members = computed(() => {
   return Object.entries(props.group.members).map(([id, member]) => ({
     id,
     ...member,
+    displayName: member.nickname || member.displayName || "Someone",
   }));
 });
 

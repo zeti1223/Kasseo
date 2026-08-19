@@ -29,7 +29,25 @@ export const useGroupsStore = defineStore("groups", () => {
       const loaded = await Promise.all(
         ids.map(async (id) => {
           const groupSnap = await get(dbRef(db, `groups/${id}`));
-          return groupSnap.exists() ? { id, ...groupSnap.val() } : null;
+          if (!groupSnap.exists()) return null;
+          const data = groupSnap.val();
+          const currentNickname =
+            authStore.userProfile?.nickname || authStore.user?.displayName;
+          if (
+            currentNickname &&
+            data.members?.[authStore.user.uid] &&
+            (data.members[authStore.user.uid].displayName !== currentNickname ||
+              data.members[authStore.user.uid].nickname !== currentNickname)
+          ) {
+            data.members[authStore.user.uid].displayName = currentNickname;
+            data.members[authStore.user.uid].nickname = currentNickname;
+            set(dbRef(db, `groups/${id}/members/${authStore.user.uid}`), {
+              ...data.members[authStore.user.uid],
+              displayName: currentNickname,
+              nickname: currentNickname,
+            }).catch(() => {});
+          }
+          return { id, ...data };
         }),
       );
       groups.value = loaded.filter(Boolean);
@@ -39,6 +57,8 @@ export const useGroupsStore = defineStore("groups", () => {
   async function createGroup(name, currency) {
     const authStore = useAuthStore();
     const user = authStore.user;
+    const nickname =
+      authStore.userProfile?.nickname || user.displayName || "User";
     const newGroupRef = push(dbRef(db, "groups"));
     const groupId = newGroupRef.key;
 
@@ -50,7 +70,8 @@ export const useGroupsStore = defineStore("groups", () => {
       createdAt: serverTimestamp(),
       members: {
         [user.uid]: {
-          displayName: user.displayName,
+          displayName: nickname,
+          nickname,
           photoURL: user.photoURL,
           joinedAt: serverTimestamp(),
         },
@@ -65,6 +86,8 @@ export const useGroupsStore = defineStore("groups", () => {
   async function joinGroup(groupId) {
     const authStore = useAuthStore();
     const user = authStore.user;
+    const nickname =
+      authStore.userProfile?.nickname || user.displayName || "User";
 
     const groupSnap = await get(dbRef(db, `groups/${groupId}`));
     if (!groupSnap.exists()) {
@@ -72,7 +95,8 @@ export const useGroupsStore = defineStore("groups", () => {
     }
 
     await set(dbRef(db, `groups/${groupId}/members/${user.uid}`), {
-      displayName: user.displayName,
+      displayName: nickname,
+      nickname,
       photoURL: user.photoURL,
       joinedAt: serverTimestamp(),
     });
@@ -81,7 +105,30 @@ export const useGroupsStore = defineStore("groups", () => {
 
   async function loadGroup(groupId) {
     const snap = await get(dbRef(db, `groups/${groupId}`));
-    currentGroup.value = snap.exists() ? { id: groupId, ...snap.val() } : null;
+    if (snap.exists()) {
+      const data = snap.val();
+      const authStore = useAuthStore();
+      const currentNickname =
+        authStore.userProfile?.nickname || authStore.user?.displayName;
+      if (
+        authStore.user &&
+        currentNickname &&
+        data.members?.[authStore.user.uid] &&
+        (data.members[authStore.user.uid].displayName !== currentNickname ||
+          data.members[authStore.user.uid].nickname !== currentNickname)
+      ) {
+        data.members[authStore.user.uid].displayName = currentNickname;
+        data.members[authStore.user.uid].nickname = currentNickname;
+        set(dbRef(db, `groups/${groupId}/members/${authStore.user.uid}`), {
+          ...data.members[authStore.user.uid],
+          displayName: currentNickname,
+          nickname: currentNickname,
+        }).catch((err) => console.warn("Failed to sync member nickname:", err));
+      }
+      currentGroup.value = { id: groupId, ...data };
+    } else {
+      currentGroup.value = null;
+    }
     return currentGroup.value;
   }
 

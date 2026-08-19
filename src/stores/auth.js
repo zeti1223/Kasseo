@@ -89,6 +89,31 @@ export const useAuthStore = defineStore("auth", () => {
       nickname: newNickname,
     });
     userProfile.value = { ...userProfile.value, nickname: newNickname };
+
+    try {
+      const groupsSnap = await get(dbRef(db, `users/${user.value.uid}/groups`));
+      if (groupsSnap.exists()) {
+        const groupIds = Object.keys(groupsSnap.val());
+        await Promise.all(
+          groupIds.map(async (groupId) => {
+            const memberRef = dbRef(
+              db,
+              `groups/${groupId}/members/${user.value.uid}`,
+            );
+            const memberSnap = await get(memberRef);
+            if (memberSnap.exists()) {
+              await set(memberRef, {
+                ...memberSnap.val(),
+                displayName: newNickname,
+                nickname: newNickname,
+              });
+            }
+          }),
+        );
+      }
+    } catch (err) {
+      console.warn("Could not update nickname in groups:", err);
+    }
   }
 
   async function loginWithGoogle() {

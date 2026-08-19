@@ -114,12 +114,16 @@ async function handleSignOut() {
           <div class="flex items-center gap-3 mb-4">
             <img
               :src="authStore.user?.photoURL"
-              :alt="authStore.user?.displayName"
+              :alt="
+                authStore.userProfile?.nickname || authStore.user?.displayName
+              "
               class="w-12 h-12 rounded-full object-cover"
             />
             <div>
               <div class="font-medium dark:text-white">
-                {{ authStore.user?.displayName }}
+                {{
+                  authStore.userProfile?.nickname || authStore.user?.displayName
+                }}
               </div>
               <div class="text-sm text-gray-500 dark:text-gray-400">
                 {{ authStore.user?.email }}

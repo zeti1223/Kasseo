@@ -259,7 +259,8 @@ export function buildAllMembersBalanceOverTime(transactions, members) {
   return {
     labels,
     datasets: memberIds.map((id, i) => ({
-      label: members[id]?.displayName || "Someone",
+      label:
+        members[id]?.nickname || members[id]?.displayName || "Someone",
       data: series[id],
       borderColor: PALETTE[i % PALETTE.length],
       backgroundColor: PALETTE[i % PALETTE.length],
@@ -284,7 +285,9 @@ export function buildMemberBreakdown(transactions, members) {
       .reduce((s, t) => s + t.amount, 0),
   );
   return {
-    labels: memberIds.map((uid) => members[uid]?.displayName || "Someone"),
+    labels: memberIds.map(
+      (uid) => members[uid]?.nickname || members[uid]?.displayName || "Someone",
+    ),
     datasets: [
       {
         label: "Deposited",

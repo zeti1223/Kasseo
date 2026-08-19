@@ -91,7 +91,7 @@ function handleCopy() {
           >
             <img
               :src="member.photoURL"
-              :alt="member.displayName"
+              :alt="member.nickname || member.displayName"
               class="w-full h-full object-cover"
             />
           </div>
@@ -99,11 +99,15 @@ function handleCopy() {
             v-else
             class="w-8 h-8 rounded-full bg-[#C8A5FC] flex items-center justify-center text-white text-sm font-medium"
           >
-            {{ member.displayName?.charAt(0).toUpperCase() || "?" }}
+            {{
+              (member.nickname || member.displayName)
+                ?.charAt(0)
+                .toUpperCase() || "?"
+            }}
           </div>
           <div>
             <div class="text-sm font-medium dark:text-white">
-              {{ member.displayName }}
+              {{ member.nickname || member.displayName }}
             </div>
             <div
               v-if="member.id === ownerId"

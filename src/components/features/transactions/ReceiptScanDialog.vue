@@ -39,7 +39,11 @@ const scansUsedToday = ref(0);
 const splitOption = ref("whole_group"); // 'whole_group' | 'per_item'
 
 const memberEntries = computed(() =>
-  Object.entries(props.members || {}).map(([id, m]) => ({ id, ...m })),
+  Object.entries(props.members || {}).map(([id, m]) => ({
+    id,
+    ...m,
+    displayName: m.nickname || m.displayName || "Someone",
+  })),
 );
 
 const allCategories = computed(() => {

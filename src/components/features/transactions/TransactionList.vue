@@ -76,7 +76,11 @@ const displayEntries = computed(() => {
 });
 
 function memberName(uid) {
-  return props.members?.[uid]?.displayName || "Someone";
+  return (
+    props.members?.[uid]?.nickname ||
+    props.members?.[uid]?.displayName ||
+    "Someone"
+  );
 }
 
 function handleDelete(txId) {
