@@ -16,6 +16,13 @@ const props = defineProps({
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
 });
 
+const emit = defineEmits(["export"]);
+
+const editingTransaction = ref(null);
+const showEditDialog = ref(false);
+const permissionTx = ref(null);
+const showPermissionAlert = ref(false);
+
 function categoryIcon(catName) {
   const customCat = props.customCategories.find((c) => c.name === catName);
   return getCategoryIcon(catName, customCat?.icon);
@@ -153,8 +160,19 @@ function splitBetweenLabel(tx) {
   <div
     class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
   >
-    <div class="text-base font-medium mb-3 font-display dark:text-white">
-      Transactions
+    <div class="flex items-center justify-between mb-3">
+      <div class="text-base font-medium font-display dark:text-white">
+        Transactions
+      </div>
+      <button
+        v-if="transactions.length"
+        @click="$emit('export')"
+        class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+        title="Export transactions"
+      >
+        <i class="fas fa-file-export"></i>
+        <span>Export</span>
+      </button>
     </div>
 
     <div
