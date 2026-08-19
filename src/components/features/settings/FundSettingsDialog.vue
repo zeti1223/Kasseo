@@ -145,11 +145,17 @@ async function handleModeChange(newMode) {
   }
 }
 
-async function handleAddCategory() {
-  if (!newCategory.value.trim() || !props.group?.id) return;
+async function handleAddCategory(payload) {
+  const catName =
+    typeof payload === "object" && payload?.name
+      ? payload.name
+      : newCategory.value.trim();
+  const icon =
+    typeof payload === "object" && payload?.icon ? payload.icon : null;
+  if (!catName || !props.group?.id) return;
   loading.value = true;
   try {
-    await groupsStore.addCategory(props.group.id, newCategory.value.trim());
+    await groupsStore.addCategory(props.group.id, catName, icon);
     newCategory.value = "";
     await loadCategories();
   } finally {

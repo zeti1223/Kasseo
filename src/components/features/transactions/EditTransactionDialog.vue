@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, nextTick, computed } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
-import { CATEGORIES } from "@/constants/categories";
+import { CATEGORIES, getCategoryIcon } from "@/constants/categories";
 import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({
@@ -17,6 +17,11 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 const transactionsStore = useTransactionsStore();
+
+function categoryIcon(catName) {
+  const customCat = props.customCategories.find((c) => c.name === catName);
+  return getCategoryIcon(catName, customCat?.icon);
+}
 
 const type = ref("expense");
 const amount = ref("");
@@ -154,6 +159,7 @@ async function handleUpdate() {
     };
     if (type.value === "expense") {
       payload.category = category.value;
+      payload.categoryIcon = categoryIcon(category.value);
       if (props.mode === "split") {
         payload.splitAmong = selectedSplit.value.length
           ? selectedSplit.value
@@ -282,14 +288,19 @@ async function handleUpdate() {
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >Category</label
           >
-          <select
-            v-model="category"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
-          >
-            <option v-for="cat in allCategories" :key="cat" :value="cat">
-              {{ cat }}
-            </option>
-          </select>
+          <div class="relative flex items-center">
+            <div class="absolute left-3 text-gray-500 dark:text-gray-400 text-sm pointer-events-none">
+              <i :class="categoryIcon(category)"></i>
+            </div>
+            <select
+              v-model="category"
+              class="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            >
+              <option v-for="cat in allCategories" :key="cat" :value="cat">
+                {{ cat }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <div v-if="mode === 'split' && type === 'expense'">

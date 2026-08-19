@@ -3,7 +3,7 @@ import { ref, computed, watch } from "vue";
 import { ref as dbRef, onValue, get, runTransaction, set } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { useTransactionsStore } from "@/stores/transactions";
-import { CATEGORIES } from "@/constants/categories";
+import { CATEGORIES, getCategoryIcon } from "@/constants/categories";
 import { scanReceiptImage, ScanError } from "@/utils/receiptScan";
 
 const props = defineProps({
@@ -16,6 +16,11 @@ const props = defineProps({
   currentUserId: { type: String, default: "" },
 });
 const emit = defineEmits(["update:modelValue"]);
+
+function itemCategoryIcon(catName) {
+  const customCat = props.customCategories.find((c) => c.name === catName);
+  return getCategoryIcon(catName, customCat?.icon);
+}
 
 const transactionsStore = useTransactionsStore();
 
@@ -277,6 +282,7 @@ async function approveAndSave() {
         currency: props.groupCurrency,
         type: "expense",
         category: it.category,
+        categoryIcon: itemCategoryIcon(it.category),
         description: label,
         date: date.value,
         splitAmong,
@@ -488,14 +494,19 @@ async function approveAndSave() {
               <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Category
               </label>
-              <select
-                v-model="item.category"
-                class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] dark:bg-gray-700 dark:text-white"
-              >
-                <option v-for="cat in allCategories" :key="cat" :value="cat">
-                  {{ cat }}
-                </option>
-              </select>
+              <div class="relative flex items-center">
+                <div class="absolute left-2.5 text-gray-500 dark:text-gray-400 text-xs pointer-events-none">
+                  <i :class="itemCategoryIcon(item.category)"></i>
+                </div>
+                <select
+                  v-model="item.category"
+                  class="w-full pl-8 pr-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] dark:bg-gray-700 dark:text-white"
+                >
+                  <option v-for="cat in allCategories" :key="cat" :value="cat">
+                    {{ cat }}
+                  </option>
+                </select>
+              </div>
             </div>
 
             <div
