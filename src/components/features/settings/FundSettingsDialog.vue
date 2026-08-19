@@ -6,12 +6,14 @@ import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { CURRENCIES } from "@/constants/currencies";
+import { DEFAULT_FUND_COLOR, DEFAULT_FUND_ICON } from "@/constants/fundStyle";
 import { useTranslation } from "i18next-vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 import CurrencyTab from "./CurrencyTab.vue";
 import ModeTab from "./ModeTab.vue";
 import MembersTab from "./MembersTab.vue";
 import CategoriesTab from "./CategoriesTab.vue";
+import StyleTab from "./StyleTab.vue";
 
 const props = defineProps({ modelValue: Boolean, group: Object });
 const emit = defineEmits(["update:modelValue"]);
@@ -26,6 +28,7 @@ const tabs = computed(() => [
   { id: "mode", label: t("fundSettings.tabMode") },
   { id: "members", label: t("fundSettings.tabMembers") },
   { id: "categories", label: t("fundSettings.tabCategories") },
+  { id: "style", label: t("fundSettings.tabStyle") },
 ]);
 const activeTab = ref("currency");
 
@@ -51,6 +54,9 @@ const recalcFailedCount = ref(0); // set after a run that left some transactions
 const newCategory = ref("");
 const categories = ref([]);
 
+const myColor = ref(DEFAULT_FUND_COLOR);
+const groupIcon = ref(DEFAULT_FUND_ICON);
+
 const removeMemberTarget = ref(null);
 const removeCategoryTarget = ref(null);
 
@@ -71,6 +77,10 @@ watch(
     if (isOpen && props.group) {
       currency.value = props.group.currency;
       mode.value = props.group.mode || "kitty";
+      myColor.value =
+        props.group.members?.[authStore.user?.uid]?.color ||
+        DEFAULT_FUND_COLOR;
+      groupIcon.value = props.group.icon || DEFAULT_FUND_ICON;
       loadCategories();
     }
   },
@@ -190,6 +200,20 @@ async function confirmRemoveMember() {
   }
 }
 
+async function handleSetColor(color) {
+  if (!props.group?.id) return;
+  myColor.value = color;
+  await groupsStore.setMyColor(props.group.id, color);
+  await groupsStore.loadGroup(props.group.id);
+}
+
+async function handleSetIcon(icon) {
+  if (!props.group?.id || !isOwner.value) return;
+  groupIcon.value = icon;
+  await groupsStore.setGroupIcon(props.group.id, icon);
+  await groupsStore.loadGroup(props.group.id);
+}
+
 const inviteUrl = computed(() => {
   if (!props.group?.id) return "";
   return `${window.location.origin}/join/${props.group.id}`;
@@ -274,6 +298,16 @@ function copyInviteLink() {
         :loading="loading"
         @add="handleAddCategory"
         @remove="(id) => (removeCategoryTarget = id)"
+      />
+
+      <StyleTab
+        v-if="activeTab === 'style'"
+        :color="myColor"
+        :icon="groupIcon"
+        :is-owner="isOwner"
+        :loading="loading"
+        @set-color="handleSetColor"
+        @set-icon="handleSetIcon"
       />
 
       <div v-if="activeTab !== 'currency'" class="flex justify-end mt-6">

@@ -203,7 +203,13 @@
     "add": "添加",
     "ownerOnlyCategories": "只有所有者可以添加分类",
     "noCustomCategories": "暂无自定义分类",
-    "clickChooseIcon": "点击选择图标"
+    "clickChooseIcon": "点击选择图标",
+    "tabStyle": "样式",
+    "styleColorTitle": "我的颜色",
+    "styleColorHelp": "仅你可见 — 为该基金选择一种颜色。",
+    "styleIconTitle": "基金图标",
+    "styleIconHelp": "该基金的所有成员都能看到。",
+    "ownerOnlyIcon": "只有所有者可以更改图标"
   },
   "export": {
     "title": "导出交易记录",

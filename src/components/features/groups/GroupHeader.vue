@@ -2,6 +2,8 @@
 defineProps({
   name: { type: String, required: true },
   currency: { type: String, required: true },
+  icon: { type: String, default: null },
+  color: { type: String, default: null },
 });
 defineEmits(["open-settings", "open-export"]);
 </script>
@@ -9,6 +11,13 @@ defineEmits(["open-settings", "open-export"]);
 <template>
   <div>
     <div class="flex items-center gap-3 mb-1">
+      <div
+        v-if="icon"
+        class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-white text-sm"
+        :style="{ backgroundColor: color }"
+      >
+        <i :class="icon"></i>
+      </div>
       <h1 class="text-xl font-bold font-display dark:text-white">{{ name }}</h1>
       <div class="flex items-center gap-2">
         <button

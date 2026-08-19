@@ -203,7 +203,13 @@
     "add": "Add",
     "ownerOnlyCategories": "Only the owner can add categories",
     "noCustomCategories": "No custom categories yet",
-    "clickChooseIcon": "Click to choose icon"
+    "clickChooseIcon": "Click to choose icon",
+    "tabStyle": "Style",
+    "styleColorTitle": "My color",
+    "styleColorHelp": "Only visible to you — pick a color for this fund.",
+    "styleIconTitle": "Fund icon",
+    "styleIconHelp": "Shown to everyone in this fund.",
+    "ownerOnlyIcon": "Only the owner can change the icon"
   },
   "export": {
     "title": "Export Transactions",

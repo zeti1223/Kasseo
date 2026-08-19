@@ -203,7 +203,13 @@
     "add": "Añadir",
     "ownerOnlyCategories": "Solo el propietario puede añadir categorías",
     "noCustomCategories": "Aún no hay categorías personalizadas",
-    "clickChooseIcon": "Haz clic para elegir icono"
+    "clickChooseIcon": "Haz clic para elegir icono",
+    "tabStyle": "Estilo",
+    "styleColorTitle": "Mi color",
+    "styleColorHelp": "Solo lo ves tú — elige un color para este fondo.",
+    "styleIconTitle": "Icono del fondo",
+    "styleIconHelp": "Visible para todos los miembros de este fondo.",
+    "ownerOnlyIcon": "Solo el propietario puede cambiar el icono"
   },
   "export": {
     "title": "Exportar transacciones",
