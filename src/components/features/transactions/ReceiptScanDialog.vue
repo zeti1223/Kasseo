@@ -13,12 +13,13 @@ const props = defineProps({
   customCategories: { type: Array, default: () => [] },
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
   members: { type: Object, default: () => ({}) },
+  currentUserId: { type: String, default: "" },
 });
 const emit = defineEmits(["update:modelValue"]);
 
 const transactionsStore = useTransactionsStore();
 
-const DAILY_SCAN_LIMIT = 3;
+const DAILY_SCAN_LIMIT = 5;
 
 // step: 'capture' -> 'preview' -> 'processing' -> 'review' -> 'error'
 const step = ref("capture");
@@ -26,10 +27,15 @@ const errorMessage = ref("");
 const fileInput = ref(null);
 const previewUrl = ref(null);
 const compressedBase64 = ref(null); // no "data:...;base64," prefix
-const items = ref([]); // [{ name, quantity, unitPrice, totalPrice, category, _aiCategory }]
+const items = ref([]); // [{ name, quantity, unitPrice, totalPrice, category, _aiCategory, splitAmong }]
 const date = ref(new Date().toISOString().slice(0, 10));
 const saving = ref(false);
 const scansUsedToday = ref(0);
+const splitOption = ref("whole_group"); // 'whole_group' | 'per_item'
+
+const memberEntries = computed(() =>
+  Object.entries(props.members || {}).map(([id, m]) => ({ id, ...m })),
+);
 
 const allCategories = computed(() => {
   const customNames = props.customCategories.map((cat) => cat.name);
@@ -97,6 +103,7 @@ function reset() {
   previewUrl.value = null;
   compressedBase64.value = null;
   items.value = [];
+  splitOption.value = "whole_group";
   date.value = new Date().toISOString().slice(0, 10);
   if (fileInput.value) fileInput.value.value = "";
 }
@@ -181,7 +188,12 @@ async function submitScan() {
       step.value = "error";
       return;
     }
-    items.value = scanned.map((it) => ({ ...it, _aiCategory: it.category }));
+    const allMemberIds = Object.keys(props.members || {});
+    items.value = scanned.map((it) => ({
+      ...it,
+      _aiCategory: it.category,
+      splitAmong: [...allMemberIds],
+    }));
     step.value = "review";
   } catch (err) {
     errorMessage.value =
@@ -195,6 +207,35 @@ async function submitScan() {
 function removeItem(index) {
   items.value.splice(index, 1);
 }
+
+function toggleItemMember(item, memberId) {
+  if (!Array.isArray(item.splitAmong)) {
+    item.splitAmong = Object.keys(props.members || {});
+  }
+  if (item.splitAmong.includes(memberId)) {
+    if (item.splitAmong.length === 1) return; // Keep at least one member
+    item.splitAmong = item.splitAmong.filter((id) => id !== memberId);
+  } else {
+    item.splitAmong = [...item.splitAmong, memberId];
+  }
+}
+
+function itemPerShare(item) {
+  const count =
+    item.splitAmong?.length || Object.keys(props.members || {}).length || 1;
+  const price = Number(item.totalPrice) || 0;
+  return (price / count).toFixed(2);
+}
+
+const canSave = computed(() => {
+  if (!items.value.length || saving.value) return false;
+  if (props.mode === "split" && splitOption.value === "per_item") {
+    return items.value.every(
+      (it) => Array.isArray(it.splitAmong) && it.splitAmong.length > 0,
+    );
+  }
+  return true;
+});
 
 async function persistCategoryOverridesIfNeeded() {
   const changed = items.value.filter(
@@ -214,14 +255,23 @@ async function persistCategoryOverridesIfNeeded() {
 }
 
 async function approveAndSave() {
-  if (!items.value.length || saving.value) return;
+  if (!canSave.value) return;
   saving.value = true;
   try {
-    const splitAmong =
-      props.mode === "split" ? Object.keys(props.members) : undefined;
+    const allMemberIds = Object.keys(props.members || {});
+    const receiptId = `rcpt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     for (const it of items.value) {
       const label =
         it.quantity && it.quantity > 1 ? `${it.name} ×${it.quantity}` : it.name;
+      const splitAmong =
+        props.mode === "split"
+          ? splitOption.value === "whole_group"
+            ? allMemberIds
+            : it.splitAmong?.length
+              ? it.splitAmong
+              : allMemberIds
+          : undefined;
+
       await transactionsStore.addTransaction(props.groupId, props.groupCurrency, {
         amount: it.totalPrice,
         currency: props.groupCurrency,
@@ -230,6 +280,8 @@ async function approveAndSave() {
         description: label,
         date: date.value,
         splitAmong,
+        receiptId,
+        splitOption: props.mode === "split" ? splitOption.value : undefined,
       });
     }
     await persistCategoryOverridesIfNeeded();
@@ -339,15 +391,51 @@ async function approveAndSave() {
           anything that wasn't read correctly.
         </p>
 
-        <div class="mb-3">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Date
-          </label>
-          <input
-            v-model="date"
-            type="date"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
-          />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date
+            </label>
+            <input
+              v-model="date"
+              type="date"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+            />
+          </div>
+
+          <div v-if="props.mode === 'split'">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Split method
+            </label>
+            <div class="flex text-xs rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600 h-[38px] p-0.5 bg-gray-50 dark:bg-gray-700">
+              <button
+                type="button"
+                @click="splitOption = 'whole_group'"
+                class="flex-1 px-2 rounded-md transition-colors font-medium flex items-center justify-center gap-1"
+                :class="
+                  splitOption === 'whole_group'
+                    ? 'bg-[#C8A5FC] text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                "
+              >
+                <i class="fas fa-users text-xs"></i>
+                Whole group
+              </button>
+              <button
+                type="button"
+                @click="splitOption = 'per_item'"
+                class="flex-1 px-2 rounded-md transition-colors font-medium flex items-center justify-center gap-1"
+                :class="
+                  splitOption === 'per_item'
+                    ? 'bg-[#C8A5FC] text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                "
+              >
+                <i class="fas fa-[#C8A5FC] fa-list-check text-xs"></i>
+                Per product
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="space-y-3 max-h-[45vh] overflow-y-auto pr-1">
@@ -409,6 +497,34 @@ async function approveAndSave() {
                 </option>
               </select>
             </div>
+
+            <div
+              v-if="props.mode === 'split' && splitOption === 'per_item'"
+              class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700"
+            >
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Split between
+              </label>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="m in memberEntries"
+                  :key="m.id"
+                  type="button"
+                  @click="toggleItemMember(item, m.id)"
+                  class="text-xs px-2.5 py-1 rounded-full border transition-colors"
+                  :class="
+                    (item.splitAmong || []).includes(m.id)
+                      ? 'bg-[#C8A5FC] border-[#C8A5FC] text-white'
+                      : 'bg-transparent border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+                  "
+                >
+                  {{ m.id === currentUserId ? "You" : m.displayName }}
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                {{ itemPerShare(item) }} each (split between {{ (item.splitAmong || []).length }} {{ (item.splitAmong || []).length === 1 ? 'person' : 'people' }})
+              </p>
+            </div>
           </div>
         </div>
 
@@ -421,7 +537,7 @@ async function approveAndSave() {
 
         <button
           @click="approveAndSave"
-          :disabled="!items.length || saving"
+          :disabled="!canSave"
           class="w-full px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <i v-if="saving" class="fas fa-spinner fa-spin"></i>

@@ -34,9 +34,9 @@ function amountLabel(balance) {
     <div
       v-for="row in rows"
       :key="row.id"
-      class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+      class="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
     >
-      <div class="flex items-center gap-3 min-w-0">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
         <div
           v-if="row.photoURL"
           class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
@@ -53,7 +53,7 @@ function amountLabel(balance) {
         >
           {{ row.displayName?.charAt(0).toUpperCase() || "?" }}
         </div>
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
           <div class="text-sm font-medium dark:text-white truncate">
             {{ row.isYou ? "You" : row.displayName }}
           </div>
@@ -63,7 +63,7 @@ function amountLabel(balance) {
         </div>
       </div>
 
-      <div class="flex items-center gap-3 flex-shrink-0">
+      <div class="flex flex-col items-end gap-1 flex-shrink-0">
         <span
           class="font-bold money text-sm"
           :class="
@@ -79,7 +79,7 @@ function amountLabel(balance) {
         <button
           v-if="!row.isYou && Math.abs(row.balance) >= 0.005"
           @click="emit('settle', row.id)"
-          class="text-xs px-2 py-1 rounded-lg bg-[#C8A5FC]/20 hover:bg-[#C8A5FC]/40 text-[#8A5FBF] dark:text-[#C8A5FC] transition-colors whitespace-nowrap"
+          class="text-xs px-2 py-0.5 rounded-md bg-[#C8A5FC]/20 hover:bg-[#C8A5FC]/40 text-[#8A5FBF] dark:text-[#C8A5FC] font-medium transition-colors whitespace-nowrap"
         >
           Settle up
         </button>
