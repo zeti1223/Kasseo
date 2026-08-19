@@ -19,7 +19,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const transactionsStore = useTransactionsStore();
 
-const DAILY_SCAN_LIMIT = 3;
+const DAILY_SCAN_LIMIT = 5;
 
 // step: 'capture' -> 'preview' -> 'processing' -> 'review' -> 'error'
 const step = ref("capture");

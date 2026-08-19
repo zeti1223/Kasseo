@@ -33,7 +33,7 @@
         "$date": {
           ".write": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
           "count": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3 && (!data.exists() || newData.val() === data.val() + 1)"
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5 && (!data.exists() || newData.val() === data.val() + 1)"
           }
         }
       }
