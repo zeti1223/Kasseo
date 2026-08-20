@@ -14,7 +14,9 @@ const PALETTE = [
 ];
 
 function translate(key, fallback) {
-  return i18next.isInitialized ? i18next.t(key) : fallback;
+  return i18next.isInitialized
+    ? i18next.t(key, { defaultValue: fallback })
+    : fallback;
 }
 
 export function buildBalanceOverTime(transactions) {

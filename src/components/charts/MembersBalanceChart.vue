@@ -27,7 +27,7 @@ const chartOptions = computed(() => cartesianOptions(props.currency));
       v-else
       class="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center h-full"
     >
-      {{ $t('charts.noData') }}
+      {{ $t('common.noData') }}
     </div>
   </div>
 </template>

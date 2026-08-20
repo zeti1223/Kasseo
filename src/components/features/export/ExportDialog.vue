@@ -134,7 +134,7 @@ function handleExport() {
                 <span class="font-semibold text-sm dark:text-white">CSV</span>
               </div>
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                {{ $t('export.csvDesc') }}
+                {{ $t('export.csvSubtitle') }}
               </span>
             </button>
 
@@ -153,7 +153,7 @@ function handleExport() {
                 <span class="font-semibold text-sm dark:text-white">JSON</span>
               </div>
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                {{ $t('export.jsonDesc') }}
+                {{ $t('export.jsonSubtitle') }}
               </span>
             </button>
           </div>
@@ -341,7 +341,7 @@ function handleExport() {
         >
           <template v-if="exportSuccess">
             <i class="fas fa-check"></i>
-            {{ $t('export.downloaded') }}
+            {{ $t('common.downloaded') }}
           </template>
           <template v-else-if="isExporting">
             <i class="fas fa-spinner fa-spin"></i>
