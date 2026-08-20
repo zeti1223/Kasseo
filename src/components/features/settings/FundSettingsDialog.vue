@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
@@ -31,6 +31,11 @@ const tabs = computed(() => [
   { id: "style", label: t("fundSettings.tabStyle") },
 ]);
 const activeTab = ref("currency");
+
+const name = ref("");
+const editingName = ref(false);
+const savingName = ref(false);
+const nameInputRef = ref(null);
 
 const currency = ref("USD");
 const currencies = CURRENCIES;
@@ -75,6 +80,8 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen && props.group) {
+      name.value = props.group.name || "";
+      editingName.value = false;
       currency.value = props.group.currency;
       mode.value = props.group.mode || "kitty";
       myColor.value =
@@ -92,6 +99,35 @@ async function loadCategories() {
   categories.value = snap.exists()
     ? Object.entries(snap.val()).map(([id, cat]) => ({ id, ...cat }))
     : [];
+}
+
+function startEditingName() {
+  if (!isOwner.value) return;
+  name.value = props.group?.name || "";
+  editingName.value = true;
+  nextTick(() => nameInputRef.value?.focus());
+}
+
+function cancelEditingName() {
+  name.value = props.group?.name || "";
+  editingName.value = false;
+}
+
+async function saveName() {
+  if (!props.group?.id) return;
+  const trimmed = name.value.trim();
+  if (!trimmed || trimmed === props.group.name) {
+    editingName.value = false;
+    return;
+  }
+  savingName.value = true;
+  try {
+    await groupsStore.updateName(props.group.id, trimmed);
+    await groupsStore.loadGroup(props.group.id);
+    editingName.value = false;
+  } finally {
+    savingName.value = false;
+  }
 }
 
 async function handleCurrencyChange() {
@@ -240,6 +276,59 @@ function copyInviteLink() {
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         {{ $t('fundSettings.title') }}
       </h2>
+
+      <div class="mb-4">
+        <label
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >{{ $t('fundSettings.fundName') }}</label
+        >
+        <div v-if="editingName" class="flex items-center gap-2">
+          <input
+            ref="nameInputRef"
+            v-model="name"
+            type="text"
+            maxlength="60"
+            :disabled="savingName"
+            @keyup.enter="saveName"
+            @keyup.escape="cancelEditingName"
+            class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+          />
+          <button
+            @click="saveName"
+            :disabled="savingName || !name.trim()"
+            class="px-3 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <i v-if="savingName" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-check"></i>
+          </button>
+          <button
+            @click="cancelEditingName"
+            :disabled="savingName"
+            class="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <span class="flex-1 px-3 py-2 dark:text-white truncate">{{
+            props.group?.name
+          }}</span>
+          <button
+            v-if="isOwner"
+            @click="startEditingName"
+            class="text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] transition-colors p-2"
+            :title="$t('fundSettings.renameFund')"
+          >
+            <i class="fas fa-pen"></i>
+          </button>
+        </div>
+        <p
+          v-if="!isOwner"
+          class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+        >
+          {{ $t('fundSettings.ownerOnlyName') }}
+        </p>
+      </div>
 
       <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
         <button

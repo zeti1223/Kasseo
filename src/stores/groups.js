@@ -136,6 +136,12 @@ export const useGroupsStore = defineStore("groups", () => {
     await set(dbRef(db, `groups/${groupId}/currency`), newCurrency);
   }
 
+  async function updateName(groupId, newName) {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    await set(dbRef(db, `groups/${groupId}/name`), trimmed);
+  }
+
   // mode: 'kitty' (shared pool funded by deposits) or 'split' (members
   // settle expenses directly with each other, no deposits).
   async function updateMode(groupId, newMode) {
@@ -185,6 +191,7 @@ export const useGroupsStore = defineStore("groups", () => {
     joinGroup,
     loadGroup,
     updateCurrency,
+    updateName,
     updateMode,
     removeMember,
     addCategory,
