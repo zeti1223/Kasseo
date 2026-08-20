@@ -30,7 +30,7 @@ function handleAdd() {
   <div class="space-y-4">
     <div v-if="isOwner" class="space-y-2">
       <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
-        {{ $t('fundSettings.newCategoryLabel') }}
+        {{ $t('fundSettings.newCategory') }}
       </label>
       <div class="flex gap-2">
         <div class="relative">
@@ -38,7 +38,7 @@ function handleAdd() {
             type="button"
             @click="showIconPicker = !showIconPicker"
             class="w-11 h-[42px] border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-            :title="$t('fundSettings.chooseIconTooltip')"
+            :title="$t('fundSettings.clickChooseIcon')"
           >
             <i :class="selectedIcon" class="text-base"></i>
           </button>
@@ -85,7 +85,7 @@ function handleAdd() {
           :disabled="!newCategory.trim() || loading"
           class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
-          {{ $t('common.add') }}
+          {{ $t('fundSettings.add') }}
         </button>
       </div>
     </div>
