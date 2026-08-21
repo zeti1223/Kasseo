@@ -6,6 +6,8 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
+  signInWithCredential,
+  GoogleAuthProvider,
   getRedirectResult,
   signOut as firebaseSignOut,
   setPersistence,
@@ -118,42 +120,27 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  // After native sign-in resolves, the Firebase Web SDK's `auth.currentUser`
-  // (and its ID token, which the Realtime Database rules check) sync in
-  // asynchronously — they are not guaranteed to be ready yet when
-  // signInWithGoogle() returns. Writing to the database before that sync
-  // completes fails with a rules "Permission denied" error even though sign-in
-  // itself succeeded. This waits for the real, usable Web SDK session.
-  function waitForSyncedUser(timeoutMs = 8000) {
-    if (auth.currentUser) return Promise.resolve(auth.currentUser);
-    return new Promise((resolve, reject) => {
-      const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser) {
-          unsubscribe();
-          clearTimeout(timer);
-          resolve(firebaseUser);
-        }
-      });
-      const timer = setTimeout(() => {
-        unsubscribe();
-        reject(new Error("Timed out waiting for the Firebase session to sync after native sign-in."));
-      }, timeoutMs);
-    });
-  }
-
   async function loginWithGoogle() {
     authError.value = null;
 
     // Google actively blocks OAuth sign-in inside embedded/WebView user agents
     // (the Android app's WebView included), so signInWithPopup/signInWithRedirect
     // from the Firebase Web SDK can never succeed there. On native platforms we
-    // go through the device's native Google Sign-In instead; the plugin then
-    // feeds the resulting credential into this same Firebase Web SDK `auth`
-    // instance, so onAuthStateChanged below still fires normally.
+    // go through the device's native Google Sign-In instead, which gives us an
+    // ID token — we then explicitly sign in to the Firebase Web SDK ourselves
+    // with that token. (The plugin's "automatic" native->web sync is not
+    // reliable enough to depend on; the Firebase docs' own recommended
+    // pattern is this explicit signInWithCredential call.)
     if (Capacitor.isNativePlatform()) {
       try {
-        await FirebaseAuthentication.signInWithGoogle();
-        const firebaseUser = await waitForSyncedUser();
+        const nativeResult = await FirebaseAuthentication.signInWithGoogle();
+        const idToken = nativeResult?.credential?.idToken;
+        if (!idToken) {
+          throw new Error("Native Google sign-in did not return an ID token.");
+        }
+        const credential = GoogleAuthProvider.credential(idToken);
+        const webResult = await signInWithCredential(auth, credential);
+        const firebaseUser = webResult.user;
         user.value = firebaseUser;
         await ensureUserProfile(firebaseUser);
         await loadUserProfile(firebaseUser);
