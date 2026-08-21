@@ -172,22 +172,6 @@
     "nicknamePlaceholder": "Enter your nickname",
     "nicknameSaved": "Nickname saved!"
   },
-  "appLock": {
-    "title": "App lock",
-    "subtitle": "Enter your PIN to continue",
-    "wrongPin": "Incorrect PIN",
-    "pinMismatch": "PINs don't match",
-    "pinLock": "PIN lock",
-    "pinLockDescription": "Require a 6-digit PIN to open the app",
-    "biometric": "Biometric unlock",
-    "biometricDescription": "Use your fingerprint or face to unlock instead of typing your PIN",
-    "changePin": "Change PIN",
-    "setupTitle": "Set up app PIN",
-    "disableTitle": "Turn off app lock",
-    "enterCurrentPin": "Enter your current PIN",
-    "enterNewPin": "Enter a new 6-digit PIN",
-    "confirmNewPin": "Confirm your new PIN"
-  },
   "fundSettings": {
     "title": "Fund Settings",
     "fundName": "Fund name",

@@ -172,22 +172,6 @@
     "nicknamePlaceholder": "Entrez votre pseudonyme",
     "nicknameSaved": "Pseudonyme enregistré !"
   },
-  "appLock": {
-    "title": "Verrouillage de l'app",
-    "subtitle": "Saisissez votre code PIN pour continuer",
-    "wrongPin": "Code PIN incorrect",
-    "pinMismatch": "Les codes PIN ne correspondent pas",
-    "pinLock": "Verrouillage par PIN",
-    "pinLockDescription": "Exiger un code PIN à 6 chiffres pour ouvrir l'app",
-    "biometric": "Déverrouillage biométrique",
-    "biometricDescription": "Utilisez votre empreinte ou votre visage au lieu de saisir le PIN",
-    "changePin": "Changer le PIN",
-    "setupTitle": "Configurer le PIN de l'app",
-    "disableTitle": "Désactiver le verrouillage de l'app",
-    "enterCurrentPin": "Saisissez votre PIN actuel",
-    "enterNewPin": "Saisissez un nouveau PIN à 6 chiffres",
-    "confirmNewPin": "Confirmez votre nouveau PIN"
-  },
   "fundSettings": {
     "title": "Paramètres de la cagnotte",
     "fundName": "Nom de la cagnotte",
