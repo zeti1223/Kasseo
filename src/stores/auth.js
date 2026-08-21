@@ -118,6 +118,29 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  // After native sign-in resolves, the Firebase Web SDK's `auth.currentUser`
+  // (and its ID token, which the Realtime Database rules check) sync in
+  // asynchronously — they are not guaranteed to be ready yet when
+  // signInWithGoogle() returns. Writing to the database before that sync
+  // completes fails with a rules "Permission denied" error even though sign-in
+  // itself succeeded. This waits for the real, usable Web SDK session.
+  function waitForSyncedUser(timeoutMs = 8000) {
+    if (auth.currentUser) return Promise.resolve(auth.currentUser);
+    return new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+          unsubscribe();
+          clearTimeout(timer);
+          resolve(firebaseUser);
+        }
+      });
+      const timer = setTimeout(() => {
+        unsubscribe();
+        reject(new Error("Timed out waiting for the Firebase session to sync after native sign-in."));
+      }, timeoutMs);
+    });
+  }
+
   async function loginWithGoogle() {
     authError.value = null;
 
@@ -129,13 +152,11 @@ export const useAuthStore = defineStore("auth", () => {
     // instance, so onAuthStateChanged below still fires normally.
     if (Capacitor.isNativePlatform()) {
       try {
-        const result = await FirebaseAuthentication.signInWithGoogle();
-        if (result?.user) {
-          // onAuthStateChanged will also fire, but set this eagerly so the
-          // UI updates immediately instead of waiting a tick.
-          await ensureUserProfile(auth.currentUser ?? result.user);
-          await loadUserProfile(auth.currentUser ?? result.user);
-        }
+        await FirebaseAuthentication.signInWithGoogle();
+        const firebaseUser = await waitForSyncedUser();
+        user.value = firebaseUser;
+        await ensureUserProfile(firebaseUser);
+        await loadUserProfile(firebaseUser);
       } catch (error) {
         console.warn("Native Google sign-in failed:", error?.code, error?.message);
         authError.value = error.message || String(error);
