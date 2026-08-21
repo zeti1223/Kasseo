@@ -190,6 +190,12 @@ export const useTransactionsStore = defineStore("transactions", () => {
       updates[tx.id] = null;
     }
     await update(dbRef(db, `transactions/${groupId}`), updates);
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.transactionDeleted"),
+      "",
+      { type: "transactionDeleted" },
+    );
   }
 
   async function updateReceiptGroupSplitOption(
