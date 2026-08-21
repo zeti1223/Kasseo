@@ -15,6 +15,13 @@ const emit = defineEmits(["copy-invite", "remove"]);
 const showQr = ref(false);
 const copied = ref(false);
 
+// Tracks members whose photoURL failed to load, falling back to the
+// initials avatar instead of a broken image icon.
+const failedPhotoIds = ref(new Set());
+function onPhotoError(id) {
+  failedPhotoIds.value = new Set(failedPhotoIds.value).add(id);
+}
+
 function handleCopy() {
   emit("copy-invite");
   copied.value = true;
@@ -86,13 +93,14 @@ function handleCopy() {
       >
         <div class="flex items-center gap-3">
           <div
-            v-if="member.photoURL"
+            v-if="member.photoURL && !failedPhotoIds.has(member.id)"
             class="w-8 h-8 rounded-full overflow-hidden"
           >
             <img
               :src="member.photoURL"
               :alt="member.nickname || member.displayName"
               class="w-full h-full object-cover"
+              @error="onPhotoError(member.id)"
             />
           </div>
           <div

@@ -172,6 +172,22 @@
     "nicknamePlaceholder": "Add meg a beceneved",
     "nicknameSaved": "Becenév mentve!"
   },
+  "appLock": {
+    "title": "Alkalmazászár",
+    "subtitle": "Add meg a PIN kódodat a folytatáshoz",
+    "wrongPin": "Hibás PIN kód",
+    "pinMismatch": "A PIN kódok nem egyeznek",
+    "pinLock": "PIN kódos zár",
+    "pinLockDescription": "6 jegyű PIN kód szükséges az alkalmazás megnyitásához",
+    "biometric": "Biometrikus feloldás",
+    "biometricDescription": "Ujjlenyomat vagy arcfelismerés használata a PIN beírása helyett",
+    "changePin": "PIN kód módosítása",
+    "setupTitle": "PIN kód beállítása",
+    "disableTitle": "Alkalmazászár kikapcsolása",
+    "enterCurrentPin": "Add meg a jelenlegi PIN kódodat",
+    "enterNewPin": "Add meg az új 6 jegyű PIN kódot",
+    "confirmNewPin": "Erősítsd meg az új PIN kódot"
+  },
   "fundSettings": {
     "title": "Kassza beállításai",
     "fundName": "Kassza neve",

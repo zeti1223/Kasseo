@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
@@ -11,6 +11,17 @@ const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
 
 const showSettingsDialog = ref(false);
+
+// Google's photoURL occasionally fails to load (transient network issues,
+// rate limiting, etc). Without this, a failed load just leaves a broken
+// image icon in the navbar with no fallback.
+const avatarFailed = ref(false);
+watch(
+  () => authStore.user?.photoURL,
+  () => {
+    avatarFailed.value = false;
+  },
+);
 
 async function handleLogout() {
   await authStore.logout();
@@ -34,10 +45,22 @@ async function handleLogout() {
       <div class="flex-1" />
       <div class="flex items-center gap-2 mr-3">
         <img
-          :src="authStore.user?.photoURL"
+          v-if="authStore.user?.photoURL && !avatarFailed"
+          :src="authStore.user.photoURL"
           :alt="authStore.userProfile?.nickname || authStore.user?.displayName"
           class="w-8 h-8 rounded-full object-cover"
+          @error="avatarFailed = true"
         />
+        <div
+          v-else
+          class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-medium flex-shrink-0"
+        >
+          {{
+            (authStore.userProfile?.nickname || authStore.user?.displayName)
+              ?.charAt(0)
+              .toUpperCase() || "?"
+          }}
+        </div>
         <span class="text-sm hidden sm:inline dark:text-white">{{
           authStore.userProfile?.nickname || authStore.user?.displayName
         }}</span>

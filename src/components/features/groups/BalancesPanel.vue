@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useTranslation } from "i18next-vue";
 import { computeSplitBalances } from "@/utils/chartData";
 
@@ -25,6 +25,14 @@ const rows = computed(() => {
     .sort((a, b) => (a.isYou ? -1 : b.isYou ? 1 : b.balance - a.balance));
 });
 
+// Tracks members whose photoURL failed to load (e.g. transient Google
+// avatar errors) so we can fall back to the initials avatar instead of
+// leaving a broken image icon.
+const failedPhotoIds = ref(new Set());
+function onPhotoError(id) {
+  failedPhotoIds.value = new Set(failedPhotoIds.value).add(id);
+}
+
 function amountLabel(balance) {
   if (Math.abs(balance) < 0.005) return t("groups.settledUp");
   return balance > 0 ? t("groups.isOwed") : t("groups.owes");
@@ -40,13 +48,14 @@ function amountLabel(balance) {
     >
       <div class="flex items-center gap-3 min-w-0 flex-1">
         <div
-          v-if="row.photoURL"
+          v-if="row.photoURL && !failedPhotoIds.has(row.id)"
           class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
         >
           <img
             :src="row.photoURL"
             :alt="row.displayName"
             class="w-full h-full object-cover"
+            @error="onPhotoError(row.id)"
           />
         </div>
         <div
