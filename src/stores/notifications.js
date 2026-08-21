@@ -5,6 +5,7 @@ import {
   requestNotificationPermission,
   showNotification,
   sendPushNotificationToUsers,
+  setOneSignalPushSubscription,
   initOneSignal,
 } from "@/services/notificationService";
 import { useAuthStore } from "./auth";
@@ -12,7 +13,9 @@ import { useAuthStore } from "./auth";
 export const useNotificationsStore = defineStore("notifications", () => {
   // 'granted' | 'denied' | 'default' | 'unsupported'
   const permission = ref(
-    "Notification" in window ? getNotificationPermission() : "unsupported",
+    typeof window !== "undefined" && "Notification" in window
+      ? getNotificationPermission()
+      : "unsupported",
   );
 
   // Whether OS push notifications are enabled by the user
@@ -22,7 +25,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
   const isGranted = computed(() => permission.value === "granted");
   const isSupported = computed(
-    () => "Notification" in window || typeof window !== "undefined",
+    () => typeof window !== "undefined" && ("Notification" in window || true),
   );
 
   /**
@@ -30,7 +33,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
    */
   async function init() {
     await initOneSignal();
-    if ("Notification" in window) {
+    if (typeof window !== "undefined" && "Notification" in window) {
       permission.value = getNotificationPermission();
     }
   }
@@ -42,6 +45,9 @@ export const useNotificationsStore = defineStore("notifications", () => {
   async function askPermission() {
     const result = await requestNotificationPermission();
     permission.value = result;
+    if (result === "granted") {
+      togglePush(true);
+    }
     return result;
   }
 
@@ -51,6 +57,7 @@ export const useNotificationsStore = defineStore("notifications", () => {
   function togglePush(enabled) {
     pushEnabled.value = enabled;
     localStorage.setItem("pushNotificationsEnabled", String(enabled));
+    setOneSignalPushSubscription(enabled);
   }
 
   /**
@@ -103,3 +110,4 @@ export const useNotificationsStore = defineStore("notifications", () => {
     sendPushNotificationToUsers,
   };
 });
+

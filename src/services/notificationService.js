@@ -21,7 +21,8 @@ async function getNativeOneSignal() {
  * Initialize OneSignal for either Capacitor (native Android) or Web browser.
  */
 export async function initOneSignal() {
-  if (!ONESIGNAL_APP_ID) return;
+  if (!ONESIGNAL_APP_ID || isOneSignalInitialized) return;
+  isOneSignalInitialized = true;
 
   const isNative = Capacitor.isNativePlatform();
 
@@ -31,7 +32,6 @@ export async function initOneSignal() {
         const OneSignal = await getNativeOneSignal();
         if (OneSignal) {
           OneSignal.initialize(ONESIGNAL_APP_ID);
-          isOneSignalInitialized = true;
         }
       } catch (err) {
         console.warn("Native OneSignal init failed:", err);
@@ -47,11 +47,17 @@ export async function initOneSignal() {
     try {
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(async function (OneSignal) {
-        await OneSignal.init({
-          appId: ONESIGNAL_APP_ID,
-          allowLocalhostAsSecureOrigin: true,
-        });
-        isOneSignalInitialized = true;
+        try {
+          await OneSignal.init({
+            appId: ONESIGNAL_APP_ID,
+            allowLocalhostAsSecureOrigin: true,
+            notifyButton: {
+              enable: false,
+            },
+          });
+        } catch (err) {
+          console.warn("Web OneSignal init failed:", err);
+        }
       });
     } catch (err) {
       console.warn("Web OneSignal init failed:", err);
@@ -64,6 +70,7 @@ export async function initOneSignal() {
  */
 export async function loginOneSignal(uid) {
   if (!uid || !ONESIGNAL_APP_ID) return;
+  await initOneSignal();
 
   const isNative = Capacitor.isNativePlatform();
 
@@ -72,10 +79,6 @@ export async function loginOneSignal(uid) {
       try {
         const OneSignal = await getNativeOneSignal();
         if (OneSignal) {
-          if (!isOneSignalInitialized) {
-            OneSignal.initialize(ONESIGNAL_APP_ID);
-            isOneSignalInitialized = true;
-          }
           if (typeof OneSignal.login === "function") {
             OneSignal.login(uid);
           } else if (typeof OneSignal.setExternalUserId === "function") {
@@ -144,6 +147,44 @@ export async function logoutOneSignal() {
 }
 
 /**
+ * Opt in or opt out of OneSignal push subscription.
+ */
+export async function setOneSignalPushSubscription(enabled) {
+  if (!ONESIGNAL_APP_ID) return;
+
+  const isNative = Capacitor.isNativePlatform();
+  if (isNative) {
+    try {
+      const OneSignal = await getNativeOneSignal();
+      if (OneSignal?.User?.pushSubscription) {
+        if (enabled) {
+          await OneSignal.User.pushSubscription.optIn();
+        } else {
+          await OneSignal.User.pushSubscription.optOut();
+        }
+      }
+    } catch (err) {
+      console.warn("Native setOneSignalPushSubscription error:", err);
+    }
+  } else {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async function (OneSignal) {
+      try {
+        if (OneSignal?.User?.pushSubscription) {
+          if (enabled) {
+            await OneSignal.User.pushSubscription.optIn();
+          } else {
+            await OneSignal.User.pushSubscription.optOut();
+          }
+        }
+      } catch (err) {
+        console.warn("Web setOneSignalPushSubscription error:", err);
+      }
+    });
+  }
+}
+
+/**
  * Request notification permission from the browser/OS / OneSignal.
  * Returns the resulting permission string: 'granted' | 'denied' | 'default'.
  */
@@ -166,34 +207,40 @@ export async function requestNotificationPermission() {
     } catch (err) {
       console.warn("Native requestPermission failed:", err);
     }
-  } else if (typeof window !== "undefined" && window.OneSignalDeferred && ONESIGNAL_APP_ID) {
-    try {
-      return new Promise((resolve) => {
-        window.OneSignalDeferred.push(async function (OneSignal) {
-          try {
-            await OneSignal.Notifications.requestPermission();
-            const perm = OneSignal.Notifications.permission ? "granted" : "denied";
-            resolve(perm);
-          } catch {
-            if ("Notification" in window) {
-              const res = await Notification.requestPermission();
-              resolve(res);
-            } else {
-              resolve("denied");
-            }
-          }
-        });
-      });
-    } catch {
-      // fallback
-    }
   }
 
-  if (typeof window === "undefined" || !("Notification" in window)) return "denied";
-  if (Notification.permission === "granted") return "granted";
-  if (Notification.permission === "denied") return "denied";
-  const result = await Notification.requestPermission();
-  return result;
+  // Web platform
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return "denied";
+  }
+
+  try {
+    let result = Notification.permission;
+    if (result !== "granted" && result !== "denied") {
+      result = await Notification.requestPermission();
+    }
+
+    if (ONESIGNAL_APP_ID) {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function (OneSignal) {
+        try {
+          if (OneSignal?.Notifications?.requestPermission) {
+            await OneSignal.Notifications.requestPermission();
+          }
+          if (result === "granted" && OneSignal?.User?.pushSubscription) {
+            await OneSignal.User.pushSubscription.optIn();
+          }
+        } catch (e) {
+          console.warn("OneSignal Web permission/optIn error:", e);
+        }
+      });
+    }
+
+    return result || Notification.permission || "denied";
+  } catch (err) {
+    console.warn("requestNotificationPermission error:", err);
+    return Notification.permission || "denied";
+  }
 }
 
 /**
@@ -235,15 +282,16 @@ export async function showNotification(title, body, options = {}) {
 
   try {
     if ("serviceWorker" in navigator) {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (reg && reg.showNotification) {
+      const reg = await navigator.serviceWorker.ready.catch(() => null) ||
+                  await navigator.serviceWorker.getRegistration().catch(() => null);
+      if (reg && typeof reg.showNotification === "function") {
         return await reg.showNotification(title, notificationOptions);
       }
     }
-    new Notification(title, notificationOptions);
-  } catch (err) {
+    return new Notification(title, notificationOptions);
+  } catch {
     try {
-      new Notification(title, notificationOptions);
+      return new Notification(title, notificationOptions);
     } catch (e) {
       console.warn("Could not display notification:", e);
     }
@@ -276,12 +324,10 @@ export async function sendPushNotificationToUsers({ recipientUids, title, body, 
 
   const payload = {
     app_id: ONESIGNAL_APP_ID,
+    target_channel: "push",
     include_aliases: {
       external_id: validRecipients,
     },
-    include_external_user_ids: validRecipients,
-    channel_for_external_user_ids: "push",
-    target_channel: "push",
     headings: {
       en: title,
       hu: title,
@@ -321,3 +367,4 @@ export async function sendPushNotificationToUsers({ recipientUids, title, body, 
     console.warn("Error sending OneSignal push notification:", error);
   }
 }
+

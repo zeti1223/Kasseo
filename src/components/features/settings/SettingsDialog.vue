@@ -20,7 +20,7 @@ const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
 const avatarFailed = ref(false);
-const permissionStatus = ref(notificationsStore.permission);
+const permissionStatus = computed(() => notificationsStore.permission);
 
 watch(
   () => authStore.user?.photoURL,
@@ -42,7 +42,6 @@ watch(
       settingsStore.loadSettings();
       nickname.value =
         authStore.userProfile?.nickname || authStore.user?.displayName || "";
-      permissionStatus.value = notificationsStore.permission;
     }
   },
 );
@@ -69,8 +68,7 @@ async function handleSignOut() {
 }
 
 async function handleRequestPermission() {
-  const result = await notificationsStore.askPermission();
-  permissionStatus.value = result;
+  await notificationsStore.askPermission();
 }
 
 function handleSendTestNotification() {
