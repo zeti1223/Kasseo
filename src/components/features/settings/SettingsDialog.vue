@@ -3,8 +3,10 @@ import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useAuthStore } from "@/stores/auth";
+import { useAppLockStore } from "@/stores/appLock";
 import { useTranslation } from "i18next-vue";
 import LanguageSelector from "@/components/common/LanguageSelector.vue";
+import AppLockSetupDialog from "@/components/features/security/AppLockSetupDialog.vue";
 
 const props = defineProps({ modelValue: Boolean });
 const emit = defineEmits(["update:modelValue"]);
@@ -12,12 +14,15 @@ const emit = defineEmits(["update:modelValue"]);
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const authStore = useAuthStore();
+const appLockStore = useAppLockStore();
 const { t } = useTranslation();
 
 const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
 const avatarFailed = ref(false);
+const showLockDialog = ref(false);
+const lockDialogMode = ref("create");
 
 watch(
   () => authStore.user?.photoURL,
@@ -25,6 +30,16 @@ watch(
     avatarFailed.value = false;
   },
 );
+
+function handleTogglePin() {
+  lockDialogMode.value = appLockStore.pinEnabled ? "disable" : "create";
+  showLockDialog.value = true;
+}
+
+function handleChangePin() {
+  lockDialogMode.value = "change";
+  showLockDialog.value = true;
+}
 
 const themeOptions = computed(() => [
   { value: "light", label: t("settings.themeLight") },
@@ -37,6 +52,7 @@ watch(
   (isOpen) => {
     if (isOpen) {
       settingsStore.loadSettings();
+      appLockStore.checkBiometricAvailability();
       nickname.value =
         authStore.userProfile?.nickname || authStore.user?.displayName || "";
     }
@@ -205,6 +221,76 @@ async function handleSignOut() {
             </div>
           </div>
         </div>
+
+        <!-- Security -->
+        <div
+          v-if="appLockStore.isNative"
+          class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4"
+        >
+          <h3 class="text-md font-semibold mb-3 font-display dark:text-white">
+            {{ $t('appLock.title') }}
+          </h3>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-medium dark:text-white">{{ $t('appLock.pinLock') }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ $t('appLock.pinLockDescription') }}
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="appLockStore.pinEnabled"
+              @click="handleTogglePin"
+              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0"
+              :class="appLockStore.pinEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                :class="appLockStore.pinEnabled ? 'translate-x-6' : 'translate-x-1'"
+              />
+            </button>
+          </div>
+
+          <div
+            v-if="appLockStore.pinEnabled"
+            class="border-t border-gray-200 dark:border-gray-600 mt-3 pt-3 space-y-3"
+          >
+            <div
+              v-if="appLockStore.biometricAvailable"
+              class="flex items-center justify-between"
+            >
+              <div>
+                <div class="font-medium dark:text-white">{{ $t('appLock.biometric') }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ $t('appLock.biometricDescription') }}
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                :aria-checked="appLockStore.biometricEnabled"
+                @click="appLockStore.setBiometricEnabled(!appLockStore.biometricEnabled)"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0"
+                :class="appLockStore.biometricEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  :class="appLockStore.biometricEnabled ? 'translate-x-6' : 'translate-x-1'"
+                />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              @click="handleChangePin"
+              class="text-primary hover:text-primary-dark dark:hover:text-primary-dark-dark text-sm"
+            >
+              {{ $t('appLock.changePin') }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="flex justify-between gap-2 mt-6">
@@ -225,4 +311,6 @@ async function handleSignOut() {
       </div>
     </div>
   </div>
+
+  <AppLockSetupDialog v-model="showLockDialog" :mode="lockDialogMode" />
 </template>
