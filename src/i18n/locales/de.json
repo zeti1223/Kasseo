@@ -293,5 +293,25 @@
     "familyAndKids": "Familie & Kinder",
     "beautyAndPersonalCare": "Körperpflege & Beauty",
     "generalTag": "Allgemeines Tag"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "permission": "Benachrichtigungsberechtigung",
+    "enable": "Aktivieren",
+    "enabled": "Aktiviert",
+    "denied": "Vom Browser blockiert",
+    "notRequested": "Noch nicht aktiviert",
+    "pushLabel": "Browser-Benachrichtigungen",
+    "pushDescription": "Benachrichtigungen anzeigen, wenn ein anderes Mitglied etwas ändert",
+    "transactionAdded": "{{name}} hat eine Transaktion hinzugefügt",
+    "transactionEdited": "{{name}} hat eine Transaktion bearbeitet",
+    "transactionDeleted": "Eine Transaktion wurde gelöscht",
+    "groupRenamed": "Gruppe umbenannt zu „{{name}}“",
+    "groupIconChanged": "Das Gruppen-Icon wurde aktualisiert",
+    "memberJoined": "{{name}} ist der Gruppe beigetreten",
+    "memberLeft": "{{name}} hat die Gruppe verlassen",
+    "testButton": "Test-Benachrichtigung senden",
+    "testTitle": "Kasseo Benachrichtigung",
+    "testBody": "Push-Benachrichtigungen sind erfolgreich eingerichtet!"
   }
 }

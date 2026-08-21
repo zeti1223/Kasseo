@@ -293,5 +293,25 @@
     "familyAndKids": "Család & Gyerekek",
     "beautyAndPersonalCare": "Szépségápolás",
     "generalTag": "Általános címke"
+  },
+  "notifications": {
+    "title": "Értesítések",
+    "permission": "Értesítési engedély",
+    "enable": "Engedélyezés",
+    "enabled": "Engedélyezve",
+    "denied": "Böngésző letiltotta",
+    "notRequested": "Még nincs engedélyezve",
+    "pushLabel": "Böngésző értesítések",
+    "pushDescription": "Értesítés, ha egy másik tag változtat valamit",
+    "transactionAdded": "{{name}} hozzáadott egy tranzakciót",
+    "transactionEdited": "{{name}} szerkesztett egy tranzakciót",
+    "transactionDeleted": "Egy tranzakciót töröltek",
+    "groupRenamed": "A csoport neve megváltozott: \"{{name}}\"",
+    "groupIconChanged": "A csoport ikonja megváltozott",
+    "memberJoined": "{{name}} csatlakozott a csoporthoz",
+    "memberLeft": "{{name}} kilépett a csoportból",
+    "testButton": "Teszt értesítés küldése",
+    "testTitle": "Kasseo értesítés",
+    "testBody": "A push értesítések sikeresen be vannak állítva!"
   }
 }

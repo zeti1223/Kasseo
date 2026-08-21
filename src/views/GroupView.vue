@@ -58,6 +58,7 @@ async function load(id) {
   await groupsStore.loadGroup(id);
   await loadCategories();
   transactionsStore.listen(id);
+  groupsStore.listenToGroup(id);
 }
 
 onMounted(() => load(groupId.value));
@@ -68,7 +69,10 @@ watch(showSettings, async (isOpen) => {
     await loadCategories();
   }
 });
-onUnmounted(() => transactionsStore.stop());
+onUnmounted(() => {
+  transactionsStore.stop();
+  groupsStore.stopGroupListener();
+});
 
 const totals = computed(() => {
   if (mode.value === "split") {

@@ -11,11 +11,37 @@ import {
 } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
+import { sendPushNotificationToUsers } from "@/services/notificationService";
+import i18next from "@/i18n";
+
+async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
+  try {
+    const authStore = useAuthStore();
+    const myUid = authStore.user?.uid;
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) return;
+    const group = groupSnap.val();
+    const members = group.members || {};
+    const recipientUids = Object.keys(members).filter((uid) => uid !== myUid);
+    if (recipientUids.length === 0) return;
+
+    await sendPushNotificationToUsers({
+      recipientUids,
+      title,
+      body,
+      data: { groupId, ...data },
+    });
+  } catch (err) {
+    console.warn("Could not dispatch push to group members:", err);
+  }
+}
 
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]); // funds the current user belongs to
   const currentGroup = ref(null);
   let unsubscribeIds = null;
+  // Listener for the currently-open group (for change notifications)
+  let unsubscribeCurrentGroup = null;
 
   // Keeps `groups` in sync with the full data of every fund the user belongs to.
   function listenToMyGroups() {
@@ -53,6 +79,25 @@ export const useGroupsStore = defineStore("groups", () => {
       groups.value = loaded.filter(Boolean);
     });
   }
+
+  function listenToGroup(groupId) {
+    if (unsubscribeCurrentGroup) unsubscribeCurrentGroup();
+
+    const groupRef = dbRef(db, `groups/${groupId}`);
+    unsubscribeCurrentGroup = onValue(groupRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+      currentGroup.value = { id: groupId, ...data };
+    });
+  }
+
+  function stopGroupListener() {
+    if (unsubscribeCurrentGroup) {
+      unsubscribeCurrentGroup();
+      unsubscribeCurrentGroup = null;
+    }
+  }
+
 
   async function createGroup(name, currency) {
     const authStore = useAuthStore();
@@ -101,6 +146,13 @@ export const useGroupsStore = defineStore("groups", () => {
       joinedAt: serverTimestamp(),
     });
     await set(dbRef(db, `users/${user.uid}/groups/${groupId}`), true);
+
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.memberJoined", { name: nickname }),
+      "",
+      { type: "memberJoined" },
+    );
   }
 
   async function loadGroup(groupId) {
@@ -140,6 +192,12 @@ export const useGroupsStore = defineStore("groups", () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
     await set(dbRef(db, `groups/${groupId}/name`), trimmed);
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.groupRenamed", { name: trimmed }),
+      "",
+      { type: "groupRenamed" },
+    );
   }
 
   // mode: 'kitty' (shared pool funded by deposits) or 'split' (members
@@ -149,8 +207,24 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function removeMember(groupId, userId) {
+    const groupSnap = await get(
+      dbRef(db, `groups/${groupId}/members/${userId}`),
+    );
+    const memberName = groupSnap.exists()
+      ? groupSnap.val()?.nickname ||
+        groupSnap.val()?.displayName ||
+        i18next.t("common.someone")
+      : i18next.t("common.someone");
+
     await remove(dbRef(db, `groups/${groupId}/members/${userId}`));
     await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
+
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.memberLeft", { name: memberName }),
+      "",
+      { type: "memberLeft" },
+    );
   }
 
   async function addCategory(groupId, category, icon = null) {
@@ -170,6 +244,12 @@ export const useGroupsStore = defineStore("groups", () => {
   // owner only (enforced in the UI, same convention as currency/mode/categories).
   async function setGroupIcon(groupId, icon) {
     await set(dbRef(db, `groups/${groupId}/icon`), icon);
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.groupIconChanged"),
+      "",
+      { type: "groupIconChanged" },
+    );
   }
 
   // Personal per-fund color — each member sets their own, stored on their
@@ -187,6 +267,8 @@ export const useGroupsStore = defineStore("groups", () => {
     groups,
     currentGroup,
     listenToMyGroups,
+    listenToGroup,
+    stopGroupListener,
     createGroup,
     joinGroup,
     loadGroup,

@@ -293,5 +293,25 @@
     "familyAndKids": "家庭与孩子",
     "beautyAndPersonalCare": "美容与个护",
     "generalTag": "通用标签"
+  },
+  "notifications": {
+    "title": "通知",
+    "permission": "通知权限",
+    "enable": "启用",
+    "enabled": "已启用",
+    "denied": "已被浏览器阻止",
+    "notRequested": "尚未启用",
+    "pushLabel": "浏览器通知",
+    "pushDescription": "当其他成员进行更改时显示通知",
+    "transactionAdded": "{{name}} 添加了一笔交易",
+    "transactionEdited": "{{name}} 编辑了一笔交易",
+    "transactionDeleted": "一笔交易已被删除",
+    "groupRenamed": "群组已重命名为“{{name}}”",
+    "groupIconChanged": "群组图标已更新",
+    "memberJoined": "{{name}} 加入了群组",
+    "memberLeft": "{{name}} 离开了群组",
+    "testButton": "发送测试通知",
+    "testTitle": "Kasseo 通知",
+    "testBody": "推送通知已成功配置！"
   }
 }

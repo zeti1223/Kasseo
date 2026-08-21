@@ -293,5 +293,25 @@
     "familyAndKids": "Famille & Enfants",
     "beautyAndPersonalCare": "Beauté & Soins",
     "generalTag": "Étiquette générale"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "permission": "Permission de notification",
+    "enable": "Activer",
+    "enabled": "Activé",
+    "denied": "Bloqué par le navigateur",
+    "notRequested": "Pas encore activé",
+    "pushLabel": "Notifications du navigateur",
+    "pushDescription": "Afficher des notifications lorsqu'un autre membre apporte des modifications",
+    "transactionAdded": "{{name}} a ajouté une transaction",
+    "transactionEdited": "{{name}} a modifié une transaction",
+    "transactionDeleted": "Une transaction a été supprimée",
+    "groupRenamed": "Groupe renommé en « {{name}} »",
+    "groupIconChanged": "L'icône du groupe a été mise à jour",
+    "memberJoined": "{{name}} a rejoint le groupe",
+    "memberLeft": "{{name}} a quitté le groupe",
+    "testButton": "Envoyer une notification test",
+    "testTitle": "Notification Kasseo",
+    "testBody": "Les notifications push sont configurées avec succès !"
   }
 }
