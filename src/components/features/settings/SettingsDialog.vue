@@ -3,6 +3,7 @@ import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from "@/stores/settings";
 import { useAuthStore } from "@/stores/auth";
+import { useNotificationsStore } from "@/stores/notifications";
 import { useTranslation } from "i18next-vue";
 import LanguageSelector from "@/components/common/LanguageSelector.vue";
 
@@ -12,12 +13,14 @@ const emit = defineEmits(["update:modelValue"]);
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const authStore = useAuthStore();
+const notificationsStore = useNotificationsStore();
 const { t } = useTranslation();
 
 const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
 const avatarFailed = ref(false);
+const permissionStatus = ref(notificationsStore.permission);
 
 watch(
   () => authStore.user?.photoURL,
@@ -39,6 +42,7 @@ watch(
       settingsStore.loadSettings();
       nickname.value =
         authStore.userProfile?.nickname || authStore.user?.displayName || "";
+      permissionStatus.value = notificationsStore.permission;
     }
   },
 );
@@ -62,6 +66,15 @@ function cancelEdit() {
 async function handleSignOut() {
   await authStore.logout();
   router.push({ name: "landing" });
+}
+
+async function handleRequestPermission() {
+  const result = await notificationsStore.askPermission();
+  permissionStatus.value = result;
+}
+
+function handleSendTestNotification() {
+  notificationsStore.sendTestNotification(t);
 }
 </script>
 
@@ -203,6 +216,75 @@ async function handleSignOut() {
                 {{ saveMessage }}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div v-if="notificationsStore.isSupported" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mt-4">
+        <h3 class="text-md font-semibold mb-3 font-display dark:text-white">
+          {{ $t('notifications.title') }}
+        </h3>
+
+        <!-- Permission status -->
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-medium dark:text-white">{{ $t('notifications.permission') }}</div>
+            <div class="text-sm mt-0.5" :class="{
+              'text-green-600 dark:text-green-400': permissionStatus === 'granted',
+              'text-red-500 dark:text-red-400': permissionStatus === 'denied',
+              'text-gray-500 dark:text-gray-400': permissionStatus === 'default',
+            }">
+              <span v-if="permissionStatus === 'granted'">
+                <i class="fas fa-check-circle mr-1" /> {{ $t('notifications.enabled') }}
+              </span>
+              <span v-else-if="permissionStatus === 'denied'">
+                <i class="fas fa-ban mr-1" /> {{ $t('notifications.denied') }}
+              </span>
+              <span v-else>
+                <i class="fas fa-bell-slash mr-1" /> {{ $t('notifications.notRequested') }}
+              </span>
+            </div>
+          </div>
+          <button
+            v-if="permissionStatus !== 'granted' && permissionStatus !== 'denied'"
+            @click="handleRequestPermission"
+            class="px-3 py-1.5 bg-[#C8A5FC] text-white rounded-lg text-sm hover:bg-[#b48df0] transition-colors"
+          >
+            {{ $t('notifications.enable') }}
+          </button>
+        </div>
+
+        <!-- Push toggle (only when granted) -->
+        <div v-if="permissionStatus === 'granted'" class="space-y-3 border-t border-gray-200 dark:border-gray-600 pt-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-medium dark:text-white">{{ $t('notifications.pushLabel') }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notifications.pushDescription') }}</div>
+            </div>
+            <button
+              role="switch"
+              :aria-checked="notificationsStore.pushEnabled"
+              @click="notificationsStore.togglePush(!notificationsStore.pushEnabled)"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none"
+              :class="notificationsStore.pushEnabled ? 'bg-[#C8A5FC]' : 'bg-gray-300 dark:bg-gray-600'"
+            >
+              <span
+                class="inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform"
+                :class="notificationsStore.pushEnabled ? 'translate-x-5' : 'translate-x-0'"
+              />
+            </button>
+          </div>
+
+          <div v-if="notificationsStore.pushEnabled" class="flex justify-end pt-1">
+            <button
+              type="button"
+              @click="handleSendTestNotification"
+              class="text-xs px-3 py-1.5 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center gap-1.5"
+            >
+              <i class="fas fa-paper-plane text-[10px]" />
+              {{ $t('notifications.testButton') }}
+            </button>
           </div>
         </div>
       </div>

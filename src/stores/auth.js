@@ -15,6 +15,7 @@ import {
 } from "firebase/auth";
 import { ref as dbRef, get, set, serverTimestamp } from "firebase/database";
 import { auth, db, googleProvider } from "@/services/firebase/config";
+import { loginOneSignal, logoutOneSignal } from "@/services/notificationService";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -49,8 +50,10 @@ export const useAuthStore = defineStore("auth", () => {
         if (firebaseUser) {
           await ensureUserProfile(firebaseUser);
           await loadUserProfile(firebaseUser);
+          loginOneSignal(firebaseUser.uid);
         } else {
           userProfile.value = null;
+          logoutOneSignal();
         }
         isReady.value = true;
         if (isInitial) {

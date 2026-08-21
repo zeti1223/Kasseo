@@ -13,6 +13,30 @@ import {
 import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { convertCurrency } from "@/services/currency";
+import { sendPushNotificationToUsers } from "@/services/notificationService";
+import i18next from "@/i18n";
+
+async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
+  try {
+    const authStore = useAuthStore();
+    const myUid = authStore.user?.uid;
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) return;
+    const group = groupSnap.val();
+    const members = group.members || {};
+    const recipientUids = Object.keys(members).filter((uid) => uid !== myUid);
+    if (recipientUids.length === 0) return;
+
+    await sendPushNotificationToUsers({
+      recipientUids,
+      title,
+      body,
+      data: { groupId, ...data },
+    });
+  } catch (err) {
+    console.warn("Could not dispatch push to group members:", err);
+  }
+}
 
 // Runs `fn` over `items` with at most `limit` calls in flight (avoids
 // overwhelming the free, unauthenticated rate API).
@@ -63,6 +87,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
   function listen(groupId) {
     if (unsubscribe) unsubscribe();
+
     const txRef = dbRef(db, `transactions/${groupId}`);
     unsubscribe = onValue(txRef, (snapshot) => {
       const val = snapshot.val() || {};
@@ -133,10 +158,28 @@ export const useTransactionsStore = defineStore("transactions", () => {
       payload.to = to;
     }
     await set(newRef, payload);
+
+    const myName =
+      authStore.userProfile?.nickname ||
+      authStore.user?.displayName ||
+      i18next.t("common.someone");
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.transactionAdded", { name: myName }),
+      description || category || "",
+      { type: "transactionAdded" },
+    );
   }
 
   async function deleteTransaction(groupId, txId) {
+    const tx = transactions.value.find((t) => t.id === txId);
     await remove(dbRef(db, `transactions/${groupId}/${txId}`));
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.transactionDeleted"),
+      tx?.description || tx?.category || "",
+      { type: "transactionDeleted" },
+    );
   }
 
   async function deleteReceiptGroup(groupId, receiptId) {
@@ -217,6 +260,18 @@ export const useTransactionsStore = defineStore("transactions", () => {
       payload.to = to;
     }
     await set(dbRef(db, `transactions/${groupId}/${txId}`), payload);
+
+    const authStore = useAuthStore();
+    const myName =
+      authStore.userProfile?.nickname ||
+      authStore.user?.displayName ||
+      i18next.t("common.someone");
+    dispatchPushToGroupMembers(
+      groupId,
+      i18next.t("notifications.transactionEdited", { name: myName }),
+      description || category || "",
+      { type: "transactionEdited" },
+    );
   }
 
   // Re-converts every transaction into `newCurrency` using each

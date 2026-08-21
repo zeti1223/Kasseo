@@ -293,5 +293,25 @@
     "familyAndKids": "Family & Kids",
     "beautyAndPersonalCare": "Beauty & Personal Care",
     "generalTag": "General Tag"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "permission": "Notification permission",
+    "enable": "Enable",
+    "enabled": "Enabled",
+    "denied": "Blocked by browser",
+    "notRequested": "Not yet enabled",
+    "pushLabel": "Browser notifications",
+    "pushDescription": "Show notifications when another member changes something",
+    "transactionAdded": "{{name}} added a transaction",
+    "transactionEdited": "{{name}} edited a transaction",
+    "transactionDeleted": "A transaction was deleted",
+    "groupRenamed": "Group renamed to \"{{name}}\"",
+    "groupIconChanged": "Group icon was updated",
+    "memberJoined": "{{name}} joined the group",
+    "memberLeft": "{{name}} left the group",
+    "testButton": "Send test notification",
+    "testTitle": "Kasseo Notification",
+    "testBody": "Push notifications are successfully set up!"
   }
 }
