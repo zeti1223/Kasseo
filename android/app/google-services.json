@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "519239484503-e38f3cko1v012cd87bo4nhe6qnod1nu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kasseo.app",
+            "certificate_hash": "7ca43d3a034a41f4d3c8db9d586b3ff21cc72ea9"
+          }
+        },
+        {
           "client_id": "519239484503-pdt98d6vev6js373pt02rpbflfjfj9r5.apps.googleusercontent.com",
           "client_type": 3
         }

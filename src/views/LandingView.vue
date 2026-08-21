@@ -8,9 +8,16 @@ const authStore = useAuthStore();
 
 async function handleLogin() {
   localStorage.setItem("authRedirect", "/dashboard");
-  await authStore.loginWithGoogle();
-  if (authStore.user) {
-    router.push({ name: "dashboard" });
+  try {
+    await authStore.loginWithGoogle();
+    if (authStore.user) {
+      router.push({ name: "dashboard" });
+    }
+  } catch (error) {
+    // loginWithGoogle already sets authStore.authError; catching here just
+    // stops it becoming a silent unhandled rejection (which looks like the
+    // button "does nothing").
+    console.error("Login failed:", error);
   }
 }
 </script>
@@ -53,6 +60,12 @@ async function handleLogin() {
         <i class="fab fa-google"></i>
         {{ $t('landing.signInWithGoogle') }}
       </button>
+      <p
+        v-if="authStore.authError"
+        class="text-sm text-red-600 mt-3 text-center break-words"
+      >
+        {{ authStore.authError }}
+      </p>
     </div>
   </div>
 </template>
