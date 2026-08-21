@@ -17,6 +17,14 @@ const { t } = useTranslation();
 const nickname = ref("");
 const isEditingNickname = ref(false);
 const saveMessage = ref("");
+const avatarFailed = ref(false);
+
+watch(
+  () => authStore.user?.photoURL,
+  () => {
+    avatarFailed.value = false;
+  },
+);
 
 const themeOptions = computed(() => [
   { value: "light", label: t("settings.themeLight") },
@@ -117,12 +125,24 @@ async function handleSignOut() {
 
           <div class="flex items-center gap-3 mb-4">
             <img
-              :src="authStore.user?.photoURL"
+              v-if="authStore.user?.photoURL && !avatarFailed"
+              :src="authStore.user.photoURL"
               :alt="
                 authStore.userProfile?.nickname || authStore.user?.displayName
               "
               class="w-12 h-12 rounded-full object-cover"
+              @error="avatarFailed = true"
             />
+            <div
+              v-else
+              class="w-12 h-12 rounded-full bg-[#C8A5FC] flex items-center justify-center text-white text-lg font-medium flex-shrink-0"
+            >
+              {{
+                (authStore.userProfile?.nickname || authStore.user?.displayName)
+                  ?.charAt(0)
+                  .toUpperCase() || "?"
+              }}
+            </div>
             <div>
               <div class="font-medium dark:text-white">
                 {{
