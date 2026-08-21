@@ -1,5 +1,11 @@
 {
   "appId": "com.kasseo.app",
   "appName": "Kasseo",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["google.com"]
+    }
+  }
 }
