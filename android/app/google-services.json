@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "519239484503",
+    "firebase_url": "https://financial-app-cccd7-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "financial-app-cccd7",
+    "storage_bucket": "financial-app-cccd7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519239484503:android:0d4e9a7a0adc7f6147cf12",
+        "android_client_info": {
+          "package_name": "com.kasseo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "519239484503-pdt98d6vev6js373pt02rpbflfjfj9r5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp9BcuhdTJbyjNgyNKyL8t2aatEygvnYo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "519239484503-1met4dnrvkpq7c8r1hreltqmr404to8s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
