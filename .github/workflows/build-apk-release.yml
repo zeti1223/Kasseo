@@ -64,6 +64,18 @@ jobs:
           cd android
           ./gradlew assembleDebug assembleRelease
 
+      - name: Sign Release APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
       - name: Prepare APK Artifacts
         run: |
           mkdir -p release-apks
@@ -71,12 +83,9 @@ jobs:
           if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
             cp android/app/build/outputs/apk/debug/app-debug.apk release-apks/kasseo-debug.apk
           fi
-          # Copy Release APK (unsigned or signed)
-          if [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk release-apks/kasseo-release-unsigned.apk
-          fi
-          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
-            cp android/app/build/outputs/apk/release/app-release.apk release-apks/kasseo-release.apk
+          # Copy Signed Release APK
+          if [ -f "${{ steps.sign_apk.outputs.signedReleaseFile }}" ]; then
+            cp "${{ steps.sign_apk.outputs.signedReleaseFile }}" release-apks/kasseo-release.apk
           fi
 
       - name: Upload APKs as Workflow Artifacts
