@@ -172,22 +172,6 @@
     "nicknamePlaceholder": "Spitznamen eingeben",
     "nicknameSaved": "Spitzname gespeichert!"
   },
-  "appLock": {
-    "title": "App-Sperre",
-    "subtitle": "Gib deine PIN ein, um fortzufahren",
-    "wrongPin": "Falsche PIN",
-    "pinMismatch": "Die PINs stimmen nicht überein",
-    "pinLock": "PIN-Sperre",
-    "pinLockDescription": "Eine 6-stellige PIN zum Öffnen der App verlangen",
-    "biometric": "Biometrische Entsperrung",
-    "biometricDescription": "Fingerabdruck oder Gesichtserkennung statt PIN-Eingabe verwenden",
-    "changePin": "PIN ändern",
-    "setupTitle": "App-PIN einrichten",
-    "disableTitle": "App-Sperre deaktivieren",
-    "enterCurrentPin": "Gib deine aktuelle PIN ein",
-    "enterNewPin": "Gib eine neue 6-stellige PIN ein",
-    "confirmNewPin": "Bestätige deine neue PIN"
-  },
   "fundSettings": {
     "title": "Kasseneinstellungen",
     "fundName": "Kassenname",

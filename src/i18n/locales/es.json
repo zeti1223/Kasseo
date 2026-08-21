@@ -172,22 +172,6 @@
     "nicknamePlaceholder": "Introduce tu apodo",
     "nicknameSaved": "¡Apodo guardado!"
   },
-  "appLock": {
-    "title": "Bloqueo de la app",
-    "subtitle": "Introduce tu PIN para continuar",
-    "wrongPin": "PIN incorrecto",
-    "pinMismatch": "Los PIN no coinciden",
-    "pinLock": "Bloqueo con PIN",
-    "pinLockDescription": "Requerir un PIN de 6 dígitos para abrir la app",
-    "biometric": "Desbloqueo biométrico",
-    "biometricDescription": "Usa tu huella o rostro para desbloquear en lugar de escribir el PIN",
-    "changePin": "Cambiar PIN",
-    "setupTitle": "Configurar PIN de la app",
-    "disableTitle": "Desactivar bloqueo de la app",
-    "enterCurrentPin": "Introduce tu PIN actual",
-    "enterNewPin": "Introduce un nuevo PIN de 6 dígitos",
-    "confirmNewPin": "Confirma tu nuevo PIN"
-  },
   "fundSettings": {
     "title": "Ajustes del fondo",
     "fundName": "Nombre del fondo",

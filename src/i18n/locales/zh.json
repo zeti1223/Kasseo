@@ -172,22 +172,6 @@
     "nicknamePlaceholder": "输入昵称",
     "nicknameSaved": "昵称已保存！"
   },
-  "appLock": {
-    "title": "应用锁",
-    "subtitle": "请输入PIN码以继续",
-    "wrongPin": "PIN码错误",
-    "pinMismatch": "两次输入的PIN码不一致",
-    "pinLock": "PIN码锁定",
-    "pinLockDescription": "打开应用时需要输入6位PIN码",
-    "biometric": "生物识别解锁",
-    "biometricDescription": "使用指纹或面容代替输入PIN码解锁",
-    "changePin": "修改PIN码",
-    "setupTitle": "设置应用PIN码",
-    "disableTitle": "关闭应用锁",
-    "enterCurrentPin": "请输入当前PIN码",
-    "enterNewPin": "请输入新的6位PIN码",
-    "confirmNewPin": "请确认新的PIN码"
-  },
   "fundSettings": {
     "title": "基金设置",
     "fundName": "基金名称",
