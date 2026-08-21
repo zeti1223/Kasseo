@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { Capacitor } from "@capacitor/core";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -118,6 +120,30 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function loginWithGoogle() {
     authError.value = null;
+
+    // Google actively blocks OAuth sign-in inside embedded/WebView user agents
+    // (the Android app's WebView included), so signInWithPopup/signInWithRedirect
+    // from the Firebase Web SDK can never succeed there. On native platforms we
+    // go through the device's native Google Sign-In instead; the plugin then
+    // feeds the resulting credential into this same Firebase Web SDK `auth`
+    // instance, so onAuthStateChanged below still fires normally.
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await FirebaseAuthentication.signInWithGoogle();
+        if (result?.user) {
+          // onAuthStateChanged will also fire, but set this eagerly so the
+          // UI updates immediately instead of waiting a tick.
+          await ensureUserProfile(auth.currentUser ?? result.user);
+          await loadUserProfile(auth.currentUser ?? result.user);
+        }
+      } catch (error) {
+        console.warn("Native Google sign-in failed:", error?.code, error?.message);
+        authError.value = error.message || String(error);
+        throw error;
+      }
+      return;
+    }
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       if (result?.user) {
