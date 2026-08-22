@@ -8,6 +8,7 @@ const props = defineProps({
   currentUserId: { type: String, default: "" },
   isOwner: { type: Boolean, default: false },
   inviteUrl: { type: String, default: "" },
+  qrInviteUrl: { type: String, default: "" },
 });
 
 const emit = defineEmits(["copy-invite", "remove"]);
@@ -68,12 +69,12 @@ function handleCopy() {
       </div>
 
       <div
-        v-if="showQr && inviteUrl"
+        v-if="showQr && (qrInviteUrl || inviteUrl)"
         class="mt-4 pt-3 border-t border-[#A5E3FC]/30 flex flex-col items-center justify-center"
       >
         <div class="p-3 bg-white rounded-xl shadow-sm inline-block">
           <QrcodeVue
-            :value="inviteUrl"
+            :value="qrInviteUrl || inviteUrl"
             :size="160"
             level="M"
             render-as="svg"

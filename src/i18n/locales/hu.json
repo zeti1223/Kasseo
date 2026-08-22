@@ -54,7 +54,13 @@
     "subtitle": "A csatlakozással közösen láthatjátok és rögzíthetitek a tranzakciókat.",
     "joinFund": "Csatlakozás a kasszához",
     "signInRequired": "A csatlakozáshoz be kell jelentkezned.",
-    "invalidLink": "Nem sikerült csatlakozni. A meghívó link érvénytelen lehet."
+    "invalidLink": "Nem sikerült csatlakozni. A meghívó link érvénytelen lehet.",
+    "openInApp": "Megnyitás Kasseo-ban",
+    "openInAppTitle": "Az app-ban jobb",
+    "openInAppPrompt": "Használd a teljes Kasseo élményt — kövessétek közösen a kiadásokat, osszátok el a számlákat és még sok mást.",
+    "continueInBrowser": "Folytatás böngészőben",
+    "signInToJoin": "Belépés Google-lel a csatlakozáshoz",
+    "deepLinkFallback": "Ha az app nem nyílt meg, ellenőrizd, hogy telepítve van-e a Kasseo, vagy folytasd böngészőben."
   },
   "dashboard": {
     "welcome": "Üdv újra itt!",

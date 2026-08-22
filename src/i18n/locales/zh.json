@@ -54,7 +54,13 @@
     "subtitle": "加入后即可与大家一起查看和记录该基金的交易。",
     "joinFund": "加入基金",
     "signInRequired": "你需要先登录才能加入基金。",
-    "invalidLink": "无法加入该基金，邀请链接可能已失效。"
+    "invalidLink": "无法加入该基金，邀请链接可能已失效。",
+    "openInApp": "在 Kasseo 中打开",
+    "openInAppTitle": "在应用中体验更佳",
+    "openInAppPrompt": "体验完整的 Kasseo 功能——追踪共享支出、分摊账单等更多内容。",
+    "continueInBrowser": "在浏览器中继续",
+    "signInToJoin": "用 Google 登录并加入",
+    "deepLinkFallback": "如果应用未打开，请确认已安装 Kasseo，或在浏览器中继续。"
   },
   "dashboard": {
     "welcome": "欢迎回来！",

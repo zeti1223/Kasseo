@@ -54,7 +54,13 @@
     "subtitle": "Durch den Beitritt könnt ihr Transaktionen gemeinsam einsehen und erfassen.",
     "joinFund": "Kasse beitreten",
     "signInRequired": "Du musst angemeldet sein, um einer Kasse beizutreten.",
-    "invalidLink": "Beitritt fehlgeschlagen. Der Einladungslink ist möglicherweise ungültig."
+    "invalidLink": "Beitritt fehlgeschlagen. Der Einladungslink ist möglicherweise ungültig.",
+    "openInApp": "In Kasseo öffnen",
+    "openInAppTitle": "Besser in der App",
+    "openInAppPrompt": "Nutze das volle Kasseo-Erlebnis — verfolge Ausgaben, teile Rechnungen und vieles mehr.",
+    "continueInBrowser": "Im Browser fortfahren",
+    "signInToJoin": "Mit Google anmelden und beitreten",
+    "deepLinkFallback": "Falls die App nicht geöffnet wurde, stelle sicher, dass Kasseo installiert ist, oder fahre im Browser fort."
   },
   "dashboard": {
     "welcome": "Willkommen zurück!",

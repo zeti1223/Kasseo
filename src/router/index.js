@@ -29,7 +29,6 @@ const routes = [
     path: "/join/:id",
     name: "join",
     component: JoinView,
-    meta: { requiresAuth: true },
   },
 ];
 
