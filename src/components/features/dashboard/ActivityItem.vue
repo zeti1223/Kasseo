@@ -1,14 +1,11 @@
 <script setup>
 import { getCategoryIcon, getCategoryLabel } from "@/constants/categories";
+import { formatCurrency } from "@/utils/format";
 
 defineProps({
   tx: { type: Object, required: true },
 });
 defineEmits(["open"]);
-
-function formatCurrency(amount, currency) {
-  return `${amount.toFixed(2)} ${currency}`;
-}
 </script>
 
 <template>

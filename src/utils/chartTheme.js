@@ -1,7 +1,8 @@
 // Shared Chart.js styling: currency-formatted tooltips and a dark-mode-aware grid.
+import { formatCompactNumber } from "./format";
 
 export function formatMoney(value, currency) {
-  const amount = Number(value).toFixed(2);
+  const amount = formatCompactNumber(value);
   return currency ? `${amount} ${currency}` : amount;
 }
 
