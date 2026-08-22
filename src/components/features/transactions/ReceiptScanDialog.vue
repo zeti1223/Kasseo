@@ -297,8 +297,10 @@ async function approveAndSave() {
             : undefined,
         receiptId,
         splitOption: props.mode === "split" ? splitOption.value : undefined,
+        notify: false, // one summary notification is sent below instead
       });
     }
+    transactionsStore.notifyReceiptScanned(props.groupId, items.value.length);
     await persistCategoryOverridesIfNeeded();
     close();
   } finally {

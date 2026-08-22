@@ -122,6 +122,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       to,
       receiptId,
       splitOption,
+      notify = true,
     },
   ) {
     const authStore = useAuthStore();
@@ -159,15 +160,36 @@ export const useTransactionsStore = defineStore("transactions", () => {
     }
     await set(newRef, payload);
 
+    if (notify) {
+      const myName =
+        authStore.userProfile?.nickname ||
+        authStore.user?.displayName ||
+        i18next.t("common.someone");
+      dispatchPushToGroupMembers(
+        groupId,
+        i18next.t("notifications.transactionAdded", { name: myName }),
+        description || category || "",
+        { type: "transactionAdded" },
+      );
+    }
+
+    return newRef.key;
+  }
+
+  // Sends a single push notification for a whole scanned receipt, instead
+  // of one per line item (each item is saved via addTransaction with
+  // notify: false, then this is called once after the loop).
+  function notifyReceiptScanned(groupId, itemCount) {
+    const authStore = useAuthStore();
     const myName =
       authStore.userProfile?.nickname ||
       authStore.user?.displayName ||
       i18next.t("common.someone");
     dispatchPushToGroupMembers(
       groupId,
-      i18next.t("notifications.transactionAdded", { name: myName }),
-      description || category || "",
-      { type: "transactionAdded" },
+      i18next.t("notifications.receiptScanned", { name: myName }),
+      i18next.t("notifications.receiptScannedBody", { count: itemCount }),
+      { type: "receiptScanned" },
     );
   }
 
@@ -339,6 +361,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
     listen,
     stop,
     addTransaction,
+    notifyReceiptScanned,
     deleteTransaction,
     deleteReceiptGroup,
     updateReceiptGroupSplitOption,
