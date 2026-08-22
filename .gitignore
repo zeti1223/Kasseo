@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 
 Tasks.md
+
+android/app/google-services.json
