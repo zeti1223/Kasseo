@@ -38,6 +38,10 @@
     "settings": "Paramètres",
     "signOut": "Se déconnecter"
   },
+  "footer": {
+    "build": "Build",
+    "from": "-"
+  },
   "landing": {
     "tagline": "Gérez vos dépenses et cagnottes partagées en temps réel avec vos proches.",
     "signInWithGoogle": "Se connecter avec Google"

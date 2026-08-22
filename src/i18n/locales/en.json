@@ -38,6 +38,10 @@
     "settings": "Settings",
     "signOut": "Sign out"
   },
+  "footer": {
+    "build": "Build",
+    "from": "from"
+  },
   "landing": {
     "tagline": "Log shared deposits and expenses with the people you split a fund with, in real time.",
     "signInWithGoogle": "Sign in with Google"

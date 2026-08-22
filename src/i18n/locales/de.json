@@ -38,6 +38,10 @@
     "settings": "Einstellungen",
     "signOut": "Abmelden"
   },
+  "footer": {
+    "build": "Build",
+    "from": "von"
+  },
   "landing": {
     "tagline": "Gemeinsame Einnahmen und Ausgaben in Echtzeit mit deiner Gruppe verwalten.",
     "signInWithGoogle": "Mit Google anmelden"
