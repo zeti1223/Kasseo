@@ -4,6 +4,7 @@ import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import { useTranslation } from "i18next-vue";
 import { splitShareAmount } from "@/utils/chartData";
+import { formatCompactNumber } from "@/utils/format";
 import { getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
@@ -130,9 +131,9 @@ function splitInfo(tx) {
   if (tx.paidBy === uid) {
     const owedToYou = tx.amount - share;
     if (owedToYou < 0.005) return { text: t("transactions.yourShareOnly"), tone: "muted" };
-    return { text: t("transactions.youAreOwed", { amount: owedToYou.toFixed(2) }), tone: "positive" };
+    return { text: t("transactions.youAreOwed", { amount: formatCompactNumber(owedToYou) }), tone: "positive" };
   }
-  return { text: t("transactions.youOwe", { amount: share.toFixed(2) }), tone: "negative" };
+  return { text: t("transactions.youOwe", { amount: formatCompactNumber(share) }), tone: "negative" };
 }
 
 // Small note showing the original amount when it differs from the
@@ -141,7 +142,7 @@ function originalAmountLabel(tx) {
   if (!tx.originalCurrency || tx.originalCurrency === props.groupCurrency) {
     return null;
   }
-  return `${tx.originalAmount.toFixed(2)} ${tx.originalCurrency}`;
+  return `${formatCompactNumber(tx.originalAmount)} ${tx.originalCurrency}`;
 }
 
 function splitBetweenLabel(tx) {
@@ -216,7 +217,7 @@ function splitBetweenLabel(tx) {
                     {{ $t('transactions.productGroup', { count: entry.items.length }) }}
                   </span>
                   <span class="font-bold text-sm sm:text-base font-mono tabular-nums text-[#C1503A] flex-shrink-0">
-                    -{{ entry.totalAmount.toFixed(2) }}
+                    -{{ formatCompactNumber(entry.totalAmount) }}
                   </span>
                 </div>
 
@@ -284,7 +285,7 @@ function splitBetweenLabel(tx) {
                       {{ tx.description || getCategoryLabel(tx.category, $t) }}
                     </span>
                     <span class="font-semibold text-xs sm:text-sm font-mono tabular-nums text-[#C1503A] flex-shrink-0">
-                      -{{ tx.amount.toFixed(2) }}
+                      -{{ formatCompactNumber(tx.amount) }}
                     </span>
                   </div>
 
@@ -397,7 +398,7 @@ function splitBetweenLabel(tx) {
                         : entry.tx.type === "settlement"
                           ? ""
                           : "-"
-                    }}{{ entry.tx.amount.toFixed(2) }}
+                    }}{{ formatCompactNumber(entry.tx.amount) }}
                   </span>
                   <div
                     v-if="originalAmountLabel(entry.tx)"

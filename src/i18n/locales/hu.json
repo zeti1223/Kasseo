@@ -38,6 +38,10 @@
     "settings": "Beállítások",
     "signOut": "Kijelentkezés"
   },
+  "footer": {
+    "build": "Build",
+    "from": "készült:"
+  },
   "landing": {
     "tagline": "Közös kiadások és befizetések valós idejű vezetése a csoportoddal.",
     "signInWithGoogle": "Bejelentkezés Google fiókkal"

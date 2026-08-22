@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue";
+import { formatCompactNumber } from "@/utils/format";
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -46,7 +47,7 @@ const iconClass = computed(() => {
       ></i>
     </div>
     <div class="text-xl font-bold money dark:text-white" :class="colorClass">
-      {{ value.toFixed(2) }} {{ currency }}
+      {{ formatCompactNumber(value) }} {{ currency }}
     </div>
   </div>
 </template>

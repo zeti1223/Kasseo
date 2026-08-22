@@ -38,6 +38,10 @@
     "settings": "Ajustes",
     "signOut": "Cerrar sesión"
   },
+  "footer": {
+    "build": "Build",
+    "from": "-"
+  },
   "landing": {
     "tagline": "Registra depósitos y gastos compartidos en tiempo real con tu grupo.",
     "signInWithGoogle": "Iniciar sesión con Google"

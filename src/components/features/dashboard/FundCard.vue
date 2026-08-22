@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { getMyFundColor, getFundIcon } from "@/constants/fundStyle";
+import { formatCurrency } from "@/utils/format";
 
 const props = defineProps({
   group: { type: Object, required: true },
@@ -11,10 +12,6 @@ defineEmits(["open"]);
 const authStore = useAuthStore();
 const myColor = computed(() => getMyFundColor(props.group, authStore.user?.uid));
 const icon = computed(() => getFundIcon(props.group));
-
-function formatCurrency(amount, currency) {
-  return `${amount.toFixed(2)} ${currency}`;
-}
 </script>
 
 <template>

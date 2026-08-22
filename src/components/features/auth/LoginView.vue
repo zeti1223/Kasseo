@@ -49,9 +49,9 @@ async function handleLogin() {
 
 <template>
   <div
-    class="flex items-center justify-center relative"
+    class="flex items-center justify-center relative flex-1 py-8"
     style="
-      min-height: 100vh;
+      min-height: calc(100vh - 3.5rem);
       background: radial-gradient(
         circle at 20% 20%,
         #c8a5fc 0%,

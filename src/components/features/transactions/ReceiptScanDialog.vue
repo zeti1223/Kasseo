@@ -5,6 +5,7 @@ import { db } from "@/services/firebase/config";
 import { useTransactionsStore } from "@/stores/transactions";
 import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import { scanReceiptImage, ScanError } from "@/utils/receiptScan";
+import { handleNumberKeyDown, handleNumberPaste } from "@/utils/numberInput";
 import { useTranslation } from "i18next-vue";
 
 const props = defineProps({
@@ -479,6 +480,8 @@ async function approveAndSave() {
                   type="number"
                   min="1"
                   step="1"
+                  @keydown="handleNumberKeyDown($event, false)"
+                  @paste="handleNumberPaste($event, false)"
                   class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -491,6 +494,8 @@ async function approveAndSave() {
                   type="number"
                   min="0"
                   step="0.01"
+                  @keydown="handleNumberKeyDown($event, true)"
+                  @paste="handleNumberPaste($event, true)"
                   class="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] dark:bg-gray-700 dark:text-white"
                 />
               </div>

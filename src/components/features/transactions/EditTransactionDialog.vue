@@ -3,6 +3,7 @@ import { ref, watch, nextTick, computed } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
 import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
 import { CURRENCIES } from "@/constants/currencies";
+import { handleNumberKeyDown, handleNumberPaste } from "@/utils/numberInput";
 
 const props = defineProps({
   modelValue: Boolean,
@@ -273,6 +274,8 @@ async function handleUpdate() {
               type="number"
               min="0"
               step="0.01"
+              @keydown="handleNumberKeyDown($event)"
+              @paste="handleNumberPaste($event)"
               class="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
             />
             <select
@@ -383,6 +386,8 @@ async function handleUpdate() {
                 min="0"
                 max="100"
                 step="0.01"
+                @keydown="handleNumberKeyDown($event)"
+                @paste="handleNumberPaste($event)"
                 class="w-16 px-2 py-1 text-xs text-right border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
               />
               <span class="text-xs text-gray-500 dark:text-gray-400 w-4">%</span>

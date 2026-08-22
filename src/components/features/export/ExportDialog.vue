@@ -5,6 +5,7 @@ import {
   exportTransactionsToCSV,
   exportGroupToJSON,
 } from "@/utils/exportData";
+import { formatCompactNumber } from "@/utils/format";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -312,7 +313,7 @@ function handleExport() {
           <div class="text-right">
             <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('export.totalVolume') }}</div>
             <div class="text-base font-bold money text-gray-800 dark:text-white">
-              {{ totalAmount.toFixed(2) }} {{ group?.currency || "" }}
+              {{ formatCompactNumber(totalAmount) }} {{ group?.currency || "" }}
             </div>
           </div>
         </div>

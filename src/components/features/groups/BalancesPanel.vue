@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useTranslation } from "i18next-vue";
 import { computeSplitBalances } from "@/utils/chartData";
+import { formatCompactNumber } from "@/utils/format";
 
 const props = defineProps({
   transactions: { type: Array, default: () => [] },
@@ -85,7 +86,7 @@ function amountLabel(balance) {
                 : 'text-[#C1503A]'
           "
         >
-          {{ Math.abs(row.balance).toFixed(2) }} {{ currency }}
+          {{ formatCompactNumber(Math.abs(row.balance)) }} {{ currency }}
         </span>
         <button
           v-if="!row.isYou && Math.abs(row.balance) >= 0.005"
