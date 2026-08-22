@@ -84,11 +84,15 @@ export const useNotificationsStore = defineStore("notifications", () => {
 
     const authStore = useAuthStore();
     if (authStore.user?.uid) {
-      // Send real push notification via OneSignal targeted to current user device
+      // Send real push notification via OneSignal targeted to current user
+      // device. Uses titleKey/bodyKey (rather than the pre-translated
+      // `title`/`body` above, which are only for the immediate local OS
+      // notification) so this device sees it in whatever language it's
+      // actually subscribed with.
       sendPushNotificationToUsers({
         recipientUids: [authStore.user.uid],
-        title,
-        body,
+        titleKey: "notifications.testTitle",
+        bodyKey: "notifications.testBody",
         data: { type: "test" },
       });
     }
