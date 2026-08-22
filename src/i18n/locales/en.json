@@ -54,7 +54,13 @@
     "subtitle": "Joining lets you see and log transactions in this fund together.",
     "joinFund": "Join fund",
     "signInRequired": "You need to be signed in to join a fund.",
-    "invalidLink": "Could not join this fund. The invite link may be invalid."
+    "invalidLink": "Could not join this fund. The invite link may be invalid.",
+    "openInApp": "Open in Kasseo",
+    "openInAppTitle": "Better in the app",
+    "openInAppPrompt": "Get the full Kasseo experience — track shared expenses, split bills and more.",
+    "continueInBrowser": "Continue in browser",
+    "signInToJoin": "Sign in with Google to Join",
+    "deepLinkFallback": "If the app didn't open, make sure Kasseo is installed or continue in browser."
   },
   "dashboard": {
     "welcome": "Welcome back!",

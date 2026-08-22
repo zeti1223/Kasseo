@@ -255,6 +255,11 @@ const inviteUrl = computed(() => {
   return `${window.location.origin}/join/${props.group.id}`;
 });
 
+const qrInviteUrl = computed(() => {
+  if (!props.group?.id) return "";
+  return `${window.location.origin}/join/${props.group.id}?qr=1`;
+});
+
 function copyInviteLink() {
   if (!props.group?.id) return;
   navigator.clipboard.writeText(inviteUrl.value);
@@ -375,6 +380,7 @@ function copyInviteLink() {
         :current-user-id="authStore.user?.uid"
         :is-owner="isOwner"
         :invite-url="inviteUrl"
+        :qr-invite-url="qrInviteUrl"
         @copy-invite="copyInviteLink"
         @remove="(id) => (removeMemberTarget = id)"
       />

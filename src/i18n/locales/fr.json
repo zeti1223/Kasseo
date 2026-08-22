@@ -54,7 +54,13 @@
     "subtitle": "Rejoindre vous permet de suivre et d'enregistrer les transactions ensemble.",
     "joinFund": "Rejoindre la cagnotte",
     "signInRequired": "Vous devez être connecté pour rejoindre une cagnotte.",
-    "invalidLink": "Impossible de rejoindre cette cagnotte. Le lien d'invitation est peut-être invalide."
+    "invalidLink": "Impossible de rejoindre cette cagnotte. Le lien d'invitation est peut-être invalide.",
+    "openInApp": "Ouvrir dans Kasseo",
+    "openInAppTitle": "Mieux dans l'application",
+    "openInAppPrompt": "Profitez de la pleine expérience Kasseo — suivez les dépenses partagées, répartissez les factures et bien plus.",
+    "continueInBrowser": "Continuer dans le navigateur",
+    "signInToJoin": "Se connecter avec Google pour rejoindre",
+    "deepLinkFallback": "Si l'application ne s'est pas ouverte, vérifiez que Kasseo est installé ou continuez dans le navigateur."
   },
   "dashboard": {
     "welcome": "Bienvenue !",

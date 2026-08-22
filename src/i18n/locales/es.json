@@ -54,7 +54,13 @@
     "subtitle": "Unirse te permite ver y registrar transacciones juntos.",
     "joinFund": "Unirse al fondo",
     "signInRequired": "Debes iniciar sesión para unirte a un fondo.",
-    "invalidLink": "No se pudo unir a este fondo. El enlace de invitación puede ser inválido."
+    "invalidLink": "No se pudo unir a este fondo. El enlace de invitación puede ser inválido.",
+    "openInApp": "Abrir en Kasseo",
+    "openInAppTitle": "Mejor en la app",
+    "openInAppPrompt": "Disfruta de la experiencia completa de Kasseo — sigue los gastos compartidos, divide facturas y mucho más.",
+    "continueInBrowser": "Continuar en el navegador",
+    "signInToJoin": "Iniciar sesión con Google para unirse",
+    "deepLinkFallback": "Si la app no se abrió, asegúrate de que Kasseo esté instalado o continúa en el navegador."
   },
   "dashboard": {
     "welcome": "¡Bienvenido de nuevo!",
