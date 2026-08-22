@@ -49,6 +49,10 @@ jobs:
           echo "VITE_ONESIGNAL_APP_ID=${{ secrets.VITE_ONESIGNAL_APP_ID }}" >> .env
           echo "VITE_ONESIGNAL_REST_API_KEY=${{ secrets.VITE_ONESIGNAL_REST_API_KEY }}" >> .env
 
+      - name: Create google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+
       - name: Install Dependencies
         run: npm ci
 
