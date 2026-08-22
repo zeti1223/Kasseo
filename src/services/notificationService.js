@@ -1,7 +1,43 @@
 import { Capacitor } from "@capacitor/core";
+import i18next, { SUPPORTED_LANGUAGES } from "@/i18n";
 
 const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID;
 const ONESIGNAL_REST_API_KEY = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
+
+/**
+ * Translate a given i18n key into every language the app supports, so the
+ * recipient sees the notification in *their* language rather than the
+ * sender's. Returns e.g. { en: "...", hu: "...", de: "...", ... }.
+ *
+ * If `params.name` is falsy (no nickname/displayName available), it is
+ * replaced with the localized "Someone" fallback for each language, instead
+ * of baking in the sender-language fallback once.
+ */
+function translateForAllLocales(key, params = {}) {
+  const result = {};
+  for (const { code } of SUPPORTED_LANGUAGES) {
+    const fixedT = i18next.getFixedT(code);
+    const resolvedParams = { ...params };
+    if ("name" in resolvedParams && !resolvedParams.name) {
+      resolvedParams.name = fixedT("common.someone");
+    }
+    result[code] = fixedT(key, resolvedParams);
+  }
+  return result;
+}
+
+/**
+ * Build a { en, hu, de, es, fr, zh } map holding the same raw text for every
+ * language. Used for content that is not a UI string (e.g. a user-typed
+ * transaction description) and therefore should not be translated.
+ */
+function sameTextForAllLocales(text) {
+  const result = {};
+  for (const { code } of SUPPORTED_LANGUAGES) {
+    result[code] = text;
+  }
+  return result;
+}
 
 let isOneSignalInitialized = false;
 
@@ -302,13 +338,33 @@ export async function showNotification(title, body, options = {}) {
  * Send real background push notifications to specific users via OneSignal REST API.
  * Supports targeting by external user ID (Firebase UID) across Android and Web.
  *
+ * Each recipient sees the notification in their *own* device/browser
+ * language, not the sender's: title/body are translated into every
+ * supported language up front (via titleKey/bodyKey), and OneSignal picks
+ * the right one per recipient based on their subscription's language.
+ *
  * @param {object} params
  * @param {string[]} params.recipientUids - Array of Firebase user UIDs
- * @param {string} params.title - Notification title
- * @param {string} params.body - Notification body
+ * @param {string} [params.titleKey] - i18n key for the title, translated into every language
+ * @param {object} [params.titleParams] - Interpolation params for titleKey (e.g. { name })
+ * @param {string} [params.title] - Raw, already-resolved title, used as-is for every language
+ *   (fallback when titleKey isn't provided; avoid for user-facing UI strings)
+ * @param {string} [params.bodyKey] - i18n key for the body, translated into every language
+ * @param {object} [params.bodyParams] - Interpolation params for bodyKey
+ * @param {string} [params.body] - Raw text (e.g. a user-typed description) used as-is
+ *   for every language, since it isn't a UI string that needs translation
  * @param {object} [params.data] - Additional data (e.g. { groupId })
  */
-export async function sendPushNotificationToUsers({ recipientUids, title, body, data = {} }) {
+export async function sendPushNotificationToUsers({
+  recipientUids,
+  titleKey,
+  titleParams,
+  title,
+  bodyKey,
+  bodyParams,
+  body,
+  data = {},
+}) {
   if (!ONESIGNAL_APP_ID || !ONESIGNAL_REST_API_KEY) {
     console.warn("OneSignal VITE_ONESIGNAL_APP_ID or VITE_ONESIGNAL_REST_API_KEY not configured.");
     return;
@@ -322,28 +378,22 @@ export async function sendPushNotificationToUsers({ recipientUids, title, body, 
     ? cleanKey
     : (cleanKey.startsWith("os_v2_") ? `Key ${cleanKey}` : `Basic ${cleanKey}`);
 
+  const headings = titleKey
+    ? translateForAllLocales(titleKey, titleParams)
+    : sameTextForAllLocales(title);
+
+  const contents = bodyKey
+    ? translateForAllLocales(bodyKey, bodyParams)
+    : sameTextForAllLocales(body || title);
+
   const payload = {
     app_id: ONESIGNAL_APP_ID,
     target_channel: "push",
     include_aliases: {
       external_id: validRecipients,
     },
-    headings: {
-      en: title,
-      hu: title,
-      de: title,
-      es: title,
-      fr: title,
-      zh: title,
-    },
-    contents: {
-      en: body || title,
-      hu: body || title,
-      de: body || title,
-      es: body || title,
-      fr: body || title,
-      zh: body || title,
-    },
+    headings,
+    contents,
     data: {
       ...data,
     },

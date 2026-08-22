@@ -12,9 +12,14 @@ import {
 import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
-import i18next from "@/i18n";
 
-async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
+// Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
+// so notificationService can translate them into every recipient's own
+// language (not the sender's).
+async function dispatchPushToGroupMembers(
+  groupId,
+  { titleKey, titleParams, body, bodyKey, bodyParams, data = {} },
+) {
   try {
     const authStore = useAuthStore();
     const myUid = authStore.user?.uid;
@@ -27,8 +32,11 @@ async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
 
     await sendPushNotificationToUsers({
       recipientUids,
-      title,
+      titleKey,
+      titleParams,
       body,
+      bodyKey,
+      bodyParams,
       data: { groupId, ...data },
     });
   } catch (err) {
@@ -147,12 +155,11 @@ export const useGroupsStore = defineStore("groups", () => {
     });
     await set(dbRef(db, `users/${user.uid}/groups/${groupId}`), true);
 
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.memberJoined", { name: nickname }),
-      "",
-      { type: "memberJoined" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.memberJoined",
+      titleParams: { name: nickname },
+      data: { type: "memberJoined" },
+    });
   }
 
   async function loadGroup(groupId) {
@@ -192,12 +199,11 @@ export const useGroupsStore = defineStore("groups", () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
     await set(dbRef(db, `groups/${groupId}/name`), trimmed);
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.groupRenamed", { name: trimmed }),
-      "",
-      { type: "groupRenamed" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.groupRenamed",
+      titleParams: { name: trimmed },
+      data: { type: "groupRenamed" },
+    });
   }
 
   // mode: 'kitty' (shared pool funded by deposits) or 'split' (members
@@ -211,20 +217,17 @@ export const useGroupsStore = defineStore("groups", () => {
       dbRef(db, `groups/${groupId}/members/${userId}`),
     );
     const memberName = groupSnap.exists()
-      ? groupSnap.val()?.nickname ||
-        groupSnap.val()?.displayName ||
-        i18next.t("common.someone")
-      : i18next.t("common.someone");
+      ? groupSnap.val()?.nickname || groupSnap.val()?.displayName
+      : undefined;
 
     await remove(dbRef(db, `groups/${groupId}/members/${userId}`));
     await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
 
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.memberLeft", { name: memberName }),
-      "",
-      { type: "memberLeft" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.memberLeft",
+      titleParams: { name: memberName },
+      data: { type: "memberLeft" },
+    });
   }
 
   async function addCategory(groupId, category, icon = null) {
@@ -244,12 +247,10 @@ export const useGroupsStore = defineStore("groups", () => {
   // owner only (enforced in the UI, same convention as currency/mode/categories).
   async function setGroupIcon(groupId, icon) {
     await set(dbRef(db, `groups/${groupId}/icon`), icon);
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.groupIconChanged"),
-      "",
-      { type: "groupIconChanged" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.groupIconChanged",
+      data: { type: "groupIconChanged" },
+    });
   }
 
   // Personal per-fund color — each member sets their own, stored on their

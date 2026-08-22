@@ -14,9 +14,15 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { convertCurrency } from "@/services/currency";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
-import i18next from "@/i18n";
 
-async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
+// Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
+// so notificationService can translate them into every recipient's own
+// language (not the sender's). `body` (raw string) is for language-neutral
+// content, e.g. a user-typed transaction description.
+async function dispatchPushToGroupMembers(
+  groupId,
+  { titleKey, titleParams, body, bodyKey, bodyParams, data = {} },
+) {
   try {
     const authStore = useAuthStore();
     const myUid = authStore.user?.uid;
@@ -29,8 +35,11 @@ async function dispatchPushToGroupMembers(groupId, title, body, data = {}) {
 
     await sendPushNotificationToUsers({
       recipientUids,
-      title,
+      titleKey,
+      titleParams,
       body,
+      bodyKey,
+      bodyParams,
       data: { groupId, ...data },
     });
   } catch (err) {
@@ -162,15 +171,13 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
     if (notify) {
       const myName =
-        authStore.userProfile?.nickname ||
-        authStore.user?.displayName ||
-        i18next.t("common.someone");
-      dispatchPushToGroupMembers(
-        groupId,
-        i18next.t("notifications.transactionAdded", { name: myName }),
-        description || category || "",
-        { type: "transactionAdded" },
-      );
+        authStore.userProfile?.nickname || authStore.user?.displayName;
+      dispatchPushToGroupMembers(groupId, {
+        titleKey: "notifications.transactionAdded",
+        titleParams: { name: myName },
+        body: description || category || "",
+        data: { type: "transactionAdded" },
+      });
     }
 
     return newRef.key;
@@ -182,26 +189,24 @@ export const useTransactionsStore = defineStore("transactions", () => {
   function notifyReceiptScanned(groupId, itemCount) {
     const authStore = useAuthStore();
     const myName =
-      authStore.userProfile?.nickname ||
-      authStore.user?.displayName ||
-      i18next.t("common.someone");
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.receiptScanned", { name: myName }),
-      i18next.t("notifications.receiptScannedBody", { count: itemCount }),
-      { type: "receiptScanned" },
-    );
+      authStore.userProfile?.nickname || authStore.user?.displayName;
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.receiptScanned",
+      titleParams: { name: myName },
+      bodyKey: "notifications.receiptScannedBody",
+      bodyParams: { count: itemCount },
+      data: { type: "receiptScanned" },
+    });
   }
 
   async function deleteTransaction(groupId, txId) {
     const tx = transactions.value.find((t) => t.id === txId);
     await remove(dbRef(db, `transactions/${groupId}/${txId}`));
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.transactionDeleted"),
-      tx?.description || tx?.category || "",
-      { type: "transactionDeleted" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.transactionDeleted",
+      body: tx?.description || tx?.category || "",
+      data: { type: "transactionDeleted" },
+    });
   }
 
   async function deleteReceiptGroup(groupId, receiptId) {
@@ -212,12 +217,10 @@ export const useTransactionsStore = defineStore("transactions", () => {
       updates[tx.id] = null;
     }
     await update(dbRef(db, `transactions/${groupId}`), updates);
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.transactionDeleted"),
-      "",
-      { type: "transactionDeleted" },
-    );
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.transactionDeleted",
+      data: { type: "transactionDeleted" },
+    });
   }
 
   async function updateReceiptGroupSplitOption(
@@ -291,15 +294,13 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
     const authStore = useAuthStore();
     const myName =
-      authStore.userProfile?.nickname ||
-      authStore.user?.displayName ||
-      i18next.t("common.someone");
-    dispatchPushToGroupMembers(
-      groupId,
-      i18next.t("notifications.transactionEdited", { name: myName }),
-      description || category || "",
-      { type: "transactionEdited" },
-    );
+      authStore.userProfile?.nickname || authStore.user?.displayName;
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.transactionEdited",
+      titleParams: { name: myName },
+      body: description || category || "",
+      data: { type: "transactionEdited" },
+    });
   }
 
   // Re-converts every transaction into `newCurrency` using each
