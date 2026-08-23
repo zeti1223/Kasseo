@@ -1,5 +1,7 @@
 # ![Kasseo logo](public/default.png)
 
+[![Hackatime Badge](https://hackatime-badge.hackclub.com/U0BDKTP2RR8/Kasseo)](https://hackatime.hackclub.com/@Zeti_1223/project/Kasseo)
+
 A modern financial app for managing shared expenses and funds — built as a web app, and packaged as a native Android app via Capacitor.
 
 > ### *Pronunciation:* kaːsˈø
