@@ -54,4 +54,11 @@ notificationsStore.init();
 authStore.init().then(() => {
   app.use(router);
   app.mount("#app");
+
+  // Register Service Worker for PWA support (skip in dev)
+  if ("serviceWorker" in navigator && import.meta.env.PROD) {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .catch((err) => console.warn("SW registration failed:", err));
+  }
 });
