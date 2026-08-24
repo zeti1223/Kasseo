@@ -213,6 +213,8 @@
     "removeMemberConfirm": "Dieses Mitglied verliert den Zugriff auf diese Kasse.",
     "removeCategoryTitle": "Kategorie löschen?",
     "removeCategoryConfirm": "Diese Kategorie wird aus der Kasse entfernt.",
+    "removeCategoryConfirmWithCount": "Diese Kategorie wird entfernt, und {{count}} Transaktion, die sie verwendet, wird zu „Sonstiges\" umkategorisiert.",
+    "removeCategoryConfirmWithCount_plural": "Diese Kategorie wird entfernt, und {{count}} Transaktionen, die sie verwenden, werden zu „Sonstiges\" umkategorisiert.",
     "newCategory": "Neue Kategorie (Symbol & Name wählen)",
     "categoryNamePlaceholder": "Kategoriename",
     "add": "Hinzufügen",

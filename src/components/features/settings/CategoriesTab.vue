@@ -111,7 +111,7 @@ function handleAdd() {
         </div>
         <button
           v-if="isOwner"
-          @click="$emit('remove', category.id)"
+          @click="$emit('remove', category)"
           class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
         >
           <i class="fas fa-trash"></i>
