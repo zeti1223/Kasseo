@@ -100,15 +100,17 @@ VITE_FIREBASE_DATABASE_URL=
 VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_APP_ID=
 
-# Google Gemini (optional — needed for receipt scanning)
-VITE_GEMINI_API_KEY=
+# Receipt scanning (optional) — URL of the deployed Cloudflare Worker
+# that proxies Gemini requests. See worker/README.md to set it up;
+# the Gemini key itself is never stored in this app.
+VITE_SCAN_WORKER_URL=
 
 # OneSignal (optional — needed for push notifications)
 VITE_ONESIGNAL_APP_ID=
 VITE_ONESIGNAL_REST_API_KEY=
 ```
 
-Any integration whose keys are left blank is simply disabled at runtime — the app still runs without Gemini or OneSignal configured, just without receipt scanning or push notifications.
+Any integration whose keys are left blank is simply disabled at runtime — the app still runs without the scan worker or OneSignal configured, just without receipt scanning or push notifications.
 
 ## Run
 

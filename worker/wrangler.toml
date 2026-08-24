@@ -1,0 +1,13 @@
+name = "kasseo-receipt-scan"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# Non-secret configuration. Adjust to your Firebase project.
+[vars]
+FIREBASE_PROJECT_ID = "financial-app-cccd7"
+FIREBASE_DATABASE_URL = "https://financial-app-cccd7-default-rtdb.europe-west1.firebasedatabase.app"
+# The exact origin(s) your app is served from (Firebase Hosting URL / custom domain).
+ALLOWED_ORIGIN = "https://kasseo.eu"
+
+# Secret — set with: wrangler secret put GEMINI_API_KEY
+# (do NOT put the real key in this file)

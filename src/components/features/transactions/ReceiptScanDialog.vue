@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from "vue";
-import { ref as dbRef, onValue, get, runTransaction, set } from "firebase/database";
+import { ref as dbRef, onValue, get, set } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { useTransactionsStore } from "@/stores/transactions";
 import { CATEGORIES, getCategoryIcon, getCategoryLabel } from "@/constants/categories";
@@ -81,23 +81,9 @@ function sanitizeKey(str) {
   return str.replace(/[.#$[\]/]/g, "_");
 }
 
-// Atomically claims one of today's scan slots for this fund. A soft
-// limit (also enforced in database.rules.json) since there's no backend.
-async function reserveScanSlot() {
-  const limitRef = dbRef(db, `scanLimits/${props.groupId}/${budapestDateKey()}`);
-  const result = await runTransaction(limitRef, (current) => {
-    const count = current?.count || 0;
-    if (count >= DAILY_SCAN_LIMIT) return; // abort, don't touch it
-    return { count: count + 1, updatedAt: Date.now() };
-  });
-  if (!result.committed) {
-    throw new ScanError(
-      t("receiptScan.noScansLeft"),
-      "resource-exhausted",
-    );
-  }
-}
-
+// The daily scan slot is now reserved server-side by the receipt-scan
+// worker (before it calls Gemini), so the client no longer writes to
+// scanLimits itself — it just listens for the count to show "X left".
 function listenToScanLimit() {
   if (stopLimitListener) stopLimitListener();
   const limitRef = dbRef(
@@ -181,14 +167,13 @@ async function submitScan() {
   step.value = "processing";
   errorMessage.value = "";
   try {
-    await reserveScanSlot();
-
     const overridesSnap = await get(
       dbRef(db, `categoryOverrides/${props.groupId}`),
     );
     const overrides = overridesSnap.exists() ? overridesSnap.val() : {};
 
     const scanned = await scanReceiptImage(
+      props.groupId,
       compressedBase64.value,
       allCategories.value,
       overrides,

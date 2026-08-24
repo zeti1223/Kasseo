@@ -1,7 +1,9 @@
-// Calls the Gemini API directly from the browser (no backend). The API
-// key ships in the client bundle — restrict it by HTTP referrer in Google AI Studio.
+// Calls the receipt-scan Cloudflare Worker, which holds the real Gemini API
+// key server-side (see /worker). The browser never sees that key — it only
+// sends the user's own Firebase ID token so the worker can verify identity,
+// confirm group membership, and enforce the daily scan limit.
 
-const GEMINI_MODEL = "gemini-3.5-flash-lite";
+import { auth } from "@/services/firebase/config";
 
 export function extractJsonArray(text) {
   let cleaned = (text || "").trim();
@@ -35,27 +37,6 @@ export function resolveCategory(name, aiCategory, allCategories, overrides) {
   return "Other";
 }
 
-function buildPrompt(allCategories) {
-  return `This is a photo of a store receipt. Extract every purchased line item from it.
-Return ONLY a JSON array, nothing else (no explanation, no markdown code fences):
-
-[
-  {
-    "name": "item name",
-    "quantity": 1,
-    "unit_price": 0,
-    "total_price": 0,
-    "category": "one of: ${allCategories.map((c) => `"${c}"`).join(", ")}"
-  }
-]
-
-Categorization rules:
-- Pick the single best-fitting category from the list above for each item.
-- If nothing fits well, use "Other".
-- Prices are plain numbers, no currency symbols.
-- If the image is unreadable or is not a receipt, return an empty array.`;
-}
-
 class ScanError extends Error {
   constructor(message, code) {
     super(message);
@@ -64,45 +45,53 @@ class ScanError extends Error {
 }
 
 /**
- * Sends a receipt photo to Gemini and returns
+ * Sends a receipt photo to the receipt-scan worker and returns
  * { name, quantity, unitPrice, totalPrice, category } items.
  *
+ * The worker itself reserves today's scan slot (server-side rate limit)
+ * before calling Gemini, so callers no longer need to do that separately.
+ *
+ * @param {string} groupId - the fund/group the scan is for (used for the membership + rate-limit check)
  * @param {string} imageBase64 - JPEG bytes, base64-encoded, no data: prefix
  * @param {string[]} allCategories - categories Gemini may pick from
  * @param {Object} overrides - { normalizedKeyword: category } from past corrections
  */
-export async function scanReceiptImage(imageBase64, allCategories, overrides) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) {
+export async function scanReceiptImage(groupId, imageBase64, allCategories, overrides) {
+  const workerUrl = import.meta.env.VITE_SCAN_WORKER_URL;
+  if (!workerUrl) {
     throw new ScanError(
-      "No Gemini API key is configured (VITE_GEMINI_API_KEY missing from .env).",
-      "missing-key",
+      "Receipt scanning isn't configured (VITE_SCAN_WORKER_URL missing from .env).",
+      "missing-config",
     );
+  }
+
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new ScanError("You need to be signed in to scan a receipt.", "not-authenticated");
+  }
+
+  let idToken;
+  try {
+    idToken = await currentUser.getIdToken();
+  } catch (err) {
+    throw new ScanError("Couldn't verify your session — please sign in again.", "auth-error");
   }
 
   let response;
   try {
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { text: buildPrompt(allCategories) },
-                { inline_data: { mime_type: "image/jpeg", data: imageBase64 } },
-              ],
-            },
-          ],
-        }),
+    response = await fetch(workerUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
       },
-    );
+      body: JSON.stringify({
+        groupId,
+        imageBase64,
+        categories: allCategories,
+        overrides,
+      }),
+    });
   } catch (err) {
     throw new ScanError(
       "Couldn't reach the AI service — check your connection and try again.",
@@ -111,44 +100,29 @@ export async function scanReceiptImage(imageBase64, allCategories, overrides) {
   }
 
   if (response.status === 429) {
+    const body = await response.json().catch(() => ({}));
     throw new ScanError(
-      "The AI service is busy right now — try again in a few minutes.",
+      body.message || "The AI service is busy right now — try again in a few minutes.",
       "rate-limited",
     );
   }
   if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
     throw new ScanError(
-      "Something went wrong reading the receipt.",
-      "api-error",
+      body.message || "Something went wrong reading the receipt.",
+      body.error || "api-error",
     );
   }
 
   const result = await response.json();
-  const modelText =
-    result?.candidates?.[0]?.content?.parts
-      ?.map((p) => p.text || "")
-      .join("") || "";
-
-  const parsed = extractJsonArray(modelText);
-  if (!Array.isArray(parsed)) {
+  if (!Array.isArray(result.items)) {
     throw new ScanError(
-      "Couldn't read that receipt — try a clearer photo.",
+      result.message || "Couldn't read that receipt — try a clearer photo.",
       "unparsable",
     );
   }
 
-  return parsed
-    .filter((it) => it && typeof it.name === "string" && it.name.trim())
-    .map((it) => {
-      const name = it.name.trim().slice(0, 120);
-      return {
-        name,
-        quantity: Number(it.quantity) > 0 ? Number(it.quantity) : 1,
-        unitPrice: Number(it.unit_price) || 0,
-        totalPrice: Number(it.total_price) || 0,
-        category: resolveCategory(name, it.category, allCategories, overrides),
-      };
-    });
+  return result.items;
 }
 
 export { ScanError };
