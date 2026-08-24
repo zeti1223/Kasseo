@@ -91,6 +91,8 @@
     "settledUp": "Saldado",
     "isOwed": "se le debe",
     "owes": "debe",
+    "owesLowercase": "debe a",
+    "suggestedSettlements": "Pagos sugeridos",
     "settleUp": "Saldar cuentas",
     "noMembers": "Aún no hay miembros",
     "exportTooltip": "Exportar datos del fondo",
