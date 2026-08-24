@@ -5,6 +5,7 @@ import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
+import { getAppBaseUrl } from "@/constants/appUrl";
 import { CURRENCIES } from "@/constants/currencies";
 import { DEFAULT_FUND_COLOR, DEFAULT_FUND_ICON } from "@/constants/fundStyle";
 import { useTranslation } from "i18next-vue";
@@ -252,12 +253,12 @@ async function handleSetIcon(icon) {
 
 const inviteUrl = computed(() => {
   if (!props.group?.id) return "";
-  return `${window.location.origin}/join/${props.group.id}`;
+  return `${getAppBaseUrl()}/join/${props.group.id}`;
 });
 
 const qrInviteUrl = computed(() => {
   if (!props.group?.id) return "";
-  return `${window.location.origin}/join/${props.group.id}?qr=1`;
+  return `${getAppBaseUrl()}/join/${props.group.id}?qr=1`;
 });
 
 function copyInviteLink() {
