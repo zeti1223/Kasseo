@@ -44,48 +44,101 @@ async function dispatchPushToGroupMembers(
   }
 }
 
+// Applies the user's current nickname to their member entry in a group's
+// data (in-memory) and persists it to the DB if it's out of date. Shared by
+// every place that reads a group's member list, so a nickname change
+// propagates consistently everywhere.
+function syncMyNicknameInGroup(groupId, data, authStore) {
+  const currentNickname =
+    authStore.userProfile?.nickname || authStore.user?.displayName;
+  const uid = authStore.user?.uid;
+  if (
+    uid &&
+    currentNickname &&
+    data.members?.[uid] &&
+    (data.members[uid].displayName !== currentNickname ||
+      data.members[uid].nickname !== currentNickname)
+  ) {
+    data.members[uid].displayName = currentNickname;
+    data.members[uid].nickname = currentNickname;
+    set(dbRef(db, `groups/${groupId}/members/${uid}`), {
+      ...data.members[uid],
+      displayName: currentNickname,
+      nickname: currentNickname,
+    }).catch((err) => console.warn("Failed to sync member nickname:", err));
+  }
+}
+
 export const useGroupsStore = defineStore("groups", () => {
   const groups = ref([]); // funds the current user belongs to
   const currentGroup = ref(null);
   let unsubscribeIds = null;
   // Listener for the currently-open group (for change notifications)
   let unsubscribeCurrentGroup = null;
+  // Per-group real-time listeners backing the dashboard's `groups` list, so
+  // a rename/currency/icon change from any member shows up live instead of
+  // only after the next full reload.
+  const groupCardListeners = new Map(); // groupId -> unsubscribe fn
+  const groupCardData = new Map(); // groupId -> latest { id, ...data }
 
-  // Keeps `groups` in sync with the full data of every fund the user belongs to.
+  function stopGroupCardListeners() {
+    for (const unsub of groupCardListeners.values()) unsub();
+    groupCardListeners.clear();
+    groupCardData.clear();
+  }
+
+  function rebuildGroupsList(ids) {
+    groups.value = ids.map((id) => groupCardData.get(id)).filter(Boolean);
+  }
+
+  // Keeps `groups` in sync with the full data of every fund the user belongs
+  // to, in real time: one onValue listener per group's `groups/{id}`, kept
+  // alive/torn down as the user's group membership list changes.
   function listenToMyGroups() {
     const authStore = useAuthStore();
     if (!authStore.user) return;
     if (unsubscribeIds) unsubscribeIds();
+    stopGroupCardListeners();
 
     const idsRef = dbRef(db, `users/${authStore.user.uid}/groups`);
-    unsubscribeIds = onValue(idsRef, async (snapshot) => {
+    unsubscribeIds = onValue(idsRef, (snapshot) => {
       const ids = snapshot.exists() ? Object.keys(snapshot.val()) : [];
-      const loaded = await Promise.all(
-        ids.map(async (id) => {
-          const groupSnap = await get(dbRef(db, `groups/${id}`));
-          if (!groupSnap.exists()) return null;
-          const data = groupSnap.val();
-          const currentNickname =
-            authStore.userProfile?.nickname || authStore.user?.displayName;
-          if (
-            currentNickname &&
-            data.members?.[authStore.user.uid] &&
-            (data.members[authStore.user.uid].displayName !== currentNickname ||
-              data.members[authStore.user.uid].nickname !== currentNickname)
-          ) {
-            data.members[authStore.user.uid].displayName = currentNickname;
-            data.members[authStore.user.uid].nickname = currentNickname;
-            set(dbRef(db, `groups/${id}/members/${authStore.user.uid}`), {
-              ...data.members[authStore.user.uid],
-              displayName: currentNickname,
-              nickname: currentNickname,
-            }).catch(() => {});
+
+      // Stop listening to funds we no longer belong to.
+      for (const [id, unsub] of groupCardListeners.entries()) {
+        if (!ids.includes(id)) {
+          unsub();
+          groupCardListeners.delete(id);
+          groupCardData.delete(id);
+        }
+      }
+
+      // Start listening to any newly-added funds.
+      for (const id of ids) {
+        if (groupCardListeners.has(id)) continue;
+        const unsub = onValue(dbRef(db, `groups/${id}`), (groupSnap) => {
+          if (!groupSnap.exists()) {
+            groupCardData.delete(id);
+          } else {
+            const data = groupSnap.val();
+            syncMyNicknameInGroup(id, data, authStore);
+            groupCardData.set(id, { id, ...data });
           }
-          return { id, ...data };
-        }),
-      );
-      groups.value = loaded.filter(Boolean);
+          rebuildGroupsList(ids);
+        });
+        groupCardListeners.set(id, unsub);
+      }
+
+      rebuildGroupsList(ids);
     });
+  }
+
+  function stopMyGroupsListener() {
+    if (unsubscribeIds) {
+      unsubscribeIds();
+      unsubscribeIds = null;
+    }
+    stopGroupCardListeners();
   }
 
   function listenToGroup(groupId) {
@@ -167,23 +220,7 @@ export const useGroupsStore = defineStore("groups", () => {
     if (snap.exists()) {
       const data = snap.val();
       const authStore = useAuthStore();
-      const currentNickname =
-        authStore.userProfile?.nickname || authStore.user?.displayName;
-      if (
-        authStore.user &&
-        currentNickname &&
-        data.members?.[authStore.user.uid] &&
-        (data.members[authStore.user.uid].displayName !== currentNickname ||
-          data.members[authStore.user.uid].nickname !== currentNickname)
-      ) {
-        data.members[authStore.user.uid].displayName = currentNickname;
-        data.members[authStore.user.uid].nickname = currentNickname;
-        set(dbRef(db, `groups/${groupId}/members/${authStore.user.uid}`), {
-          ...data.members[authStore.user.uid],
-          displayName: currentNickname,
-          nickname: currentNickname,
-        }).catch((err) => console.warn("Failed to sync member nickname:", err));
-      }
+      syncMyNicknameInGroup(groupId, data, authStore);
       currentGroup.value = { id: groupId, ...data };
     } else {
       currentGroup.value = null;
@@ -268,6 +305,7 @@ export const useGroupsStore = defineStore("groups", () => {
     groups,
     currentGroup,
     listenToMyGroups,
+    stopMyGroupsListener,
     listenToGroup,
     stopGroupListener,
     createGroup,

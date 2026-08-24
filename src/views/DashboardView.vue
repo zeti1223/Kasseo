@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed, watch } from "vue";
+import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
@@ -23,6 +23,10 @@ const loadingTransactions = ref(false);
 onMounted(() => {
   groupsStore.listenToMyGroups();
   loadRecentTransactions();
+});
+
+onUnmounted(() => {
+  groupsStore.stopMyGroupsListener();
 });
 
 watch(
