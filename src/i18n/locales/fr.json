@@ -91,6 +91,8 @@
     "settledUp": "Équilibré",
     "isOwed": "lui est dû",
     "owes": "doit",
+    "owesLowercase": "doit à",
+    "suggestedSettlements": "Règlements suggérés",
     "settleUp": "Régler",
     "noMembers": "Aucun membre pour le moment",
     "exportTooltip": "Exporter les données",

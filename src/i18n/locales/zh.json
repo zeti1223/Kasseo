@@ -91,6 +91,8 @@
     "settledUp": "已结清",
     "isOwed": "被欠",
     "owes": "欠",
+    "owesLowercase": "欠",
+    "suggestedSettlements": "建议结算",
     "settleUp": "结算",
     "noMembers": "暂无成员",
     "exportTooltip": "导出基金数据",

@@ -91,6 +91,8 @@
     "settledUp": "Rendezve",
     "isOwed": "jár neki",
     "owes": "tartozik",
+    "owesLowercase": "tartozik",
+    "suggestedSettlements": "Javasolt kiegyenlítések",
     "settleUp": "Kiegyenlítés",
     "noMembers": "Még nincsenek tagok",
     "exportTooltip": "Kassza adatainak exportálása",

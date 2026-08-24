@@ -34,7 +34,7 @@ const showSettings = ref(false);
 const showScan = ref(false);
 const showExport = ref(false);
 const customCategories = ref([]);
-const settleTarget = ref(null); // member id prefilled into the "Settle up" form
+const settleTarget = ref(null); // { memberId, amount } prefilled into the "Settle up" form
 
 const mode = computed(() => groupsStore.currentGroup?.mode || "kitty");
 const myColor = computed(() =>
@@ -42,8 +42,8 @@ const myColor = computed(() =>
 );
 const groupIcon = computed(() => getFundIcon(groupsStore.currentGroup));
 
-function handleSettle(memberId) {
-  settleTarget.value = memberId;
+function handleSettle(payload) {
+  settleTarget.value = payload;
 }
 
 async function loadCategories() {

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useTranslation } from "i18next-vue";
-import { computeSplitBalances } from "@/utils/chartData";
+import { computeSplitBalances, simplifyDebts } from "@/utils/chartData";
 import { formatCompactNumber } from "@/utils/format";
 
 const props = defineProps({
@@ -12,6 +12,11 @@ const props = defineProps({
 });
 const emit = defineEmits(["settle"]);
 const { t } = useTranslation();
+
+function memberName(id) {
+  const member = props.members?.[id];
+  return member?.nickname || member?.displayName || t("common.someone");
+}
 
 const rows = computed(() => {
   const balances = computeSplitBalances(props.transactions, props.members);
@@ -25,6 +30,24 @@ const rows = computed(() => {
     }))
     .sort((a, b) => (a.isYou ? -1 : b.isYou ? 1 : b.balance - a.balance));
 });
+
+// Pairwise "who owes whom" — the minimal set of payments that settles
+// everyone up, so members know exactly who to pay (and how much)
+// instead of just their overall net position.
+const debts = computed(() => {
+  const balances = computeSplitBalances(props.transactions, props.members);
+  return simplifyDebts(balances).map((d) => ({
+    ...d,
+    fromName: memberName(d.from),
+    toName: memberName(d.to),
+    fromIsYou: d.from === props.currentUserId,
+    toIsYou: d.to === props.currentUserId,
+  }));
+});
+
+function settleDebt(debt) {
+  emit("settle", { memberId: debt.to, amount: debt.amount });
+}
 
 // Tracks members whose photoURL failed to load (e.g. transient Google
 // avatar errors) so we can fall back to the initials avatar instead of
@@ -88,13 +111,6 @@ function amountLabel(balance) {
         >
           {{ formatCompactNumber(Math.abs(row.balance)) }} {{ currency }}
         </span>
-        <button
-          v-if="!row.isYou && Math.abs(row.balance) >= 0.005"
-          @click="emit('settle', row.id)"
-          class="text-xs px-2 py-0.5 rounded-md bg-[#C8A5FC]/20 hover:bg-[#C8A5FC]/40 text-[#8A5FBF] dark:text-[#C8A5FC] font-medium transition-colors whitespace-nowrap"
-        >
-          {{ $t('groups.settleUp') }}
-        </button>
       </div>
     </div>
 
@@ -103,6 +119,35 @@ function amountLabel(balance) {
       class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
     >
       {{ $t('groups.noMembers') }}
+    </div>
+
+    <div v-if="debts.length" class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-600 space-y-2">
+      <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        {{ $t('groups.suggestedSettlements') }}
+      </div>
+      <div
+        v-for="(debt, i) in debts"
+        :key="i"
+        class="flex items-center justify-between gap-3 p-2.5 bg-gray-50 dark:bg-gray-700 rounded-lg"
+      >
+        <div class="text-sm min-w-0 flex-1 dark:text-white truncate">
+          <span class="font-medium">{{ debt.fromIsYou ? $t('common.you') : debt.fromName }}</span>
+          {{ $t('groups.owesLowercase') }}
+          <span class="font-medium">{{ debt.toIsYou ? $t('common.you') : debt.toName }}</span>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="font-bold money text-sm text-[#C1503A]">
+            {{ formatCompactNumber(debt.amount) }} {{ currency }}
+          </span>
+          <button
+            v-if="debt.fromIsYou"
+            @click="settleDebt(debt)"
+            class="text-xs px-2 py-0.5 rounded-md bg-[#C8A5FC]/20 hover:bg-[#C8A5FC]/40 text-[#8A5FBF] dark:text-[#C8A5FC] font-medium transition-colors whitespace-nowrap"
+          >
+            {{ $t('groups.settleUp') }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

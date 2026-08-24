@@ -91,6 +91,8 @@
     "settledUp": "Ausgeglichen",
     "isOwed": "bekommt",
     "owes": "schuldet",
+    "owesLowercase": "schuldet",
+    "suggestedSettlements": "Vorgeschlagene Ausgleichszahlungen",
     "settleUp": "Abrechnen",
     "noMembers": "Noch keine Mitglieder",
     "exportTooltip": "Kassendaten exportieren",

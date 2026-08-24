@@ -12,7 +12,7 @@ const props = defineProps({
   mode: { type: String, default: "kitty" }, // 'kitty' | 'split'
   members: { type: Object, default: () => ({}) },
   currentUserId: { type: String, default: "" },
-  settleWith: { type: String, default: null }, // member id, prefills "Settle up"
+  settleWith: { type: Object, default: null }, // { memberId, amount }, prefills "Settle up"
 });
 const emit = defineEmits(["settle-with-consumed"]);
 const transactionsStore = useTransactionsStore();
@@ -122,13 +122,16 @@ watch(
   { immediate: true },
 );
 
-// BalancesPanel can ask this form to prefill a "Settle up" for a member.
+// BalancesPanel can ask this form to prefill a "Settle up" for a member,
+// including the exact amount owed to them (from the debt-simplification
+// suggestions), so the member doesn't have to figure out or retype it.
 watch(
   () => props.settleWith,
-  (uid) => {
-    if (!uid) return;
+  (payload) => {
+    if (!payload) return;
     type.value = "settlement";
-    recipient.value = uid;
+    recipient.value = payload.memberId;
+    if (payload.amount != null) amount.value = String(payload.amount);
     emit("settle-with-consumed");
   },
 );

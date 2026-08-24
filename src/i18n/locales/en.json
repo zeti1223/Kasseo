@@ -91,6 +91,8 @@
     "settledUp": "Settled up",
     "isOwed": "is owed",
     "owes": "owes",
+    "owesLowercase": "owes",
+    "suggestedSettlements": "Suggested settlements",
     "settleUp": "Settle up",
     "noMembers": "No members yet",
     "exportTooltip": "Export fund data",

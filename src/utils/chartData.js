@@ -85,6 +85,47 @@ export function computeSplitBalances(transactions, members) {
   return balances;
 }
 
+// Split mode: turns net balances (from computeSplitBalances) into the
+// smallest set of pairwise payments that settles everyone up, via a
+// greedy "largest debtor pays largest creditor" debt-simplification
+// algorithm. Returns [{ from, to, amount }], meaning `from` pays
+// `amount` to `to`. This is what actually tells a member who to pay
+// and how much, instead of just their overall net position.
+export function simplifyDebts(balances) {
+  const EPSILON = 0.005;
+  const creditors = [];
+  const debtors = [];
+  Object.entries(balances || {}).forEach(([id, balance]) => {
+    if (balance > EPSILON) creditors.push({ id, amount: balance });
+    else if (balance < -EPSILON) debtors.push({ id, amount: -balance });
+  });
+  // Largest amounts first, so big debts get cleared in as few transactions
+  // as possible.
+  creditors.sort((a, b) => b.amount - a.amount);
+  debtors.sort((a, b) => b.amount - a.amount);
+
+  const settlements = [];
+  let i = 0;
+  let j = 0;
+  while (i < debtors.length && j < creditors.length) {
+    const debtor = debtors[i];
+    const creditor = creditors[j];
+    const amount = Math.min(debtor.amount, creditor.amount);
+    if (amount > EPSILON) {
+      settlements.push({
+        from: debtor.id,
+        to: creditor.id,
+        amount: Number(amount.toFixed(2)),
+      });
+    }
+    debtor.amount -= amount;
+    creditor.amount -= amount;
+    if (debtor.amount <= EPSILON) i++;
+    if (creditor.amount <= EPSILON) j++;
+  }
+  return settlements;
+}
+
 // Same as computeSplitBalances, but tracks one member's running total
 // over time for a line chart.
 export function buildYourBalanceOverTime(transactions, members, userId) {
