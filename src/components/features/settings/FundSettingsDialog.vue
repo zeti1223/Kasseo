@@ -64,7 +64,14 @@ const myColor = ref(DEFAULT_FUND_COLOR);
 const groupIcon = ref(DEFAULT_FUND_ICON);
 
 const removeMemberTarget = ref(null);
-const removeCategoryTarget = ref(null);
+const removeCategoryTarget = ref(null); // { id, name, ... } category being removed
+
+const affectedTransactionCount = computed(() => {
+  if (!removeCategoryTarget.value) return 0;
+  return transactionsStore.transactions.filter(
+    (t) => t.type === "expense" && t.category === removeCategoryTarget.value.name,
+  ).length;
+});
 
 const isOwner = computed(() => props.group?.ownerId === authStore.user?.uid);
 
@@ -215,9 +222,16 @@ async function confirmRemoveCategory() {
   if (!props.group?.id || !removeCategoryTarget.value) return;
   loading.value = true;
   try {
+    // Re-categorize affected transactions to "Other" first, so they're
+    // never left pointing at a category name that no longer exists.
+    await transactionsStore.reassignCategory(
+      props.group.id,
+      removeCategoryTarget.value.name,
+      "Other",
+    );
     await groupsStore.removeCategory(
       props.group.id,
-      removeCategoryTarget.value,
+      removeCategoryTarget.value.id,
     );
     await loadCategories();
     removeCategoryTarget.value = null;
@@ -393,7 +407,7 @@ function copyInviteLink() {
         :is-owner="isOwner"
         :loading="loading"
         @add="handleAddCategory"
-        @remove="(id) => (removeCategoryTarget = id)"
+        @remove="(category) => (removeCategoryTarget = category)"
       />
 
       <StyleTab
@@ -438,7 +452,11 @@ function copyInviteLink() {
       :loading="loading"
       @confirm="confirmRemoveCategory"
     >
-      {{ $t('fundSettings.removeCategoryConfirm') }}
+      {{
+        affectedTransactionCount > 0
+          ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
+          : $t('fundSettings.removeCategoryConfirm')
+      }}
     </ConfirmDialog>
   </div>
 </template>

@@ -213,6 +213,8 @@
     "removeMemberConfirm": "Ce membre perdra l'accès à cette cagnotte.",
     "removeCategoryTitle": "Supprimer la catégorie ?",
     "removeCategoryConfirm": "Cette catégorie sera supprimée de la cagnotte.",
+    "removeCategoryConfirmWithCount": "Cette catégorie sera supprimée, et {{count}} transaction qui l'utilise sera recatégorisée en « Autre ».",
+    "removeCategoryConfirmWithCount_plural": "Cette catégorie sera supprimée, et {{count}} transactions qui l'utilisent seront recatégorisées en « Autre ».",
     "newCategory": "Nouvelle catégorie (choisir icône et nom)",
     "categoryNamePlaceholder": "Nom de la catégorie",
     "add": "Ajouter",

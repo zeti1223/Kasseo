@@ -357,6 +357,26 @@ export const useTransactionsStore = defineStore("transactions", () => {
     return results.filter((r) => !r.ok).map((r) => r.id);
   }
 
+  // Re-categorizes every transaction that references `oldCategoryName` to
+  // `newCategoryName`, and drops any custom `categoryIcon` so the icon
+  // falls back to the new category's default (an old custom icon painted
+  // on the deleted category would otherwise stick around and look wrong).
+  // Used when a custom category is deleted, so its transactions don't end
+  // up silently orphaned with a category name that no longer exists.
+  async function reassignCategory(groupId, oldCategoryName, newCategoryName) {
+    const matched = transactions.value.filter(
+      (t) => t.type === "expense" && t.category === oldCategoryName,
+    );
+    if (!matched.length) return 0;
+    const updates = {};
+    for (const tx of matched) {
+      updates[`${tx.id}/category`] = newCategoryName;
+      updates[`${tx.id}/categoryIcon`] = null;
+    }
+    await update(dbRef(db, `transactions/${groupId}`), updates);
+    return matched.length;
+  }
+
   return {
     transactions,
     listen,
@@ -368,5 +388,6 @@ export const useTransactionsStore = defineStore("transactions", () => {
     updateReceiptGroupSplitOption,
     updateTransaction,
     recalculateForCurrency,
+    reassignCategory,
   };
 });

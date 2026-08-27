@@ -213,6 +213,8 @@
     "removeMemberConfirm": "Este miembro perderá el acceso a este fondo.",
     "removeCategoryTitle": "¿Eliminar categoría?",
     "removeCategoryConfirm": "Esta categoría será eliminada del fondo.",
+    "removeCategoryConfirmWithCount": "Esta categoría se eliminará y {{count}} transacción que la usa se recategorizará como \"Otro\".",
+    "removeCategoryConfirmWithCount_plural": "Esta categoría se eliminará y {{count}} transacciones que la usan se recategorizarán como \"Otro\".",
     "newCategory": "Nueva categoría (elegir icono y nombre)",
     "categoryNamePlaceholder": "Nombre de la categoría",
     "add": "Añadir",

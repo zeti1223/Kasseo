@@ -213,6 +213,8 @@
     "removeMemberConfirm": "This member will lose access to this fund.",
     "removeCategoryTitle": "Remove category?",
     "removeCategoryConfirm": "This category will be removed from the fund.",
+    "removeCategoryConfirmWithCount": "This category will be removed, and {{count}} transaction using it will be recategorized to \"Other\".",
+    "removeCategoryConfirmWithCount_plural": "This category will be removed, and {{count}} transactions using it will be recategorized to \"Other\".",
     "newCategory": "New category (choose icon & name)",
     "categoryNamePlaceholder": "Category name",
     "add": "Add",
