@@ -32,7 +32,13 @@
     "downloaded": "Heruntergeladen!",
     "export": "Exportieren",
     "noData": "Noch keine Daten",
-    "selected": "Ausgewählt"
+    "selected": "Ausgewählt",
+    "backToFunds": "Kassen"
+  },
+  "mobileTabs": {
+    "transactions": "Transaktionen",
+    "balances": "Salden",
+    "charts": "Diagramme"
   },
   "navbar": {
     "settings": "Einstellungen",

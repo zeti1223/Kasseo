@@ -219,25 +219,25 @@ async function handleSubmit() {
 
 <template>
   <div
-    class="bg-white dark:bg-surface-dark rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700"
+    class="bg-white dark:bg-surface-dark rounded-xl p-4 sm:p-5 shadow-xs border border-gray-100 dark:border-gray-700"
   >
-    <div class="text-base font-medium mb-3 font-display dark:text-white">
+    <div class="text-base font-semibold mb-3 font-display dark:text-white">
       {{ $t('transactions.logTransaction') }}
     </div>
 
     <div
-      class="flex mb-4 divide-x divide-gray-200 dark:divide-gray-600 rounded-lg overflow-hidden"
+      class="flex mb-4 divide-x divide-gray-200 dark:divide-gray-600 rounded-xl overflow-hidden shadow-xs border border-gray-200/50 dark:border-gray-700"
     >
       <button
         @click="type = 'expense'"
         :class="
           type === 'expense'
-            ? 'bg-[#C1503A] text-white'
+            ? 'bg-[#C1503A] text-white font-semibold'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         "
-        class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
+        class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm active:scale-95"
       >
-        <i class="fas fa-arrow-up"></i>
+        <i class="fas fa-arrow-up text-xs"></i>
         {{ $t('transactions.expense') }}
       </button>
 
@@ -246,12 +246,12 @@ async function handleSubmit() {
         @click="type = 'deposit'"
         :class="
           type === 'deposit'
-            ? 'bg-[#A7F49D] text-white'
+            ? 'bg-[#A7F49D] text-white font-semibold'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         "
-        class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
+        class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm active:scale-95"
       >
-        <i class="fas fa-arrow-down"></i>
+        <i class="fas fa-arrow-down text-xs"></i>
         {{ $t('transactions.deposit') }}
       </button>
 
@@ -260,12 +260,12 @@ async function handleSubmit() {
         @click="type = 'settlement'"
         :class="
           type === 'settlement'
-            ? 'bg-[#A5E3FC] text-white'
+            ? 'bg-[#A5E3FC] text-white font-semibold'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         "
-        class="flex-1 px-4 py-2 transition-colors flex items-center justify-center gap-2"
+        class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm active:scale-95"
       >
-        <i class="fas fa-handshake"></i>
+        <i class="fas fa-handshake text-xs"></i>
         {{ $t('transactions.settleUp') }}
       </button>
     </div>
@@ -477,7 +477,7 @@ async function handleSubmit() {
     <button
       @click="handleSubmit"
       :disabled="!canSubmit"
-      class="w-full mt-4 px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      class="w-full mt-4 px-4 py-3 sm:py-2.5 bg-[#C8A5FC] text-white font-semibold rounded-xl sm:rounded-lg hover:bg-[#A78BCA] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base shadow-xs"
     >
       <i v-if="loading" class="fas fa-spinner fa-spin h-4 w-4"></i>
       {{ type === "settlement" ? $t('transactions.recordSettlement') : $t('transactions.addTransaction') }}

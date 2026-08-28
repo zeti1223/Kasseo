@@ -32,7 +32,13 @@
     "downloaded": "已下载！",
     "export": "导出",
     "noData": "暂无数据",
-    "selected": "已选择"
+    "selected": "已选择",
+    "backToFunds": "资金库"
+  },
+  "mobileTabs": {
+    "transactions": "交易明细",
+    "balances": "余额结算",
+    "charts": "图表分析"
   },
   "navbar": {
     "settings": "设置",

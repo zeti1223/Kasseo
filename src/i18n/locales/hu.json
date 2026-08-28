@@ -32,7 +32,13 @@
     "downloaded": "Letöltve!",
     "export": "Exportálás",
     "noData": "Még nincs adat",
-    "selected": "Kiválasztva"
+    "selected": "Kiválasztva",
+    "backToFunds": "Kasszák"
+  },
+  "mobileTabs": {
+    "transactions": "Tranzakciók",
+    "balances": "Egyenlegek",
+    "charts": "Grafikonok"
   },
   "navbar": {
     "settings": "Beállítások",

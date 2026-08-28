@@ -19,3 +19,34 @@ body {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+
+/* Mobile ergonomics & safe areas */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+.safe-top {
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Smooth active press feedback on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button:active, a:active {
+    opacity: 0.85;
+  }
+}
+
+/* Prevent auto zoom on input focus in iOS */
+@media screen and (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+

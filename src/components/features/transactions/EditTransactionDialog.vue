@@ -203,15 +203,18 @@ async function handleUpdate() {
 <template>
   <div
     v-if="props.modelValue"
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
   >
     <div
-      class="absolute inset-0 bg-black/50"
+      class="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
       @click="emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[420px] mx-4"
+      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-[420px] max-h-[90vh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
     >
+      <!-- Mobile drag handle indicator -->
+      <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 sm:hidden" />
+
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         {{ $t('transactions.editTransaction') }}
       </h2>

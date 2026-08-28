@@ -44,15 +44,18 @@ async function handleCreate() {
 <template>
   <div
     v-if="props.modelValue"
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
   >
     <div
-      class="absolute inset-0 bg-black/50"
+      class="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
       @click="emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[420px] mx-4"
+      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-[420px] max-h-[90vh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
     >
+      <!-- Mobile drag handle indicator -->
+      <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 sm:hidden" />
+
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         {{ $t('groups.newFundTitle') }}
       </h2>
@@ -67,7 +70,7 @@ async function handleCreate() {
             v-model="name"
             type="text"
             :placeholder="$t('groups.fundNamePlaceholder')"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
             @keyup.enter="handleCreate"
           />
         </div>
@@ -78,7 +81,7 @@ async function handleCreate() {
           >
           <select
             v-model="currency"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full px-3 py-2.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option v-for="curr in currencies" :key="curr" :value="curr">
               {{ curr }}
@@ -89,14 +92,14 @@ async function handleCreate() {
       <div class="flex justify-end gap-2 mt-6">
         <button
           @click="emit('update:modelValue', false)"
-          class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-center"
         >
           {{ $t('common.cancel') }}
         </button>
         <button
           @click="handleCreate"
           :disabled="!name.trim() || loading"
-          class="px-4 py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="flex-1 sm:flex-initial px-5 py-2.5 sm:py-2 bg-[#C8A5FC] text-white rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
         >
           <i v-if="loading" class="fas fa-spinner fa-spin h-4 w-4"></i>
           {{ $t('common.create') }}

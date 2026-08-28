@@ -95,23 +95,23 @@ function openGroup(id) {
 </script>
 
 <template>
-  <div class="max-w-[1200px] mx-auto px-4 py-8">
+  <div class="max-w-[1200px] mx-auto px-4 py-4 sm:py-8 pb-16 md:pb-8">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6 flex-wrap gap-2">
+    <div class="flex justify-between items-center mb-5 sm:mb-6 flex-wrap gap-2">
       <div>
-        <h1 class="text-2xl font-bold font-display dark:text-white">
+        <h1 class="text-xl sm:text-2xl font-bold font-display dark:text-white">
           {{ $t('dashboard.welcome') }}
         </h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">
           {{ $t('dashboard.subtitle') }}
         </p>
       </div>
       <button
         @click="showCreateDialog = true"
-        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+        class="bg-primary text-white text-sm sm:text-base px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-lg hover:bg-primary-dark active:scale-95 transition-all flex items-center gap-2 font-medium shadow-xs"
       >
-        <i class="fas fa-plus"></i>
-        {{ $t('dashboard.newFund') }}
+        <i class="fas fa-plus text-xs sm:text-sm"></i>
+        <span>{{ $t('dashboard.newFund') }}</span>
       </button>
     </div>
 
