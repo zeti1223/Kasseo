@@ -80,15 +80,18 @@ function handleExport() {
 <template>
   <div
     v-if="modelValue"
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
   >
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/50" @click="close" />
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity" @click="close" />
 
     <!-- Modal Content -->
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-xl shadow-xl p-6 w-full max-w-[520px] mx-4 max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-gray-700"
+      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-[520px] max-h-[90vh] overflow-y-auto border-t sm:border border-gray-100 dark:border-gray-700 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
     >
+      <!-- Mobile drag handle indicator -->
+      <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 sm:hidden" />
+
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2.5">
           <div

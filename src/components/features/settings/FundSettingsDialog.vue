@@ -284,15 +284,18 @@ function copyInviteLink() {
 <template>
   <div
     v-if="props.modelValue"
-    class="fixed inset-0 z-50 flex items-center justify-center"
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
   >
     <div
-      class="absolute inset-0 bg-black/50"
+      class="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
       @click="!loading && emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-lg shadow-lg p-6 w-full max-w-[500px] mx-4"
+      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-[500px] max-h-[90vh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
     >
+      <!-- Mobile drag handle indicator -->
+      <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 sm:hidden" />
+
       <h2 class="text-lg font-semibold font-display mb-4 dark:text-white">
         {{ $t('fundSettings.title') }}
       </h2>
@@ -350,13 +353,13 @@ function copyInviteLink() {
         </p>
       </div>
 
-      <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+      <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto no-scrollbar -mx-1 px-1">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
           :class="[
-            'px-4 py-2 text-sm font-medium transition-colors',
+            'px-3 sm:px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap',
             activeTab === tab.id
               ? 'border-b-2 border-[#C8A5FC] text-[#C8A5FC]'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
