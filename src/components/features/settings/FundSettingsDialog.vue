@@ -245,6 +245,17 @@ async function confirmRemoveCategory() {
   }
 }
 
+async function handleAddPlaceholderMember(memberName) {
+  if (!props.group?.id || !memberName) return;
+  loading.value = true;
+  try {
+    await groupsStore.addPlaceholderMember(props.group.id, memberName);
+    await groupsStore.loadGroup(props.group.id);
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function confirmRemoveMember() {
   if (!props.group?.id || !removeMemberTarget.value) return;
   loading.value = true;
@@ -444,6 +455,7 @@ function copyInviteLink() {
         :invite-url="inviteUrl"
         :qr-invite-url="qrInviteUrl"
         @copy-invite="copyInviteLink"
+        @add-placeholder-member="handleAddPlaceholderMember"
         @remove="(id) => (removeMemberTarget = id)"
         @transfer-ownership="(target) => (transferOwnershipTarget = target)"
         @leave="showLeaveConfirm = true"

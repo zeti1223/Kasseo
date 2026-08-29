@@ -36,7 +36,9 @@
     "backToFunds": "Fondos",
     "leave": "Salir",
     "makeOwner": "Hacer propietario",
-    "dangerZone": "Zona de peligro"
+    "dangerZone": "Zona de peligro",
+    "noAccount": "Sin cuenta",
+    "addMember": "Añadir miembro"
   },
   "mobileTabs": {
     "transactions": "Transacciones",
@@ -69,7 +71,16 @@
     "openInAppPrompt": "Disfruta de la experiencia completa de Kasseo — sigue los gastos compartidos, divide facturas y mucho más.",
     "continueInBrowser": "Continuar en el navegador",
     "signInToJoin": "Iniciar sesión con Google para unirse",
-    "deepLinkFallback": "Si la app no se abrió, asegúrate de que Kasseo esté instalado o continúa en el navegador."
+    "deepLinkFallback": "Si la app no se abrió, asegúrate de que Kasseo esté instalado o continúa en el navegador.",
+    "joinAsNew": "Unirse como nuevo miembro",
+    "joinAsNewDesc": "Únete como nuevo miembro con tu perfil de Google.",
+    "claimExisting": "Reclamar un perfil existente",
+    "claimExistingDesc": "Toma el control de uno de los perfiles creados sin cuenta:",
+    "selectProfileToClaim": "Selecciona un perfil para reclamar",
+    "confirmJoin": "Unirse al fondo",
+    "confirmClaim": "Reclamar perfil y unirse",
+    "alreadyMember": "¡Ya eres miembro de este fondo!",
+    "goToFund": "Ir al fondo"
   },
   "dashboard": {
     "welcome": "¡Bienvenido de nuevo!",
@@ -218,6 +229,9 @@
     "inviteMembers": "Invitar miembros",
     "inviteSubtitle": "Comparte el enlace o escanea el código QR para unirse",
     "scanQrHelp": "Escanea con la cámara del móvil para unirte a este fondo",
+    "addMemberWithoutAccount": "Añadir miembro (sin cuenta)",
+    "memberNamePlaceholder": "Nombre del miembro (ej. Alex)",
+    "addMemberHelp": "Puedes invitar a la persona más tarde para que reclame este perfil.",
     "removeMemberTitle": "¿Eliminar miembro?",
     "removeMemberConfirm": "Este miembro perderá el acceso a este fondo.",
     "leaveFund": "Salir del fondo",

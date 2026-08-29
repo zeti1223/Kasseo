@@ -5,6 +5,7 @@ import {
   push,
   set,
   get,
+  update,
   onValue,
   serverTimestamp,
   remove,
@@ -224,6 +225,120 @@ export const useGroupsStore = defineStore("groups", () => {
     });
   }
 
+  async function addPlaceholderMember(groupId, name) {
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+    const newMemberRef = push(dbRef(db, `groups/${groupId}/members`));
+    const memberId = newMemberRef.key;
+    await set(newMemberRef, {
+      displayName: trimmed,
+      nickname: trimmed,
+      photoURL: null,
+      isPlaceholder: true,
+      createdAt: serverTimestamp(),
+    });
+    return memberId;
+  }
+
+  async function claimMember(groupId, placeholderMemberId) {
+    const authStore = useAuthStore();
+    const user = authStore.user;
+    if (!user) throw new Error("Authentication required");
+
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) {
+      throw new Error("This fund does not exist.");
+    }
+    const groupData = groupSnap.val();
+    const placeholderMember = groupData.members?.[placeholderMemberId];
+    if (!placeholderMember) {
+      throw new Error("Placeholder member does not exist.");
+    }
+
+    const nickname =
+      authStore.userProfile?.nickname ||
+      user.displayName ||
+      placeholderMember.nickname ||
+      placeholderMember.displayName ||
+      "User";
+
+    // 1. Add current user as a full member
+    const memberData = {
+      displayName: nickname,
+      nickname,
+      photoURL: user.photoURL || null,
+      joinedAt: serverTimestamp(),
+      claimedAt: serverTimestamp(),
+      claimedFrom: placeholderMemberId,
+    };
+    if (placeholderMember.color) {
+      memberData.color = placeholderMember.color;
+    }
+
+    await set(dbRef(db, `groups/${groupId}/members/${user.uid}`), memberData);
+    await set(dbRef(db, `users/${user.uid}/groups/${groupId}`), true);
+
+    // 2. Migrate transactions referencing placeholderMemberId
+    try {
+      const txSnap = await get(dbRef(db, `transactions/${groupId}`));
+      if (txSnap.exists()) {
+        const allTx = txSnap.val();
+        const updates = {};
+        for (const [txId, tx] of Object.entries(allTx)) {
+          let changed = false;
+          const txUpdate = {};
+
+          if (tx.paidBy === placeholderMemberId) {
+            txUpdate[`${txId}/paidBy`] = user.uid;
+            changed = true;
+          }
+          if (tx.to === placeholderMemberId) {
+            txUpdate[`${txId}/to`] = user.uid;
+            changed = true;
+          }
+          if (Array.isArray(tx.splitAmong) && tx.splitAmong.includes(placeholderMemberId)) {
+            txUpdate[`${txId}/splitAmong`] = tx.splitAmong.map((id) =>
+              id === placeholderMemberId ? user.uid : id,
+            );
+            changed = true;
+          }
+          if (tx.splitShares && tx.splitShares[placeholderMemberId] !== undefined) {
+            const newShares = { ...tx.splitShares };
+            newShares[user.uid] = newShares[placeholderMemberId];
+            delete newShares[placeholderMemberId];
+            txUpdate[`${txId}/splitShares`] = newShares;
+            changed = true;
+          }
+
+          if (changed) {
+            Object.assign(updates, txUpdate);
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await update(dbRef(db, `transactions/${groupId}`), updates);
+        }
+      }
+    } catch (err) {
+      console.error("Error migrating transactions on claim:", err);
+    }
+
+    // 3. If placeholder member was group owner, transfer ownership to new user
+    if (groupData.ownerId === placeholderMemberId) {
+      await set(dbRef(db, `groups/${groupId}/ownerId`), user.uid);
+    }
+
+    // 4. Remove the placeholder member from group.members
+    await remove(dbRef(db, `groups/${groupId}/members/${placeholderMemberId}`));
+
+    // 5. Notify members
+    dispatchPushToGroupMembers(groupId, {
+      titleKey: "notifications.memberJoined",
+      titleParams: { name: nickname },
+      data: { type: "memberJoined" },
+    });
+  }
+
   async function loadGroup(groupId) {
     const snap = await get(dbRef(db, `groups/${groupId}`));
     if (snap.exists()) {
@@ -348,6 +463,8 @@ export const useGroupsStore = defineStore("groups", () => {
     stopGroupListener,
     createGroup,
     joinGroup,
+    addPlaceholderMember,
+    claimMember,
     loadGroup,
     updateCurrency,
     updateName,
