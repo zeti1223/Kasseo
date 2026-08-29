@@ -36,7 +36,9 @@
     "backToFunds": "Kassen",
     "leave": "Verlassen",
     "makeOwner": "Zum Eigentümer machen",
-    "dangerZone": "Gefahrenzone"
+    "dangerZone": "Gefahrenzone",
+    "noAccount": "Ohne Konto",
+    "addMember": "Mitglied hinzufügen"
   },
   "mobileTabs": {
     "transactions": "Transaktionen",
@@ -69,7 +71,16 @@
     "openInAppPrompt": "Nutze das volle Kasseo-Erlebnis — verfolge Ausgaben, teile Rechnungen und vieles mehr.",
     "continueInBrowser": "Im Browser fortfahren",
     "signInToJoin": "Mit Google anmelden und beitreten",
-    "deepLinkFallback": "Falls die App nicht geöffnet wurde, stelle sicher, dass Kasseo installiert ist, oder fahre im Browser fort."
+    "deepLinkFallback": "Falls die App nicht geöffnet wurde, stelle sicher, dass Kasseo installiert ist, oder fahre im Browser fort.",
+    "joinAsNew": "Als neues Mitglied beitreten",
+    "joinAsNewDesc": "Du trittst als neues Mitglied mit deinem Google-Profil bei.",
+    "claimExisting": "Bestehendes Profil übernehmen",
+    "claimExistingDesc": "Übernimm eines der zuvor ohne Konto erstellten Profile:",
+    "selectProfileToClaim": "Wähle ein Profil zum Übernehmen",
+    "confirmJoin": "Kasse beitreten",
+    "confirmClaim": "Profil übernehmen und beitreten",
+    "alreadyMember": "Du bist bereits Mitglied dieser Kasse!",
+    "goToFund": "Zur Kasse gehen"
   },
   "dashboard": {
     "welcome": "Willkommen zurück!",
@@ -216,8 +227,11 @@
     "ownerOnlyMode": "Nur der Eigentümer kann den Modus ändern",
     "modeSwitchNote": "Ein Moduswechsel löscht keine Transaktionen — er ändert lediglich die Erfassung neuer Ausgaben und die Saldoberechnung.",
     "inviteMembers": "Mitglieder einladen",
-    "inviteSubtitle": "Link teilen oder QR-Code scannen",
+    "inviteSubtitle": "Link teilen oder QR-Code scannen zum Beitreten",
     "scanQrHelp": "Mit der Handykamera scannen, um beizutreten",
+    "addMemberWithoutAccount": "Mitglied hinzufügen (ohne Konto)",
+    "memberNamePlaceholder": "Name des Mitglieds (z. B. Alex)",
+    "addMemberHelp": "Du kannst die Person später einladen, um dieses Profil zu übernehmen.",
     "removeMemberTitle": "Mitglied entfernen?",
     "removeMemberConfirm": "Dieses Mitglied verliert den Zugriff auf diese Kasse.",
     "leaveFund": "Kasse verlassen",

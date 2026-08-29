@@ -36,7 +36,9 @@
     "backToFunds": "Funds",
     "leave": "Leave",
     "makeOwner": "Make Owner",
-    "dangerZone": "Danger Zone"
+    "dangerZone": "Danger Zone",
+    "noAccount": "No account",
+    "addMember": "Add member"
   },
   "mobileTabs": {
     "transactions": "Transactions",
@@ -69,7 +71,16 @@
     "openInAppPrompt": "Get the full Kasseo experience — track shared expenses, split bills and more.",
     "continueInBrowser": "Continue in browser",
     "signInToJoin": "Sign in with Google to Join",
-    "deepLinkFallback": "If the app didn't open, make sure Kasseo is installed or continue in browser."
+    "deepLinkFallback": "If the app didn't open, make sure Kasseo is installed or continue in browser.",
+    "joinAsNew": "Join as a new member",
+    "joinAsNewDesc": "Join as a new member using your Google profile.",
+    "claimExisting": "Claim an existing profile",
+    "claimExistingDesc": "Take over one of the profiles created without an account:",
+    "selectProfileToClaim": "Select a profile to claim",
+    "confirmJoin": "Join fund",
+    "confirmClaim": "Claim profile & join",
+    "alreadyMember": "You are already a member of this fund!",
+    "goToFund": "Go to fund"
   },
   "dashboard": {
     "welcome": "Welcome back!",
@@ -218,6 +229,9 @@
     "inviteMembers": "Invite members",
     "inviteSubtitle": "Share link or scan QR code to join",
     "scanQrHelp": "Scan with a phone camera to join this fund",
+    "addMemberWithoutAccount": "Add member (without account)",
+    "memberNamePlaceholder": "Member name (e.g. Alex)",
+    "addMemberHelp": "You can invite them later to claim this profile.",
     "removeMemberTitle": "Remove member?",
     "removeMemberConfirm": "This member will lose access to this fund.",
     "leaveFund": "Leave fund",

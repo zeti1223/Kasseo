@@ -36,7 +36,9 @@
     "backToFunds": "资金库",
     "leave": "退出",
     "makeOwner": "设为所有者",
-    "dangerZone": "危险区域"
+    "dangerZone": "危险区域",
+    "noAccount": "无账号",
+    "addMember": "添加成员"
   },
   "mobileTabs": {
     "transactions": "交易明细",
@@ -69,7 +71,16 @@
     "openInAppPrompt": "体验完整的 Kasseo 功能——追踪共享支出、分摊账单等更多内容。",
     "continueInBrowser": "在浏览器中继续",
     "signInToJoin": "用 Google 登录并加入",
-    "deepLinkFallback": "如果应用未打开，请确认已安装 Kasseo，或在浏览器中继续。"
+    "deepLinkFallback": "如果应用未打开，请确认已安装 Kasseo，或在浏览器中继续。",
+    "joinAsNew": "作为新成员加入",
+    "joinAsNewDesc": "使用你的 Google 账号创建新成员加入。",
+    "claimExisting": "认领已有成员档案",
+    "claimExistingDesc": "接管先前未关联账号创建的成员档案：",
+    "selectProfileToClaim": "选择要认领的成员",
+    "confirmJoin": "加入基金",
+    "confirmClaim": "认领并加入",
+    "alreadyMember": "你已经是该基金的成员！",
+    "goToFund": "前往基金"
   },
   "dashboard": {
     "welcome": "欢迎回来！",
@@ -216,8 +227,11 @@
     "ownerOnlyMode": "只有所有者可以更改基金模式",
     "modeSwitchNote": "切换模式不会删除任何交易 — 只会改变新交易的记录方式以及余额的计算方式。",
     "inviteMembers": "邀请成员",
-    "inviteSubtitle": "分享链接或扫描二维码加入",
+    "inviteSubtitle": "分享链接或扫描二维码以加入",
     "scanQrHelp": "用手机摄像头扫描以加入此基金",
+    "addMemberWithoutAccount": "添加成员（无账号）",
+    "memberNamePlaceholder": "成员名称（例如：Alex）",
+    "addMemberHelp": "您可以稍后邀请对方认领此成员档案。",
     "removeMemberTitle": "移除成员？",
     "removeMemberConfirm": "该成员将失去对此基金的访问权限。",
     "leaveFund": "退出基金",

@@ -36,7 +36,9 @@
     "backToFunds": "Fonds",
     "leave": "Quitter",
     "makeOwner": "Nommer propriétaire",
-    "dangerZone": "Zone de danger"
+    "dangerZone": "Zone de danger",
+    "noAccount": "Sans compte",
+    "addMember": "Ajouter un membre"
   },
   "mobileTabs": {
     "transactions": "Transactions",
@@ -69,7 +71,16 @@
     "openInAppPrompt": "Profitez de la pleine expérience Kasseo — suivez les dépenses partagées, répartissez les factures et bien plus.",
     "continueInBrowser": "Continuer dans le navigateur",
     "signInToJoin": "Se connecter avec Google pour rejoindre",
-    "deepLinkFallback": "Si l'application ne s'est pas ouverte, vérifiez que Kasseo est installé ou continuez dans le navigateur."
+    "deepLinkFallback": "Si l'application ne s'est pas ouverte, vérifiez que Kasseo est installé ou continuez dans le navigateur.",
+    "joinAsNew": "Rejoindre en tant que nouveau membre",
+    "joinAsNewDesc": "Rejoignez en tant que nouveau membre avec votre profil Google.",
+    "claimExisting": "Reprendre un profil existant",
+    "claimExistingDesc": "Reprenez l'un des profils créés sans compte :",
+    "selectProfileToClaim": "Sélectionnez un profil à reprendre",
+    "confirmJoin": "Rejoindre la cagnotte",
+    "confirmClaim": "Reprendre le profil et rejoindre",
+    "alreadyMember": "Vous êtes déjà membre de cette cagnotte !",
+    "goToFund": "Aller à la cagnotte"
   },
   "dashboard": {
     "welcome": "Bienvenue !",
@@ -216,8 +227,11 @@
     "ownerOnlyMode": "Seul le propriétaire peut changer le mode de la cagnotte",
     "modeSwitchNote": "Changer de mode ne supprime aucune transaction — cela modifie seulement l'enregistrement des nouvelles dépenses et le calcul des soldes.",
     "inviteMembers": "Inviter des membres",
-    "inviteSubtitle": "Partagez le lien ou scannez le QR code pour rejoindre",
+    "inviteSubtitle": "Partagez le lien ou scannez le code QR pour rejoindre",
     "scanQrHelp": "Scannez avec l'appareil photo d'un téléphone pour rejoindre",
+    "addMemberWithoutAccount": "Ajouter un membre (sans compte)",
+    "memberNamePlaceholder": "Nom du membre (ex. Alex)",
+    "addMemberHelp": "Vous pourrez l'inviter plus tard pour qu'il reprenne ce profil.",
     "removeMemberTitle": "Retirer le membre ?",
     "removeMemberConfirm": "Ce membre perdra l'accès à cette cagnotte.",
     "leaveFund": "Quitter la cagnotte",

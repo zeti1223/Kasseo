@@ -17,10 +17,13 @@ const emit = defineEmits([
   "transfer-ownership",
   "leave",
   "delete-fund",
+  "add-placeholder-member",
 ]);
 
 const showQr = ref(false);
 const copied = ref(false);
+const newMemberName = ref("");
+const addingMember = ref(false);
 
 // Tracks members whose photoURL failed to load, falling back to the
 // initials avatar instead of a broken image icon.
@@ -35,6 +38,13 @@ function handleCopy() {
   setTimeout(() => {
     copied.value = false;
   }, 2000);
+}
+
+function handleAddMember() {
+  const trimmed = newMemberName.value.trim();
+  if (!trimmed || addingMember.value) return;
+  emit("add-placeholder-member", trimmed);
+  newMemberName.value = "";
 }
 </script>
 
@@ -92,6 +102,36 @@ function handleCopy() {
       </div>
     </div>
 
+    <!-- Add member without account -->
+    <div class="p-3 bg-gray-50 dark:bg-gray-700/60 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+      <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center justify-between">
+        <span>{{ $t('fundSettings.addMemberWithoutAccount') }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <input
+          v-model="newMemberName"
+          type="text"
+          :placeholder="$t('fundSettings.memberNamePlaceholder')"
+          maxlength="50"
+          :disabled="addingMember"
+          @keyup.enter="handleAddMember"
+          class="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent dark:bg-gray-800 dark:text-white"
+        />
+        <button
+          type="button"
+          @click="handleAddMember"
+          :disabled="!newMemberName.trim() || addingMember"
+          class="px-3 py-1.5 bg-[#C8A5FC] text-white text-xs font-semibold rounded-lg hover:bg-[#A78BCA] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 shrink-0"
+        >
+          <i class="fas fa-user-plus"></i>
+          <span>{{ $t('fundSettings.add') || $t('common.create') }}</span>
+        </button>
+      </div>
+      <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+        {{ $t('fundSettings.addMemberHelp') }}
+      </p>
+    </div>
+
     <div class="space-y-2 max-h-60 overflow-y-auto">
       <div
         v-for="member in members"
@@ -121,13 +161,20 @@ function handleCopy() {
             }}
           </div>
           <div class="min-w-0">
-            <div class="text-sm font-medium dark:text-white truncate flex items-center gap-1.5">
+            <div class="text-sm font-medium dark:text-white truncate flex items-center gap-1.5 flex-wrap">
               <span>{{ member.nickname || member.displayName }}</span>
               <span
                 v-if="member.id === currentUserId"
                 class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-1.5 py-0.2 rounded"
               >
                 {{ $t('common.you') }}
+              </span>
+              <span
+                v-if="member.isPlaceholder"
+                class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded font-normal flex items-center gap-1"
+              >
+                <i class="fas fa-user-clock text-[9px]"></i>
+                {{ $t('common.noAccount') }}
               </span>
             </div>
             <div
@@ -142,7 +189,7 @@ function handleCopy() {
 
         <div class="flex items-center gap-1 shrink-0">
           <button
-            v-if="isOwner && member.id !== ownerId"
+            v-if="isOwner && member.id !== ownerId && !member.isPlaceholder"
             type="button"
             @click="$emit('transfer-ownership', { id: member.id, name: member.nickname || member.displayName })"
             class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-[#C8A5FC] text-xs px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1"

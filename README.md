@@ -2,163 +2,190 @@
 
 [![Hackatime Badge](https://hackatime-badge.hackclub.com/U0BDKTP2RR8/Kasseo)](https://hackatime.hackclub.com/@Zeti_1223/project/Kasseo)
 
-A modern financial app for managing shared expenses and funds — built as a web app, and packaged as a native Android app via Capacitor.
+A modern financial app for managing shared expenses and funds — built as a web app and packaged as a native Android app via Capacitor.
 
 > ### *Pronunciation:* kaːsˈø
 
-## Functions
+---
 
-- **User authentication**: sign in with Google OAuth, backed by Firebase Authentication (works both on the web and as a native login on Android)
-- **2 Modes** per fund:
-  - **Kitty mode**: a shared pool everyone deposits into and spends from
-  - **Split mode**: members settle expenses directly with each other, split evenly or by custom percentage shares
-- **Transaction tracking**: real-time sync of deposits, expenses, and settlements across all members via Firebase Realtime Database
-- **Multi-currency support**: 13 currencies (USD, EUR, HUF, GBP, INR, CHF, JPY, CAD, AUD, CNY, PLN, CZK, RON), with automatic historical exchange-rate conversion so past transactions keep their original value when a fund's currency changes
-- **Detailed analytics**:
+## Features
+
+- **User authentication**: Sign in with Google OAuth, powered by Firebase Authentication (supports both Web and native Android login).
+- **2 Fund Modes**:
+  - **Kitty mode**: A shared pool that members deposit into and spend from.
+  - **Split mode**: Settle expenses directly with each other, split evenly or by custom percentage shares.
+- **Real-time transaction tracking**: Instant synchronization of deposits, expenses, and settlements across all members via Firebase Realtime Database.
+- **Multi-currency support**: 13 currencies (USD, EUR, HUF, GBP, INR, CHF, JPY, CAD, AUD, CNY, PLN, CZK, RON) with historical exchange-rate conversion so past records retain their original value when a fund's primary currency changes.
+- **Detailed analytics & interactive charts**:
   - Balance history over time
-  - Expenses by category, with category trends
-  - Breakdown by member
+  - Member net balances over time (Split mode)
+  - Expense breakdown by category
+  - Category spending trends
+  - Contribution breakdown by member
   - Monthly cash flow
-- **Receipt scanning**: point the camera at a receipt and let Gemini automatically extract and categorize line items as individual transactions
-- **Push & browser notifications**: real-time alerts (via OneSignal) whenever a fund member adds, edits, or deletes a transaction, joins/leaves a group, or renames/re-icons the fund — each recipient sees the notification in their **own** app language, regardless of which language the sender is using
-- **Inviting members**: share a link (or QR code) to let others join a fund instantly
-- **Custom categories**: create your own expense categories with custom icons
-- **Data export**: export a fund's transactions for external use
-- **Internationalization**: full UI in 6 languages — English, Hungarian, German, French, Spanish, and Chinese
-- **Dark mode**: light, dark, or system-matched theme
-- **Native Android app**: the same codebase is packaged into a native Android app via Capacitor, alongside the regular web app
+- **AI Receipt scanning**: Capture or upload receipt images to automatically extract and categorize line items using Google Gemini (proxied securely via a Cloudflare Worker).
+- **Push & browser notifications**: Real-time alerts via OneSignal whenever a member adds, edits, or deletes a transaction, joins/leaves a group, or modifies fund details — automatically translated into each recipient's chosen language.
+- **Member invitations**: Invite others seamlessly with shareable join links and QR codes.
+- **Custom fund styling & categories**: Personalize funds with custom icons/colors and create user-defined expense categories with custom icons.
+- **Data export**: Export transaction history to CSV and JSON formats.
+- **Internationalization**: Full multi-language UI supporting 6 languages: English, Hungarian, German, French, Spanish, and Chinese.
+- **Dark mode**: Seamless Light, Dark, and System-matched themes.
+- **Native Android app**: Cross-platform architecture packaged into a native Android app via Capacitor.
 
-## Tech stack
+---
 
-- **Frontend**: Vue 3 (Composition API)
-- **Build tool**: Vite
-- **State management**: Pinia
-- **Styling**: Tailwind CSS
-- **Routing**: Vue Router
-- **Internationalization**: i18next / i18next-vue
-- **Authentication**: Firebase Authentication (Google OAuth)
-- **Database**: Firebase Realtime Database
-- **Charts**: Chart.js + vue-chartjs
-- **Icons**: Font Awesome, flag-icons
-- **Receipt scanning**: Google Gemini API
-- **Push notifications**: OneSignal (web push + native via `onesignal-cordova-plugin`)
-- **Native app packaging**: Capacitor (Android)
-- **Hosting / CI**: Firebase Hosting, GitHub Actions
+## Tech Stack
 
-## Project structure
+- **Frontend**: [Vue 3](https://vuejs.org/) (Composition API, `<script setup>`)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **State Management**: [Pinia](https://pinia.vuejs.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + PostCSS / Autoprefixer
+- **Routing**: [Vue Router](https://router.vuejs.org/)
+- **Internationalization**: [i18next](https://www.i18next.com/) / `i18next-vue`
+- **Backend & Database**: [Firebase](https://firebase.google.com/) (Authentication & Realtime Database)
+- **AI & Serverless Worker**: [Google Gemini API](https://ai.google.dev/) via [Cloudflare Workers](https://workers.cloudflare.com/) (Wrangler)
+- **Charts & Visualization**: [Chart.js](https://www.chartjs.org/) + `vue-chartjs`
+- **Icons & UI**: [Font Awesome](https://fontawesome.com/), `flag-icons`, `qrcode.vue`
+- **Push Notifications**: [OneSignal](https://onesignal.com/) (Web Push + `onesignal-cordova-plugin`)
+- **Native App Packaging**: [Capacitor](https://capacitorjs.com/) (Android)
+- **Testing**: [Vitest](https://vitest.dev/) + `@vue/test-utils` + `jsdom`
+- **Hosting & CI/CD**: Firebase Hosting, GitHub Actions
+
+---
+
+## Project Structure
 
 ```
-src/
-├── components/     # UI components, grouped by feature (dashboard, groups, transactions, settings, ...)
-├── views/          # Top-level routed pages (Landing, Dashboard, Group)
-├── stores/         # Pinia stores (auth, groups, transactions, notifications, settings)
-├── services/       # Firebase config, currency conversion, push notification service
-├── router/         # Vue Router setup
-├── i18n/           # i18next setup + one JSON locale file per supported language
-├── constants/      # Categories, currencies, fund style presets
-└── utils/          # Formatting, chart data prep, export, receipt scanning helpers
-android/            # Capacitor-generated native Android project
+.
+├── src/
+│   ├── assets/         # Global styles and static assets
+│   ├── components/     # UI components organized by domain / feature
+│   │   ├── charts/     # Chart.js visualizations
+│   │   ├── common/     # Reusable UI primitives (dialogs, stat cards, etc.)
+│   │   ├── features/   # Feature modules (auth, dashboard, groups, transactions, settings, export)
+│   │   └── layouts/    # App layout components (Navbar, Footer)
+│   ├── constants/      # App URLs, categories, currencies, fund style presets
+│   ├── i18n/           # i18next configuration and locale translations
+│   ├── router/         # Vue Router configuration and route guards
+│   ├── services/       # Firebase, currency conversion, push notifications
+│   ├── stores/         # Pinia stores (auth, groups, transactions, settings)
+│   ├── utils/          # Formatting, chart helpers, export utils, receipt scanning
+│   ├── views/          # Top-level views (Landing, Dashboard, Group)
+│   └── App.vue         # Root application component
+├── tests/              # Unit and component test suites (Vitest)
+│   ├── components/     # Component tests
+│   └── unit/           # Store, service, and utility tests
+├── worker/             # Cloudflare Worker proxy for Gemini receipt scanning
+├── android/            # Capacitor-generated native Android project
+└── public/             # Static public assets (icons, logos, manifest)
 ```
 
-## Local dev setup
+---
 
-1. Clone the github repository:
+## Getting Started
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/zeti1223/Kasseo.git
 cd Kasseo
 ```
 
-2. Download dependencies:
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-3. Configure Firebase:
-   - Create a Firebase project
-   - Enable **Google Auth** and **Realtime Database**
-   - Deploy the included `database.rules.json` as your database's security rules
+### 3. Configure Firebase
 
-4. *(Optional)* Set up the integrations you want to use:
-   - **[Google Gemini](https://ai.google.dev/)** — needed for automatic receipt scanning
-   - **[OneSignal](https://onesignal.com/)** — needed for push notifications (create an app and grab its App ID and REST API key)
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
+2. Enable **Google Authentication** under Authentication > Sign-in method.
+3. Create a **Realtime Database** instance.
+4. Deploy the rules from `database.rules.json` to your Realtime Database.
 
-5. Copy `.env.example` to `.env`:
+### 4. Optional Integrations
+
+- **Google Gemini (Receipt Scanning)**:
+  Receipt scanning runs via a serverless proxy on Cloudflare Workers so API keys remain secure. See [worker/README.md](worker/README.md) to set up and deploy the worker.
+- **OneSignal (Push Notifications)**:
+  Create an app in [OneSignal](https://onesignal.com/) and obtain your App ID and REST API Key.
+
+### 5. Environment Configuration
+
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Fill out the `.env` file:
+Configure your `.env` file:
 
-``` env
-# Firebase configuration (required)
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_DATABASE_URL=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_APP_ID=
+```env
+# Firebase Configuration (Required)
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://your_project-default-rtdb.firebaseio.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_APP_ID=your_firebase_app_id
 
-# Receipt scanning (optional) — URL of the deployed Cloudflare Worker
-# that proxies Gemini requests. See worker/README.md to set it up;
-# the Gemini key itself is never stored in this app.
-VITE_SCAN_WORKER_URL=
+# Cloudflare Worker for Receipt Scanning (Optional)
+VITE_SCAN_WORKER_URL=https://your-worker-subdomain.workers.dev
 
-# OneSignal (optional — needed for push notifications)
-VITE_ONESIGNAL_APP_ID=
-VITE_ONESIGNAL_REST_API_KEY=
+# OneSignal Push Notifications (Optional)
+VITE_ONESIGNAL_APP_ID=your_onesignal_app_id
+VITE_ONESIGNAL_REST_API_KEY=your_onesignal_rest_api_key
 ```
 
-Any integration whose keys are left blank is simply disabled at runtime — the app still runs without the scan worker or OneSignal configured, just without receipt scanning or push notifications.
-
-## Run
-
-Developer setup (web, with hot reload):
-
-```bash
-npm run dev
-```
-
-Building for production (web):
-
-```bash
-npm run build
-npm run preview   # preview the production build locally
-```
-
-### Android (via Capacitor)
-
-Build the web app and sync it into the native Android project:
-
-```bash
-npm run cap:build
-```
-
-Open the project in Android Studio:
-
-```bash
-npm run cap:open
-```
-
-Or just sync an already-built `dist/` folder into the native project:
-
-```bash
-npm run cap:sync
-```
-
-Tagged pushes (`v*`) also trigger the `Build & Release Android APK` GitHub Actions workflow, which builds and publishes a signed release APK automatically.
-
-## Adding a language
-
-1. Add a new locale file under `src/i18n/locales/<code>.json`, using an existing file (e.g. `en.json`) as the key reference.
-2. Register the language in `src/i18n/index.js`, in both `SUPPORTED_LANGUAGES` and the i18next `resources` map.
-3. If it should also be used for translated push notifications, no further changes are needed — `notificationService.js` automatically translates outgoing push notifications into every language listed in `SUPPORTED_LANGUAGES`.
+> [!NOTE]
+> Integrations left unconfigured in `.env` are gracefully disabled at runtime. The core app remains fully functional without them.
 
 ---
 
-### [LICENSE](LICENSE)
+## Scripts & Development
+
+### Web App
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the local development server with hot module replacement |
+| `npm run build` | Build the optimized web application for production |
+| `npm run preview` | Preview the production build locally |
+| `npm test` | Run test suites using Vitest |
+| `npm run test:watch` | Run tests in interactive watch mode |
+
+### Android (Capacitor)
+
+| Command | Description |
+|---|---|
+| `npm run cap:build` | Build the web app and sync assets into the Android native project |
+| `npm run cap:sync` | Sync web build output (`dist/`) to the native Android directory |
+| `npm run cap:open` | Open the native Android project in Android Studio |
+
+> Tagged commits (e.g., `v1.0.0`) trigger GitHub Actions to automatically build and publish signed release APKs.
+
+### Receipt Scanner Worker
+
+```bash
+cd worker
+npm install
+npm run deploy    # Deploy to Cloudflare Workers via Wrangler
+```
 
 ---
 
-This project has nothing to do with [KASSEO](https://open.spotify.com/artist/76UKhIGvZtS7jjb1muDTUM?si=U4IUSirBQDuLucBmK3mR0Q&utm_source=copy_link), but if you feel like it, give it a listen
+## Adding a Language
+
+1. Add a new locale file in `src/i18n/locales/<code>.json` using `en.json` as a reference.
+2. Register the language code and name in `src/i18n/index.js` in both `SUPPORTED_LANGUAGES` and `resources`.
+3. Outgoing push notifications are automatically translated into all languages configured in `SUPPORTED_LANGUAGES`.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+*This project has nothing to do with [KASSEO](https://open.spotify.com/artist/76UKhIGvZtS7jjb1muDTUM?si=U4IUSirBQDuLucBmK3mR0Q&utm_source=copy_link), but if you feel like it, give it a listen.*
