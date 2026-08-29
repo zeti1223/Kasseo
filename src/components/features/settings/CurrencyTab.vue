@@ -6,6 +6,7 @@ const props = defineProps({
   currency: { type: String, required: true },
   currencies: { type: Array, required: true },
   isOwner: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
   // { done, total } while transactions are being reconverted, else null.
   recalcProgress: { type: Object, default: null },
@@ -14,6 +15,8 @@ const props = defineProps({
 });
 defineEmits(["update:currency", "save", "retry", "cancel"]);
 const { t } = useTranslation();
+
+const canEdit = computed(() => props.isAdmin || props.isOwner);
 
 const statusText = computed(() => {
   if (!props.loading) return null;
@@ -36,15 +39,15 @@ const statusText = computed(() => {
       <select
         :value="currency"
         @change="$emit('update:currency', $event.target.value)"
-        :disabled="!isOwner || loading"
+        :disabled="!canEdit || loading"
         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A5FC] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:text-white"
       >
         <option v-for="curr in currencies" :key="curr" :value="curr">
           {{ curr }}
         </option>
       </select>
-      <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-        {{ $t('fundSettings.ownerOnlyCurrency') }}
+      <p v-if="!canEdit" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {{ $t('fundSettings.adminOnlyCurrency') }}
       </p>
       <p
         v-else-if="!loading && !recalcFailedCount"
@@ -93,7 +96,7 @@ const statusText = computed(() => {
       </div>
     </div>
 
-    <div v-if="isOwner" class="flex justify-end gap-2">
+    <div v-if="canEdit" class="flex justify-end gap-2">
       <button
         @click="$emit('cancel')"
         :disabled="loading"

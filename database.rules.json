@@ -6,7 +6,7 @@
         ".write": "auth != null && auth.uid === $uid",
         "groups": {
           "$groupId": {
-            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
+            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'admin' || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
           }
         }
       }
@@ -15,11 +15,11 @@
     "groups": {
       "$groupId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)",
+        ".write": "auth != null && (!data.exists() || (!newData.exists() ? (data.child('ownerId').val() === auth.uid || root.child('groups').child($groupId).child('ownerId').val() === auth.uid) : (root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'admin' || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)))",
 
         "members": {
           "$uid": {
-            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
+            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'admin' || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
           }
         }
       }
@@ -28,7 +28,9 @@
     "transactions": {
       "$groupId": {
         ".read": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
-        ".write": "auth != null && (root.child('groups').child($groupId).child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
+        "$txId": {
+          ".write": "auth != null && (root.child('groups').child($groupId).child('members').child(auth.uid).child('role').val() === 'admin' || root.child('groups').child($groupId).child('ownerId').val() === auth.uid || (!data.exists() && newData.child('paidBy').val() === auth.uid && root.child('groups').child($groupId).child('members').child(auth.uid).exists()) || (data.exists() && data.child('paidBy').val() === auth.uid && (!newData.exists() || newData.child('paidBy').val() === auth.uid)))"
+        }
       }
     },
 

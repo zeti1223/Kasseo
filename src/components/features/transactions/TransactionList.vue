@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useTransactionsStore } from "@/stores/transactions";
+import { useGroupsStore, isMemberAdmin } from "@/stores/groups";
 import { useAuthStore } from "@/stores/auth";
 import { useTranslation } from "i18next-vue";
 import { splitShareAmount } from "@/utils/chartData";
@@ -21,6 +22,20 @@ const props = defineProps({
 const emit = defineEmits(["export"]);
 const { t } = useTranslation();
 
+const transactionsStore = useTransactionsStore();
+const groupsStore = useGroupsStore();
+const authStore = useAuthStore();
+
+const isAdmin = computed(() => {
+  const uid = authStore.user?.uid;
+  if (!uid) return false;
+  const currentMember = props.members?.[uid];
+  return isMemberAdmin(
+    currentMember ? { id: uid, ...currentMember } : null,
+    groupsStore.currentGroup?.ownerId,
+  );
+});
+
 const editingTransaction = ref(null);
 const showEditDialog = ref(false);
 const permissionTx = ref(null);
@@ -30,8 +45,6 @@ function categoryIcon(catName) {
   const customCat = props.customCategories.find((c) => c.name === catName);
   return getCategoryIcon(catName, customCat?.icon);
 }
-const transactionsStore = useTransactionsStore();
-const authStore = useAuthStore();
 
 const expandedGroups = ref({});
 
@@ -86,11 +99,31 @@ function memberName(uid) {
   );
 }
 
+function canEdit(tx) {
+  return tx.paidBy === authStore.user?.uid || isAdmin.value;
+}
+
+function canDelete(tx) {
+  return tx.paidBy === authStore.user?.uid || isAdmin.value;
+}
+
+function canDeleteReceiptGroup(entry) {
+  return entry.paidBy === authStore.user?.uid || isAdmin.value;
+}
+
+function canChangeReceiptGroupSplit(entry) {
+  return entry.paidBy === authStore.user?.uid || isAdmin.value;
+}
+
 function handleDelete(txId) {
+  const tx = props.transactions.find((t) => t.id === txId);
+  if (tx && !canDelete(tx)) return;
   transactionsStore.deleteTransaction(props.groupId, txId);
 }
 
 function handleDeleteReceiptGroup(receiptId) {
+  const entry = displayEntries.value.find((e) => e.isGroup && e.receiptId === receiptId);
+  if (entry && !canDeleteReceiptGroup(entry)) return;
   transactionsStore.deleteReceiptGroup(props.groupId, receiptId);
 }
 
@@ -101,10 +134,6 @@ function setGroupSplitOption(receiptId, newSplitOption) {
     newSplitOption,
     props.members,
   );
-}
-
-function canEdit(tx) {
-  return tx.paidBy === authStore.user?.uid;
 }
 
 function handleEdit(tx) {
@@ -226,7 +255,7 @@ function splitBetweenLabel(tx) {
                   <span class="text-gray-300 dark:text-gray-600">·</span>
                   <span class="dark:text-gray-300 font-medium">{{ memberName(entry.paidBy) }}</span>
 
-                  <div v-if="mode === 'split'" class="inline-flex text-[11px] rounded-md border border-gray-200 dark:border-gray-600 overflow-hidden ml-1">
+                  <div v-if="mode === 'split' && canChangeReceiptGroupSplit(entry)" class="inline-flex text-[11px] rounded-md border border-gray-200 dark:border-gray-600 overflow-hidden ml-1">
                     <button
                       type="button"
                       @click="setGroupSplitOption(entry.receiptId, 'whole_group')"
@@ -256,6 +285,7 @@ function splitBetweenLabel(tx) {
                   </button>
 
                   <button
+                    v-if="canDeleteReceiptGroup(entry)"
                     @click="handleDeleteReceiptGroup(entry.receiptId)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     :title="$t('transactions.deleteProductGroup')"
@@ -326,6 +356,7 @@ function splitBetweenLabel(tx) {
                     <i class="fas fa-edit text-xs"></i>
                   </button>
                   <button
+                    v-if="canDelete(tx)"
                     @click="handleDelete(tx.id)"
                     class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     :title="$t('transactions.deleteItem')"
@@ -463,6 +494,7 @@ function splitBetweenLabel(tx) {
                     <i class="fas fa-edit text-xs"></i>
                   </button>
                   <button
+                    v-if="canDelete(entry.tx)"
                     @click="handleDelete(entry.tx.id)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     :title="$t('transactions.deleteTransaction')"
