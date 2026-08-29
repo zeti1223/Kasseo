@@ -33,7 +33,10 @@
     "export": "Export",
     "noData": "No data yet",
     "selected": "Selected",
-    "backToFunds": "Funds"
+    "backToFunds": "Funds",
+    "leave": "Leave",
+    "makeOwner": "Make Owner",
+    "dangerZone": "Danger Zone"
   },
   "mobileTabs": {
     "transactions": "Transactions",
@@ -217,6 +220,16 @@
     "scanQrHelp": "Scan with a phone camera to join this fund",
     "removeMemberTitle": "Remove member?",
     "removeMemberConfirm": "This member will lose access to this fund.",
+    "leaveFund": "Leave fund",
+    "leaveFundTitle": "Leave fund?",
+    "leaveFundConfirm": "Are you sure you want to leave this fund? You will lose access to its transactions and balances.",
+    "deleteFund": "Delete fund",
+    "deleteFundTitle": "Delete fund?",
+    "deleteFundConfirm": "Are you sure you want to delete this fund? This will permanently delete all transactions and balances for all members.",
+    "transferOwnership": "Transfer ownership",
+    "transferOwnershipTitle": "Transfer ownership?",
+    "transferOwnershipConfirm": "Are you sure you want to make {{name}} the owner of this fund? You will become a regular member.",
+    "ownerLeaveHelp": "As the owner, you must transfer ownership to another member or delete the fund.",
     "removeCategoryTitle": "Remove category?",
     "removeCategoryConfirm": "This category will be removed from the fund.",
     "removeCategoryConfirmWithCount": "This category will be removed, and {{count}} transaction using it will be recategorized to \"Other\".",

@@ -119,10 +119,16 @@ export const useGroupsStore = defineStore("groups", () => {
         const unsub = onValue(dbRef(db, `groups/${id}`), (groupSnap) => {
           if (!groupSnap.exists()) {
             groupCardData.delete(id);
+            remove(dbRef(db, `users/${authStore.user.uid}/groups/${id}`)).catch(() => {});
           } else {
             const data = groupSnap.val();
-            syncMyNicknameInGroup(id, data, authStore);
-            groupCardData.set(id, { id, ...data });
+            if (!data.members || !data.members[authStore.user.uid]) {
+              groupCardData.delete(id);
+              remove(dbRef(db, `users/${authStore.user.uid}/groups/${id}`)).catch(() => {});
+            } else {
+              syncMyNicknameInGroup(id, data, authStore);
+              groupCardData.set(id, { id, ...data });
+            }
           }
           rebuildGroupsList(ids);
         });
@@ -147,7 +153,10 @@ export const useGroupsStore = defineStore("groups", () => {
     const groupRef = dbRef(db, `groups/${groupId}`);
     unsubscribeCurrentGroup = onValue(groupRef, (snapshot) => {
       const data = snapshot.val();
-      if (!data) return;
+      if (!data) {
+        currentGroup.value = null;
+        return;
+      }
       currentGroup.value = { id: groupId, ...data };
     });
   }
@@ -258,13 +267,42 @@ export const useGroupsStore = defineStore("groups", () => {
       : undefined;
 
     await remove(dbRef(db, `groups/${groupId}/members/${userId}`));
-    await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
+    try {
+      await remove(dbRef(db, `users/${userId}/groups/${groupId}`));
+    } catch {
+      // Security rules may prevent deleting from another user's index;
+      // their client cleans it up automatically when they next sync.
+    }
 
     dispatchPushToGroupMembers(groupId, {
       titleKey: "notifications.memberLeft",
       titleParams: { name: memberName },
       data: { type: "memberLeft" },
     });
+  }
+
+  async function leaveGroup(groupId) {
+    const authStore = useAuthStore();
+    const myUid = authStore.user?.uid;
+    if (!myUid) return;
+    await removeMember(groupId, myUid);
+  }
+
+  async function deleteGroup(groupId) {
+    const authStore = useAuthStore();
+    const myUid = authStore.user?.uid;
+
+    await remove(dbRef(db, `groups/${groupId}`));
+    await remove(dbRef(db, `transactions/${groupId}`)).catch(() => {});
+    await remove(dbRef(db, `scanLimits/${groupId}`)).catch(() => {});
+    await remove(dbRef(db, `categoryOverrides/${groupId}`)).catch(() => {});
+    if (myUid) {
+      await remove(dbRef(db, `users/${myUid}/groups/${groupId}`)).catch(() => {});
+    }
+  }
+
+  async function transferOwnership(groupId, newOwnerId) {
+    await set(dbRef(db, `groups/${groupId}/ownerId`), newOwnerId);
   }
 
   async function addCategory(groupId, category, icon = null) {
@@ -315,6 +353,9 @@ export const useGroupsStore = defineStore("groups", () => {
     updateName,
     updateMode,
     removeMember,
+    leaveGroup,
+    deleteGroup,
+    transferOwnership,
     addCategory,
     removeCategory,
     setGroupIcon,

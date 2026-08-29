@@ -33,7 +33,10 @@
     "export": "导出",
     "noData": "暂无数据",
     "selected": "已选择",
-    "backToFunds": "资金库"
+    "backToFunds": "资金库",
+    "leave": "退出",
+    "makeOwner": "设为所有者",
+    "dangerZone": "危险区域"
   },
   "mobileTabs": {
     "transactions": "交易明细",
@@ -217,6 +220,16 @@
     "scanQrHelp": "用手机摄像头扫描以加入此基金",
     "removeMemberTitle": "移除成员？",
     "removeMemberConfirm": "该成员将失去对此基金的访问权限。",
+    "leaveFund": "退出基金",
+    "leaveFundTitle": "退出基金？",
+    "leaveFundConfirm": "确定要退出此基金吗？您将失去对其交易和余额的访问权限。",
+    "deleteFund": "删除基金",
+    "deleteFundTitle": "删除基金？",
+    "deleteFundConfirm": "确定要删除此基金吗？这将为所有成员永久删除所有交易和余额。",
+    "transferOwnership": "转让所有权",
+    "transferOwnershipTitle": "转让所有权？",
+    "transferOwnershipConfirm": "确定要将此基金的所有权转让给 {{name}} 吗？您将成为普通成员。",
+    "ownerLeaveHelp": "作为所有者，您必须将所有权转让给其他成员或删除基金。",
     "removeCategoryTitle": "移除分类？",
     "removeCategoryConfirm": "该分类将从基金中移除。",
     "removeCategoryConfirmWithCount": "此类别将被删除，使用该类别的 {{count}} 笔交易将被重新归类为“其他”。",

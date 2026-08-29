@@ -33,7 +33,10 @@
     "export": "Exportar",
     "noData": "Aún no hay datos",
     "selected": "Seleccionado",
-    "backToFunds": "Fondos"
+    "backToFunds": "Fondos",
+    "leave": "Salir",
+    "makeOwner": "Hacer propietario",
+    "dangerZone": "Zona de peligro"
   },
   "mobileTabs": {
     "transactions": "Transacciones",
@@ -217,6 +220,16 @@
     "scanQrHelp": "Escanea con la cámara del móvil para unirte a este fondo",
     "removeMemberTitle": "¿Eliminar miembro?",
     "removeMemberConfirm": "Este miembro perderá el acceso a este fondo.",
+    "leaveFund": "Salir del fondo",
+    "leaveFundTitle": "¿Salir del fondo?",
+    "leaveFundConfirm": "¿Estás seguro de que deseas salir de este fondo? Perderás el acceso a sus transacciones y balances.",
+    "deleteFund": "Eliminar fondo",
+    "deleteFundTitle": "¿Eliminar fondo?",
+    "deleteFundConfirm": "¿Estás seguro de que deseas eliminar este fondo? Esto eliminará permanentemente todas las transacciones y balances para todos los miembros.",
+    "transferOwnership": "Transferir propiedad",
+    "transferOwnershipTitle": "¿Transferir propiedad?",
+    "transferOwnershipConfirm": "¿Estás seguro de que deseas hacer a {{name}} propietario de este fondo? Pasarás a ser un miembro normal.",
+    "ownerLeaveHelp": "Como propietario, debes transferir la propiedad a otro miembro o eliminar el fondo.",
     "removeCategoryTitle": "¿Eliminar categoría?",
     "removeCategoryConfirm": "Esta categoría será eliminada del fondo.",
     "removeCategoryConfirmWithCount": "Esta categoría se eliminará y {{count}} transacción que la usa se recategorizará como \"Otro\".",

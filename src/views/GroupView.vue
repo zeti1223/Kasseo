@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, watch, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
@@ -25,6 +25,7 @@ import ExportDialog from "@/components/features/export/ExportDialog.vue";
 import { getMyFundColor, getFundIcon } from "@/constants/fundStyle";
 
 const route = useRoute();
+const router = useRouter();
 const groupsStore = useGroupsStore();
 const transactionsStore = useTransactionsStore();
 const authStore = useAuthStore();
@@ -67,6 +68,22 @@ async function load(id) {
 
 onMounted(() => load(groupId.value));
 watch(groupId, (id) => load(id));
+watch(
+  () => groupsStore.currentGroup,
+  (group) => {
+    if (group === null) {
+      router.push({ name: "dashboard" });
+    } else if (
+      group &&
+      authStore.user?.uid &&
+      group.members &&
+      !group.members[authStore.user.uid]
+    ) {
+      router.push({ name: "dashboard" });
+    }
+  },
+  { deep: true },
+);
 watch(showSettings, async (isOpen) => {
   if (!isOpen && groupId.value) {
     await groupsStore.loadGroup(groupId.value);
