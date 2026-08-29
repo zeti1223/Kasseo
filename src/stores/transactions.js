@@ -377,6 +377,117 @@ export const useTransactionsStore = defineStore("transactions", () => {
     return matched.length;
   }
 
+  // Imports a batch of parsed transactions into a group, converting currencies and mapping members
+  async function importTransactionsBatch(
+    groupId,
+    groupCurrency,
+    importedTransactions = [],
+    memberMap = {},
+    { onProgress } = {},
+  ) {
+    const authStore = useAuthStore();
+    const currentUid = authStore.user?.uid;
+    const total = importedTransactions.length;
+    if (total === 0) return 0;
+
+    let done = 0;
+
+    // Process and convert all transactions with concurrency
+    const batchEntries = await mapWithConcurrency(
+      importedTransactions,
+      4,
+      async (rawTx) => {
+        try {
+          const conversion = await buildConversionFields(
+            groupCurrency,
+            rawTx.amount,
+            rawTx.currency || groupCurrency,
+            rawTx.date,
+          );
+
+          const type = rawTx.type || "expense";
+          const paidBy =
+            memberMap[rawTx.paidByName] ||
+            memberMap[rawTx.paidBy] ||
+            currentUid;
+
+          const txPayload = {
+            ...conversion,
+            type,
+            category: categoryFor(type, rawTx.category),
+            description: rawTx.description || "",
+            paidBy,
+            date: rawTx.date,
+            createdAt: serverTimestamp(),
+          };
+
+          if (rawTx.categoryIcon) txPayload.categoryIcon = rawTx.categoryIcon;
+          if (rawTx.receiptId) txPayload.receiptId = rawTx.receiptId;
+          if (rawTx.splitOption) txPayload.splitOption = rawTx.splitOption;
+
+          if (type === "expense") {
+            const rawSplit = rawTx.splitAmongNames || rawTx.splitAmong || [];
+            const mappedSplit = rawSplit
+              .map((nameOrId) => memberMap[nameOrId] || nameOrId)
+              .filter(Boolean);
+
+            if (mappedSplit.length > 0) {
+              txPayload.splitAmong = Array.from(new Set(mappedSplit));
+            }
+
+            if (rawTx.splitType === "percent" && rawTx.splitShares) {
+              const mappedShares = {};
+              for (const [nameOrId, pct] of Object.entries(rawTx.splitShares)) {
+                const mappedId = memberMap[nameOrId] || nameOrId;
+                if (mappedId) {
+                  mappedShares[mappedId] = pct;
+                }
+              }
+              if (Object.keys(mappedShares).length > 0) {
+                txPayload.splitType = "percent";
+                txPayload.splitShares = mappedShares;
+              }
+            }
+          } else if (type === "settlement") {
+            const to =
+              memberMap[rawTx.toName] ||
+              memberMap[rawTx.to] ||
+              null;
+            if (to) {
+              txPayload.to = to;
+            }
+          }
+
+          const newTxRef = push(dbRef(db, `transactions/${groupId}`));
+          const txId = newTxRef.key;
+
+          return { txId, txPayload, ok: true };
+        } catch (err) {
+          console.error("Error preparing transaction for import:", err);
+          return { ok: false };
+        } finally {
+          done++;
+          onProgress?.(done, total);
+        }
+      },
+    );
+
+    const updates = {};
+    let count = 0;
+    for (const entry of batchEntries) {
+      if (entry && entry.ok && entry.txId && entry.txPayload) {
+        updates[`${entry.txId}`] = entry.txPayload;
+        count++;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await update(dbRef(db, `transactions/${groupId}`), updates);
+    }
+
+    return count;
+  }
+
   return {
     transactions,
     listen,
@@ -389,5 +500,6 @@ export const useTransactionsStore = defineStore("transactions", () => {
     updateTransaction,
     recalculateForCurrency,
     reassignCategory,
+    importTransactionsBatch,
   };
 });

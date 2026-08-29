@@ -5,7 +5,7 @@ import { useGroupsStore } from "@/stores/groups";
 import { CURRENCIES } from "@/constants/currencies";
 
 const props = defineProps({ modelValue: Boolean });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "open-import"]);
 
 const router = useRouter();
 const groupsStore = useGroupsStore();
@@ -26,6 +26,11 @@ watch(
     }
   },
 );
+
+function handleOpenImport() {
+  emit("update:modelValue", false);
+  emit("open-import");
+}
 
 async function handleCreate() {
   if (!name.value.trim()) return;
@@ -87,6 +92,18 @@ async function handleCreate() {
               {{ curr }}
             </option>
           </select>
+        </div>
+
+        <!-- Quick Import Link -->
+        <div class="pt-2 text-center border-t border-gray-100 dark:border-gray-700/60">
+          <button
+            type="button"
+            @click="handleOpenImport"
+            class="text-xs text-primary hover:text-primary-dark font-medium inline-flex items-center gap-1.5 hover:underline"
+          >
+            <i class="fas fa-file-import"></i>
+            <span>{{ $t('import.quickImport') }}</span>
+          </button>
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-6">

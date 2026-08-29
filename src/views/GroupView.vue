@@ -22,6 +22,7 @@ import TransactionList from "@/components/features/transactions/TransactionList.
 import FundSettingsDialog from "@/components/features/settings/FundSettingsDialog.vue";
 import ReceiptScanDialog from "@/components/features/transactions/ReceiptScanDialog.vue";
 import ExportDialog from "@/components/features/export/ExportDialog.vue";
+import ImportDialog from "@/components/features/import/ImportDialog.vue";
 import { getMyFundColor, getFundIcon } from "@/constants/fundStyle";
 
 const route = useRoute();
@@ -34,6 +35,7 @@ const groupId = computed(() => route.params.id);
 const showSettings = ref(false);
 const showScan = ref(false);
 const showExport = ref(false);
+const showImport = ref(false);
 const customCategories = ref([]);
 const settleTarget = ref(null); // { memberId, amount } prefilled into the "Settle up" form
 
@@ -129,6 +131,7 @@ const totals = computed(() => {
       :color="myColor"
       @open-settings="showSettings = true"
       @open-export="showExport = true"
+      @open-import="showImport = true"
     />
 
     <GroupStats
@@ -433,6 +436,14 @@ const totals = computed(() => {
     :transactions="transactionsStore.transactions"
     :members="groupsStore.currentGroup.members"
     :custom-categories="customCategories"
+    :mode="mode"
+  />
+  <ImportDialog
+    v-if="groupsStore.currentGroup"
+    v-model="showImport"
+    :group-id="groupId"
+    :group="groupsStore.currentGroup"
+    :members="groupsStore.currentGroup.members"
     :mode="mode"
   />
 </template>

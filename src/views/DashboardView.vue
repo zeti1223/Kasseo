@@ -9,11 +9,13 @@ import CreateGroupDialog from "@/components/features/groups/CreateGroupDialog.vu
 import EmptyState from "@/components/features/dashboard/EmptyState.vue";
 import FundsList from "@/components/features/dashboard/FundsList.vue";
 import RecentActivity from "@/components/features/dashboard/RecentActivity.vue";
+import ImportDialog from "@/components/features/import/ImportDialog.vue";
 
 const router = useRouter();
 const groupsStore = useGroupsStore();
 const transactionsStore = useTransactionsStore();
 const showCreateDialog = ref(false);
+const showImportDialog = ref(false);
 const recentTransactions = ref([]);
 // Holds every transaction across every fund (unlike recentTransactions,
 // which is just the top 5) so the chart has full history to plot.
@@ -106,18 +108,28 @@ function openGroup(id) {
           {{ $t('dashboard.subtitle') }}
         </p>
       </div>
-      <button
-        @click="showCreateDialog = true"
-        class="bg-primary text-white text-sm sm:text-base px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-lg hover:bg-primary-dark active:scale-95 transition-all flex items-center gap-2 font-medium shadow-xs"
-      >
-        <i class="fas fa-plus text-xs sm:text-sm"></i>
-        <span>{{ $t('dashboard.newFund') }}</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          @click="showImportDialog = true"
+          class="px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-lg border border-[#C8A5FC] text-[#8A5FBF] dark:text-[#C8A5FC] bg-white dark:bg-surface-dark hover:bg-[#C8A5FC]/10 active:scale-95 transition-all flex items-center gap-2 text-sm sm:text-base font-medium shadow-xs"
+        >
+          <i class="fas fa-file-import text-xs sm:text-sm"></i>
+          <span>{{ $t('import.importAction') }}</span>
+        </button>
+        <button
+          @click="showCreateDialog = true"
+          class="bg-primary text-white text-sm sm:text-base px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl sm:rounded-lg hover:bg-primary-dark active:scale-95 transition-all flex items-center gap-2 font-medium shadow-xs"
+        >
+          <i class="fas fa-plus text-xs sm:text-sm"></i>
+          <span>{{ $t('dashboard.newFund') }}</span>
+        </button>
+      </div>
     </div>
 
     <EmptyState
       v-if="groupsStore.groups.length === 0"
       @create="showCreateDialog = true"
+      @import="showImportDialog = true"
     />
 
     <template v-else>
@@ -139,6 +151,13 @@ function openGroup(id) {
       </div>
     </template>
 
-    <CreateGroupDialog v-model="showCreateDialog" />
+    <CreateGroupDialog
+      v-model="showCreateDialog"
+      @open-import="showCreateDialog = false; showImportDialog = true"
+    />
+    <ImportDialog
+      v-model="showImportDialog"
+      @imported="openGroup"
+    />
   </div>
 </template>
