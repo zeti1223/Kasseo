@@ -11,7 +11,13 @@ const props = defineProps({
   qrInviteUrl: { type: String, default: "" },
 });
 
-const emit = defineEmits(["copy-invite", "remove"]);
+const emit = defineEmits([
+  "copy-invite",
+  "remove",
+  "transfer-ownership",
+  "leave",
+  "delete-fund",
+]);
 
 const showQr = ref(false);
 const copied = ref(false);
@@ -90,12 +96,12 @@ function handleCopy() {
       <div
         v-for="member in members"
         :key="member.id"
-        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg gap-2"
       >
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
           <div
             v-if="member.photoURL && !failedPhotoIds.has(member.id)"
-            class="w-8 h-8 rounded-full overflow-hidden"
+            class="w-8 h-8 rounded-full overflow-hidden shrink-0"
           >
             <img
               :src="member.photoURL"
@@ -106,7 +112,7 @@ function handleCopy() {
           </div>
           <div
             v-else
-            class="w-8 h-8 rounded-full bg-[#C8A5FC] flex items-center justify-center text-white text-sm font-medium"
+            class="w-8 h-8 rounded-full bg-[#C8A5FC] flex items-center justify-center text-white text-sm font-medium shrink-0"
           >
             {{
               (member.nickname || member.displayName)
@@ -114,26 +120,98 @@ function handleCopy() {
                 .toUpperCase() || "?"
             }}
           </div>
-          <div>
-            <div class="text-sm font-medium dark:text-white">
-              {{ member.nickname || member.displayName }}
+          <div class="min-w-0">
+            <div class="text-sm font-medium dark:text-white truncate flex items-center gap-1.5">
+              <span>{{ member.nickname || member.displayName }}</span>
+              <span
+                v-if="member.id === currentUserId"
+                class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-1.5 py-0.2 rounded"
+              >
+                {{ $t('common.you') }}
+              </span>
             </div>
             <div
               v-if="member.id === ownerId"
-              class="text-xs text-gray-500 dark:text-gray-400"
+              class="text-xs text-primary dark:text-[#C8A5FC] font-medium flex items-center gap-1"
             >
+              <i class="fas fa-crown text-[10px]"></i>
               {{ $t('common.owner') }}
             </div>
           </div>
         </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button
+            v-if="isOwner && member.id !== ownerId"
+            type="button"
+            @click="$emit('transfer-ownership', { id: member.id, name: member.nickname || member.displayName })"
+            class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-[#C8A5FC] text-xs px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1"
+            :title="$t('fundSettings.transferOwnership')"
+          >
+            <i class="fas fa-crown"></i>
+            <span class="hidden sm:inline">{{ $t('common.makeOwner') }}</span>
+          </button>
+          <button
+            v-if="isOwner && member.id !== ownerId && member.id !== currentUserId"
+            type="button"
+            @click="$emit('remove', member.id)"
+            class="text-red-600 hover:text-red-700 text-xs px-2 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
+            :title="$t('common.remove')"
+          >
+            <i class="fas fa-user-minus"></i>
+            <span>{{ $t('common.remove') }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone / Fund actions -->
+    <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+        {{ $t('common.dangerZone') }}
+      </div>
+
+      <div v-if="!isOwner" class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+        <div>
+          <div class="text-sm font-medium text-red-700 dark:text-red-400">
+            {{ $t('fundSettings.leaveFund') }}
+          </div>
+          <div class="text-xs text-red-600/80 dark:text-red-400/70">
+            {{ $t('fundSettings.leaveFundConfirm') }}
+          </div>
+        </div>
         <button
-          v-if="isOwner && member.id !== ownerId && member.id !== currentUserId"
-          @click="$emit('remove', member.id)"
-          class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
+          type="button"
+          @click="$emit('leave')"
+          class="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
         >
-          <i class="fas fa-user-minus"></i>
-          {{ $t('common.remove') }}
+          <i class="fas fa-sign-out-alt"></i>
+          {{ $t('common.leave') }}
         </button>
+      </div>
+
+      <div v-else class="space-y-2">
+        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+          <div>
+            <div class="text-sm font-medium text-red-700 dark:text-red-400">
+              {{ $t('fundSettings.deleteFund') }}
+            </div>
+            <div class="text-xs text-red-600/80 dark:text-red-400/70">
+              {{ $t('fundSettings.deleteFundConfirm') }}
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="$emit('delete-fund')"
+            class="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
+          >
+            <i class="fas fa-trash-alt"></i>
+            {{ $t('common.delete') }}
+          </button>
+        </div>
+        <p v-if="members.length > 1" class="text-xs text-gray-500 dark:text-gray-400 px-1">
+          {{ $t('fundSettings.ownerLeaveHelp') }}
+        </p>
       </div>
     </div>
   </div>

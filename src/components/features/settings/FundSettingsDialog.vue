@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, nextTick } from "vue";
+import { useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
@@ -19,6 +20,7 @@ import StyleTab from "./StyleTab.vue";
 const props = defineProps({ modelValue: Boolean, group: Object });
 const emit = defineEmits(["update:modelValue"]);
 const { t } = useTranslation();
+const router = useRouter();
 
 const groupsStore = useGroupsStore();
 const transactionsStore = useTransactionsStore();
@@ -65,6 +67,9 @@ const groupIcon = ref(DEFAULT_FUND_ICON);
 
 const removeMemberTarget = ref(null);
 const removeCategoryTarget = ref(null); // { id, name, ... } category being removed
+const transferOwnershipTarget = ref(null); // { id, name }
+const showLeaveConfirm = ref(false);
+const showDeleteConfirm = ref(false);
 
 const affectedTransactionCount = computed(() => {
   if (!removeCategoryTarget.value) return 0;
@@ -245,7 +250,46 @@ async function confirmRemoveMember() {
   loading.value = true;
   try {
     await groupsStore.removeMember(props.group.id, removeMemberTarget.value);
+    await groupsStore.loadGroup(props.group.id);
     removeMemberTarget.value = null;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function confirmLeaveGroup() {
+  if (!props.group?.id) return;
+  loading.value = true;
+  try {
+    await groupsStore.leaveGroup(props.group.id);
+    emit("update:modelValue", false);
+    router.push({ name: "dashboard" });
+  } finally {
+    loading.value = false;
+    showLeaveConfirm.value = false;
+  }
+}
+
+async function confirmDeleteGroup() {
+  if (!props.group?.id || !isOwner.value) return;
+  loading.value = true;
+  try {
+    await groupsStore.deleteGroup(props.group.id);
+    emit("update:modelValue", false);
+    router.push({ name: "dashboard" });
+  } finally {
+    loading.value = false;
+    showDeleteConfirm.value = false;
+  }
+}
+
+async function confirmTransferOwnership() {
+  if (!props.group?.id || !transferOwnershipTarget.value || !isOwner.value) return;
+  loading.value = true;
+  try {
+    await groupsStore.transferOwnership(props.group.id, transferOwnershipTarget.value.id);
+    await groupsStore.loadGroup(props.group.id);
+    transferOwnershipTarget.value = null;
   } finally {
     loading.value = false;
   }
@@ -401,6 +445,9 @@ function copyInviteLink() {
         :qr-invite-url="qrInviteUrl"
         @copy-invite="copyInviteLink"
         @remove="(id) => (removeMemberTarget = id)"
+        @transfer-ownership="(target) => (transferOwnershipTarget = target)"
+        @leave="showLeaveConfirm = true"
+        @delete-fund="showDeleteConfirm = true"
       />
 
       <CategoriesTab
@@ -444,6 +491,41 @@ function copyInviteLink() {
       @confirm="confirmRemoveMember"
     >
       {{ $t('fundSettings.removeMemberConfirm') }}
+    </ConfirmDialog>
+
+    <ConfirmDialog
+      :model-value="showLeaveConfirm"
+      @update:model-value="showLeaveConfirm = false"
+      :title="$t('fundSettings.leaveFundTitle')"
+      :confirm-label="$t('common.leave')"
+      danger
+      :loading="loading"
+      @confirm="confirmLeaveGroup"
+    >
+      {{ $t('fundSettings.leaveFundConfirm') }}
+    </ConfirmDialog>
+
+    <ConfirmDialog
+      :model-value="showDeleteConfirm"
+      @update:model-value="showDeleteConfirm = false"
+      :title="$t('fundSettings.deleteFundTitle')"
+      :confirm-label="$t('common.delete')"
+      danger
+      :loading="loading"
+      @confirm="confirmDeleteGroup"
+    >
+      {{ $t('fundSettings.deleteFundConfirm') }}
+    </ConfirmDialog>
+
+    <ConfirmDialog
+      :model-value="!!transferOwnershipTarget"
+      @update:model-value="transferOwnershipTarget = null"
+      :title="$t('fundSettings.transferOwnershipTitle')"
+      :confirm-label="$t('common.confirm')"
+      :loading="loading"
+      @confirm="confirmTransferOwnership"
+    >
+      {{ $t('fundSettings.transferOwnershipConfirm', { name: transferOwnershipTarget?.name }) }}
     </ConfirmDialog>
 
     <ConfirmDialog

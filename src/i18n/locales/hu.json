@@ -33,7 +33,10 @@
     "export": "Exportálás",
     "noData": "Még nincs adat",
     "selected": "Kiválasztva",
-    "backToFunds": "Kasszák"
+    "backToFunds": "Kasszák",
+    "leave": "Kilépés",
+    "makeOwner": "Legyen tulajdonos",
+    "dangerZone": "Veszélyes zóna"
   },
   "mobileTabs": {
     "transactions": "Tranzakciók",
@@ -217,6 +220,16 @@
     "scanQrHelp": "Olvasd be a telefonod kamerájával a csatlakozáshoz",
     "removeMemberTitle": "Tag eltávolítása?",
     "removeMemberConfirm": "Ez a tag elveszíti a hozzáférését ehhez a kasszához.",
+    "leaveFund": "Kilépés a kasszából",
+    "leaveFundTitle": "Kilépés a kasszából?",
+    "leaveFundConfirm": "Biztosan ki szeretnél lépni ebből a kasszából? Elveszíted a hozzáférést a tranzakciókhoz és egyenlegekhez.",
+    "deleteFund": "Kassza törlése",
+    "deleteFundTitle": "Kassza törlése?",
+    "deleteFundConfirm": "Biztosan törölni szeretnéd ezt a kasszát? Ezzel véglegesen törlődik minden tranzakció és egyenleg minden tag számára.",
+    "transferOwnership": "Tulajdonjog átadása",
+    "transferOwnershipTitle": "Tulajdonjog átadása?",
+    "transferOwnershipConfirm": "Biztosan átadod a tulajdonjogot {{name}} részére? Te normál taggá válsz.",
+    "ownerLeaveHelp": "Tulajdonosként a kilépéshez át kell adnod a tulajdonjogot egy másik tagnak, vagy törölnöd kell a kasszát.",
     "removeCategoryTitle": "Kategória törlése?",
     "removeCategoryConfirm": "Ez a kategória törlésre kerül a kasszából.",
     "removeCategoryConfirmWithCount": "Ez a kategória törlődik, és {{count}} tranzakció, amely használja, át lesz sorolva \"Egyéb\" kategóriába.",

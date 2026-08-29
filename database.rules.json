@@ -3,18 +3,23 @@
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "groups": {
+          "$groupId": {
+            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
+          }
+        }
       }
     },
 
     "groups": {
       "$groupId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('members').child(auth.uid).exists())",
+        ".write": "auth != null && (!data.exists() || data.child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)",
 
         "members": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid"
+            ".write": "auth != null && (auth.uid === $uid || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
           }
         }
       }
@@ -23,7 +28,7 @@
     "transactions": {
       "$groupId": {
         ".read": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
-        ".write": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()"
+        ".write": "auth != null && (root.child('groups').child($groupId).child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
       }
     },
 
@@ -31,7 +36,7 @@
       "$groupId": {
         ".read": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
         "$date": {
-          ".write": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
+          ".write": "auth != null && (root.child('groups').child($groupId).child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)",
           "count": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5 && (!data.exists() || newData.val() === data.val() + 1)"
           }
@@ -43,7 +48,7 @@
       "$groupId": {
         ".read": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
         "$keyword": {
-          ".write": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()"
+          ".write": "auth != null && (root.child('groups').child($groupId).child('members').child(auth.uid).exists() || root.child('groups').child($groupId).child('ownerId').val() === auth.uid)"
         }
       }
     }

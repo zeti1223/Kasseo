@@ -33,7 +33,10 @@
     "export": "Exportieren",
     "noData": "Noch keine Daten",
     "selected": "Ausgewählt",
-    "backToFunds": "Kassen"
+    "backToFunds": "Kassen",
+    "leave": "Verlassen",
+    "makeOwner": "Zum Eigentümer machen",
+    "dangerZone": "Gefahrenzone"
   },
   "mobileTabs": {
     "transactions": "Transaktionen",
@@ -217,6 +220,16 @@
     "scanQrHelp": "Mit der Handykamera scannen, um beizutreten",
     "removeMemberTitle": "Mitglied entfernen?",
     "removeMemberConfirm": "Dieses Mitglied verliert den Zugriff auf diese Kasse.",
+    "leaveFund": "Kasse verlassen",
+    "leaveFundTitle": "Kasse verlassen?",
+    "leaveFundConfirm": "Möchtest du diese Kasse wirklich verlassen? Du verlierst den Zugriff auf alle Transaktionen und Salden.",
+    "deleteFund": "Kasse löschen",
+    "deleteFundTitle": "Kasse löschen?",
+    "deleteFundConfirm": "Möchtest du diese Kasse wirklich löschen? Dadurch werden alle Transaktionen und Salden für alle Mitglieder dauerhaft gelöscht.",
+    "transferOwnership": "Eigentümerschaft übertragen",
+    "transferOwnershipTitle": "Eigentümerschaft übertragen?",
+    "transferOwnershipConfirm": "Möchtest du {{name}} wirklich zum Eigentümer dieser Kasse machen? Du wirst ein normales Mitglied.",
+    "ownerLeaveHelp": "Als Eigentümer musst du die Eigentümerschaft an ein anderes Mitglied übertragen oder die Kasse löschen.",
     "removeCategoryTitle": "Kategorie löschen?",
     "removeCategoryConfirm": "Diese Kategorie wird aus der Kasse entfernt.",
     "removeCategoryConfirmWithCount": "Diese Kategorie wird entfernt, und {{count}} Transaktion, die sie verwendet, wird zu „Sonstiges\" umkategorisiert.",
