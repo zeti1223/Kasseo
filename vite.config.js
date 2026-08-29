@@ -43,6 +43,14 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: ['./tests/setup.js'],
       include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+      env: {
+        VITE_FIREBASE_API_KEY: 'test-api-key',
+        VITE_FIREBASE_AUTH_DOMAIN: 'test-project.firebaseapp.com',
+        VITE_FIREBASE_DATABASE_URL: 'https://test-project-default-rtdb.firebaseio.com',
+        VITE_FIREBASE_PROJECT_ID: 'test-project',
+        VITE_FIREBASE_APP_ID: '1:123456789:web:abcdef',
+        VITE_SCAN_WORKER_URL: 'https://scan.test.workers.dev',
+      },
     },
   }
 })
