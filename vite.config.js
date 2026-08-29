@@ -38,5 +38,11 @@ export default defineConfig(({ mode }) => {
       port: Number(env.PORT) || 5173,
       allowedHosts: true,
     },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./tests/setup.js'],
+      include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    },
   }
 })
