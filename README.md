@@ -24,6 +24,7 @@ A modern financial app for managing shared expenses and funds — built as a web
   - Contribution breakdown by member
   - Monthly cash flow
 - **AI Receipt scanning**: Capture or upload receipt images to automatically extract and categorize line items using Google Gemini (proxied securely via a Cloudflare Worker).
+- **Roles & permissions (Admin vs. Member)**: Role-based permissions to protect fund configuration and manage members securely in groups of any size.
 - **Push & browser notifications**: Real-time alerts via OneSignal whenever a member adds, edits, or deletes a transaction, joins/leaves a group, or modifies fund details — automatically translated into each recipient's chosen language.
 - **Member invitations**: Invite others seamlessly with shareable join links and QR codes.
 - **Custom fund styling & categories**: Personalize funds with custom icons/colors and create user-defined expense categories with custom icons.
@@ -31,6 +32,35 @@ A modern financial app for managing shared expenses and funds — built as a web
 - **Internationalization**: Full multi-language UI supporting 6 languages: English, Hungarian, German, French, Spanish, and Chinese.
 - **Dark mode**: Seamless Light, Dark, and System-matched themes.
 - **Native Android app**: Cross-platform architecture packaged into a native Android app via Capacitor.
+
+---
+
+## Roles & Permissions
+
+Kasseo supports role-based access control to keep funds organized and secure:
+
+| Capability | Member | Admin | Owner |
+|---|:---:|:---:|:---:|
+| Add transactions, deposits & settlements | ✅ | ✅ | ✅ |
+| Edit & delete own transactions | ✅ | ✅ | ✅ |
+| Scan receipts with AI | ✅ | ✅ | ✅ |
+| Set personal fund theme color | ✅ | ✅ | ✅ |
+| View analytics, balance history & exports | ✅ | ✅ | ✅ |
+| Invite members & add placeholder members | ✅ | ✅ | ✅ |
+| Edit & delete other members' transactions | ❌ | ✅ | ✅ |
+| Rename fund & change central fund icon | ❌ | ✅ | ✅ |
+| Change fund currency (with historical recalculation) | ❌ | ✅ | ✅ |
+| Change fund mode (*Kitty* / *Split*) | ❌ | ✅ | ✅ |
+| Add & remove custom categories | ❌ | ✅ | ✅ |
+| Promote members to Admin & demote Admins | ❌ | ✅ | ✅ |
+| Remove members from fund | ❌ | ✅ | ✅ |
+| Delete fund | ❌ | ❌ | ✅ |
+| Transfer fund ownership | ❌ | ❌ | ✅ |
+
+> - **Owner**: The fund creator (or designated successor) who holds the ownership crown. The Owner has full Admin permissions, is the only one who can delete the fund or transfer ownership.
+> - **Admin**: Managers with permissions to configure the fund, manage categories, moderate transactions, and promote/remove members.
+> - **Member**: Standard participants who can manage their own expenses, view analytics, and invite others.
+> - **Last Admin protection**: A fund must always have at least one Admin. The last remaining admin cannot be demoted, removed, or leave the fund without first appointing another admin (or deleting the fund if Owner).
 
 ---
 

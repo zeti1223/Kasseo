@@ -46,6 +46,19 @@ async function dispatchPushToGroupMembers(
   }
 }
 
+export function isMemberAdmin(member, ownerId) {
+  if (!member) return false;
+  if (member.role === "admin") return true;
+  if (member.role === "member") return false;
+  // Fallback for legacy funds without role set on members
+  const memberId = member.id || member.uid;
+  return Boolean(ownerId && memberId && memberId === ownerId);
+}
+
+export function getMemberRole(member, ownerId) {
+  return isMemberAdmin(member, ownerId) ? "admin" : "member";
+}
+
 // Applies the user's current nickname to their member entry in a group's
 // data (in-memory) and persists it to the DB if it's out of date. Shared by
 // every place that reads a group's member list, so a nickname change
@@ -190,6 +203,7 @@ export const useGroupsStore = defineStore("groups", () => {
           displayName: nickname,
           nickname,
           photoURL: user.photoURL,
+          role: "admin",
           joinedAt: serverTimestamp(),
         },
       },
@@ -215,6 +229,7 @@ export const useGroupsStore = defineStore("groups", () => {
       displayName: nickname,
       nickname,
       photoURL: user.photoURL,
+      role: "member",
       joinedAt: serverTimestamp(),
     });
     await set(dbRef(db, `users/${user.uid}/groups/${groupId}`), true);
@@ -236,6 +251,7 @@ export const useGroupsStore = defineStore("groups", () => {
       nickname: trimmed,
       photoURL: null,
       isPlaceholder: true,
+      role: "member",
       createdAt: serverTimestamp(),
     });
     return memberId;
@@ -268,6 +284,7 @@ export const useGroupsStore = defineStore("groups", () => {
       displayName: nickname,
       nickname,
       photoURL: user.photoURL || null,
+      role: placeholderMember.role || (groupData.ownerId === placeholderMemberId ? "admin" : "member"),
       joinedAt: serverTimestamp(),
       claimedAt: serverTimestamp(),
       claimedFrom: placeholderMemberId,
@@ -374,13 +391,59 @@ export const useGroupsStore = defineStore("groups", () => {
     await set(dbRef(db, `groups/${groupId}/mode`), newMode);
   }
 
+  async function updateMemberRole(groupId, memberId, newRole) {
+    if (newRole !== "admin" && newRole !== "member") {
+      throw new Error("Invalid role specified.");
+    }
+
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) {
+      throw new Error("Group does not exist.");
+    }
+    const group = groupSnap.val();
+    const members = group.members || {};
+    const targetMember = members[memberId];
+    if (!targetMember) {
+      throw new Error("Member not found in group.");
+    }
+
+    const currentRole = getMemberRole({ id: memberId, ...targetMember }, group.ownerId);
+
+    // If demoting from admin to member, check if they are the last admin
+    if (currentRole === "admin" && newRole === "member") {
+      const adminCount = Object.entries(members).filter(([id, m]) =>
+        isMemberAdmin({ id, ...m }, group.ownerId)
+      ).length;
+
+      if (adminCount <= 1) {
+        throw new Error("Cannot demote the last remaining admin.");
+      }
+    }
+
+    await set(dbRef(db, `groups/${groupId}/members/${memberId}/role`), newRole);
+  }
+
   async function removeMember(groupId, userId) {
     const groupSnap = await get(
-      dbRef(db, `groups/${groupId}/members/${userId}`),
+      dbRef(db, `groups/${groupId}`),
     );
-    const memberName = groupSnap.exists()
-      ? groupSnap.val()?.nickname || groupSnap.val()?.displayName
-      : undefined;
+    if (!groupSnap.exists()) return;
+    const group = groupSnap.val();
+    const members = group.members || {};
+    const memberData = members[userId];
+    const memberName = memberData?.nickname || memberData?.displayName;
+
+    // If removing an admin, ensure they are not the only admin when multiple members exist
+    const memberCount = Object.keys(members).length;
+    if (memberCount > 1 && isMemberAdmin({ id: userId, ...memberData }, group.ownerId)) {
+      const adminCount = Object.entries(members).filter(([id, m]) =>
+        isMemberAdmin({ id, ...m }, group.ownerId)
+      ).length;
+
+      if (adminCount <= 1) {
+        throw new Error("Cannot remove the last remaining admin.");
+      }
+    }
 
     await remove(dbRef(db, `groups/${groupId}/members/${userId}`));
     try {
@@ -481,6 +544,7 @@ export const useGroupsStore = defineStore("groups", () => {
         displayName: nickname,
         nickname,
         photoURL: user.photoURL || null,
+        role: "admin",
         joinedAt: serverTimestamp(),
       },
     };
@@ -512,6 +576,7 @@ export const useGroupsStore = defineStore("groups", () => {
         nickname: trimmed,
         photoURL: null,
         isPlaceholder: true,
+        role: "member",
         createdAt: serverTimestamp(),
       };
       memberMap[trimmed] = placeholderId;
@@ -586,6 +651,7 @@ export const useGroupsStore = defineStore("groups", () => {
     updateCurrency,
     updateName,
     updateMode,
+    updateMemberRole,
     removeMember,
     leaveGroup,
     deleteGroup,

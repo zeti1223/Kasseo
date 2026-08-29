@@ -1,14 +1,17 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { getCategoryIcon, PRESET_ICONS } from "@/constants/categories";
 
 const props = defineProps({
   categories: { type: Array, required: true },
   newCategory: { type: String, default: "" },
   isOwner: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
 });
 const emit = defineEmits(["update:newCategory", "add", "remove"]);
+
+const canEdit = computed(() => props.isAdmin || props.isOwner);
 
 const selectedIcon = ref("fas fa-tag");
 const showIconPicker = ref(false);
@@ -28,7 +31,7 @@ function handleAdd() {
 
 <template>
   <div class="space-y-4">
-    <div v-if="isOwner" class="space-y-2">
+    <div v-if="canEdit" class="space-y-2">
       <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
         {{ $t('fundSettings.newCategory') }}
       </label>
@@ -89,8 +92,8 @@ function handleAdd() {
         </button>
       </div>
     </div>
-    <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400">
-      {{ $t('fundSettings.ownerOnlyCategories') }}
+    <p v-if="!canEdit" class="text-xs text-gray-500 dark:text-gray-400">
+      {{ $t('fundSettings.adminOnlyCategories') }}
     </p>
 
     <div class="space-y-2 max-h-60 overflow-y-auto">
@@ -110,7 +113,7 @@ function handleAdd() {
           }}</span>
         </div>
         <button
-          v-if="isOwner"
+          v-if="canEdit"
           @click="$emit('remove', category)"
           class="text-red-600 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
         >

@@ -1,12 +1,14 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import QrcodeVue from "qrcode.vue";
+import { isMemberAdmin } from "@/stores/groups";
 
 const props = defineProps({
   members: { type: Array, required: true },
   ownerId: { type: String, default: "" },
   currentUserId: { type: String, default: "" },
   isOwner: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   inviteUrl: { type: String, default: "" },
   qrInviteUrl: { type: String, default: "" },
 });
@@ -14,6 +16,7 @@ const props = defineProps({
 const emit = defineEmits([
   "copy-invite",
   "remove",
+  "update-role",
   "transfer-ownership",
   "leave",
   "delete-fund",
@@ -24,6 +27,10 @@ const showQr = ref(false);
 const copied = ref(false);
 const newMemberName = ref("");
 const addingMember = ref(false);
+
+const adminCount = computed(() => {
+  return props.members.filter((m) => isMemberAdmin(m, props.ownerId)).length;
+});
 
 // Tracks members whose photoURL failed to load, falling back to the
 // initials avatar instead of a broken image icon.
@@ -176,6 +183,19 @@ function handleAddMember() {
                 <i class="fas fa-user-clock text-[9px]"></i>
                 {{ $t('common.noAccount') }}
               </span>
+              <span
+                v-if="isMemberAdmin(member, ownerId)"
+                class="text-[10px] bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-[#C8A5FC] px-1.5 py-0.5 rounded font-medium flex items-center gap-1"
+              >
+                <i class="fas fa-shield-halved text-[9px]"></i>
+                {{ $t('common.admin') }}
+              </span>
+              <span
+                v-else-if="!member.isPlaceholder"
+                class="text-[10px] bg-gray-200/70 dark:bg-gray-600/70 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded font-normal"
+              >
+                {{ $t('common.member') }}
+              </span>
             </div>
             <div
               v-if="member.id === ownerId"
@@ -188,6 +208,32 @@ function handleAddMember() {
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
+          <!-- Promote to Admin button -->
+          <button
+            v-if="isAdmin && !isMemberAdmin(member, ownerId) && !member.isPlaceholder"
+            type="button"
+            @click="$emit('update-role', { id: member.id, role: 'admin' })"
+            class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-[#C8A5FC] text-xs px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1"
+            :title="$t('common.makeAdmin')"
+          >
+            <i class="fas fa-shield-halved"></i>
+            <span class="hidden sm:inline">{{ $t('common.makeAdmin') }}</span>
+          </button>
+
+          <!-- Demote to Member button -->
+          <button
+            v-if="isAdmin && isMemberAdmin(member, ownerId) && !member.isPlaceholder && member.id !== ownerId"
+            type="button"
+            :disabled="adminCount <= 1"
+            @click="adminCount > 1 && $emit('update-role', { id: member.id, role: 'member' })"
+            class="text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400 text-xs px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            :title="adminCount <= 1 ? $t('fundSettings.cannotDemoteLastAdmin') : $t('common.demoteAdmin')"
+          >
+            <i class="fas fa-user-minus"></i>
+            <span class="hidden sm:inline">{{ $t('common.demoteAdmin') }}</span>
+          </button>
+
+          <!-- Transfer ownership (for original owner) -->
           <button
             v-if="isOwner && member.id !== ownerId && !member.isPlaceholder"
             type="button"
@@ -198,14 +244,17 @@ function handleAddMember() {
             <i class="fas fa-crown"></i>
             <span class="hidden sm:inline">{{ $t('common.makeOwner') }}</span>
           </button>
+
+          <!-- Remove member button -->
           <button
-            v-if="isOwner && member.id !== ownerId && member.id !== currentUserId"
+            v-if="isAdmin && member.id !== currentUserId"
             type="button"
-            @click="$emit('remove', member.id)"
-            class="text-red-600 hover:text-red-700 text-xs px-2 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1"
-            :title="$t('common.remove')"
+            :disabled="isMemberAdmin(member, ownerId) && adminCount <= 1"
+            @click="!(isMemberAdmin(member, ownerId) && adminCount <= 1) && $emit('remove', member.id)"
+            class="text-red-600 hover:text-red-700 text-xs px-2 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            :title="isMemberAdmin(member, ownerId) && adminCount <= 1 ? $t('fundSettings.cannotRemoveLastAdmin') : $t('common.remove')"
           >
-            <i class="fas fa-user-minus"></i>
+            <i class="fas fa-user-xmark"></i>
             <span>{{ $t('common.remove') }}</span>
           </button>
         </div>
@@ -218,47 +267,61 @@ function handleAddMember() {
         {{ $t('common.dangerZone') }}
       </div>
 
-      <div v-if="!isOwner" class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
-        <div>
-          <div class="text-sm font-medium text-red-700 dark:text-red-400">
-            {{ $t('fundSettings.leaveFund') }}
-          </div>
-          <div class="text-xs text-red-600/80 dark:text-red-400/70">
-            {{ $t('fundSettings.leaveFundConfirm') }}
-          </div>
-        </div>
-        <button
-          type="button"
-          @click="$emit('leave')"
-          class="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
+      <div class="space-y-3">
+        <!-- Leave Fund Action (Available to all non-owners; restricted for the last admin if other members exist) -->
+        <div
+          v-if="!isOwner && (!isAdmin || adminCount > 1 || members.length <= 1)"
+          class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg"
         >
-          <i class="fas fa-sign-out-alt"></i>
-          {{ $t('common.leave') }}
-        </button>
-      </div>
-
-      <div v-else class="space-y-2">
-        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
           <div>
             <div class="text-sm font-medium text-red-700 dark:text-red-400">
-              {{ $t('fundSettings.deleteFund') }}
+              {{ $t('fundSettings.leaveFund') }}
             </div>
             <div class="text-xs text-red-600/80 dark:text-red-400/70">
-              {{ $t('fundSettings.deleteFundConfirm') }}
+              {{ $t('fundSettings.leaveFundConfirm') }}
             </div>
           </div>
           <button
             type="button"
-            @click="$emit('delete-fund')"
+            @click="$emit('leave')"
             class="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
           >
-            <i class="fas fa-trash-alt"></i>
-            {{ $t('common.delete') }}
+            <i class="fas fa-sign-out-alt"></i>
+            {{ $t('common.leave') }}
           </button>
         </div>
-        <p v-if="members.length > 1" class="text-xs text-gray-500 dark:text-gray-400 px-1">
-          {{ $t('fundSettings.ownerLeaveHelp') }}
+
+        <p v-if="!isOwner && isAdmin && adminCount <= 1 && members.length > 1" class="text-xs text-gray-500 dark:text-gray-400 px-1">
+          {{ $t('fundSettings.adminLeaveHelp') }}
         </p>
+
+        <!-- Delete Fund Action (Only for Owner) -->
+        <div
+          v-if="isOwner"
+          class="space-y-2"
+        >
+          <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+            <div>
+              <div class="text-sm font-medium text-red-700 dark:text-red-400">
+                {{ $t('fundSettings.deleteFund') }}
+              </div>
+              <div class="text-xs text-red-600/80 dark:text-red-400/70">
+                {{ $t('fundSettings.deleteFundConfirm') }}
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="$emit('delete-fund')"
+              class="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 shadow-xs"
+            >
+              <i class="fas fa-trash-alt"></i>
+              {{ $t('common.delete') }}
+            </button>
+          </div>
+          <p v-if="members.length > 1" class="text-xs text-gray-500 dark:text-gray-400 px-1">
+            {{ $t('fundSettings.ownerLeaveHelp') }}
+          </p>
+        </div>
       </div>
     </div>
   </div>

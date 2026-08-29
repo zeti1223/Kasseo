@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
-import { useGroupsStore } from "@/stores/groups";
+import { useGroupsStore, isMemberAdmin } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
 import { ref as dbRef, get } from "firebase/database";
@@ -79,6 +79,15 @@ const affectedTransactionCount = computed(() => {
 });
 
 const isOwner = computed(() => props.group?.ownerId === authStore.user?.uid);
+const isAdmin = computed(() => {
+  const uid = authStore.user?.uid;
+  if (!uid || !props.group) return false;
+  const currentMember = props.group.members?.[uid];
+  return isMemberAdmin(
+    currentMember ? { id: uid, ...currentMember } : null,
+    props.group.ownerId,
+  );
+});
 
 const members = computed(() => {
   if (!props.group?.members) return [];
@@ -115,7 +124,7 @@ async function loadCategories() {
 }
 
 function startEditingName() {
-  if (!isOwner.value) return;
+  if (!isAdmin.value) return;
   name.value = props.group?.name || "";
   editingName.value = true;
   nextTick(() => nameInputRef.value?.focus());
@@ -127,7 +136,7 @@ function cancelEditingName() {
 }
 
 async function saveName() {
-  if (!props.group?.id) return;
+  if (!props.group?.id || !isAdmin.value) return;
   const trimmed = name.value.trim();
   if (!trimmed || trimmed === props.group.name) {
     editingName.value = false;
@@ -306,6 +315,17 @@ async function confirmTransferOwnership() {
   }
 }
 
+async function handleUpdateMemberRole({ id, role }) {
+  if (!props.group?.id || !isAdmin.value) return;
+  loading.value = true;
+  try {
+    await groupsStore.updateMemberRole(props.group.id, id, role);
+    await groupsStore.loadGroup(props.group.id);
+  } finally {
+    loading.value = false;
+  }
+}
+
 async function handleSetColor(color) {
   if (!props.group?.id) return;
   myColor.value = color;
@@ -314,7 +334,7 @@ async function handleSetColor(color) {
 }
 
 async function handleSetIcon(icon) {
-  if (!props.group?.id || !isOwner.value) return;
+  if (!props.group?.id || !isAdmin.value) return;
   groupIcon.value = icon;
   await groupsStore.setGroupIcon(props.group.id, icon);
   await groupsStore.loadGroup(props.group.id);
@@ -346,7 +366,7 @@ function copyInviteLink() {
       @click="!loading && emit('update:modelValue', false)"
     />
     <div
-      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-[500px] max-h-[90vh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
+      class="relative bg-white dark:bg-surface-dark rounded-t-2xl sm:rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-none sm:max-w-xl max-h-[90vh] overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
     >
       <!-- Mobile drag handle indicator -->
       <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-3 sm:hidden" />
@@ -392,7 +412,7 @@ function copyInviteLink() {
             props.group?.name
           }}</span>
           <button
-            v-if="isOwner"
+            v-if="isAdmin"
             @click="startEditingName"
             class="text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] transition-colors p-2"
             :title="$t('fundSettings.renameFund')"
@@ -401,10 +421,10 @@ function copyInviteLink() {
           </button>
         </div>
         <p
-          v-if="!isOwner"
+          v-if="!isAdmin"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
-          {{ $t('fundSettings.ownerOnlyName') }}
+          {{ $t('fundSettings.adminOnlyName') }}
         </p>
       </div>
 
@@ -429,6 +449,7 @@ function copyInviteLink() {
         v-model:currency="currency"
         :currencies="currencies"
         :is-owner="isOwner"
+        :is-admin="isAdmin"
         :loading="loading"
         :recalc-progress="recalcProgress"
         :recalc-failed-count="recalcFailedCount"
@@ -442,6 +463,7 @@ function copyInviteLink() {
         :mode="mode"
         :modes="modes"
         :is-owner="isOwner"
+        :is-admin="isAdmin"
         :loading="loading"
         @change="handleModeChange"
       />
@@ -452,10 +474,12 @@ function copyInviteLink() {
         :owner-id="props.group?.ownerId"
         :current-user-id="authStore.user?.uid"
         :is-owner="isOwner"
+        :is-admin="isAdmin"
         :invite-url="inviteUrl"
         :qr-invite-url="qrInviteUrl"
         @copy-invite="copyInviteLink"
         @add-placeholder-member="handleAddPlaceholderMember"
+        @update-role="handleUpdateMemberRole"
         @remove="(id) => (removeMemberTarget = id)"
         @transfer-ownership="(target) => (transferOwnershipTarget = target)"
         @leave="showLeaveConfirm = true"
@@ -467,6 +491,7 @@ function copyInviteLink() {
         v-model:new-category="newCategory"
         :categories="categories"
         :is-owner="isOwner"
+        :is-admin="isAdmin"
         :loading="loading"
         @add="handleAddCategory"
         @remove="(category) => (removeCategoryTarget = category)"
@@ -477,6 +502,7 @@ function copyInviteLink() {
         :color="myColor"
         :icon="groupIcon"
         :is-owner="isOwner"
+        :is-admin="isAdmin"
         :loading="loading"
         @set-color="handleSetColor"
         @set-icon="handleSetIcon"

@@ -1,14 +1,17 @@
 <script setup>
+import { computed } from "vue";
 import { FUND_COLORS, FUND_ICONS } from "@/constants/fundStyle";
 
-defineProps({
+const props = defineProps({
   color: { type: String, required: true },
   icon: { type: String, required: true },
   isOwner: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
 });
 defineEmits(["set-color", "set-icon"]);
 
+const canEdit = computed(() => props.isAdmin || props.isOwner);
 const colors = FUND_COLORS;
 const icons = FUND_ICONS;
 </script>
@@ -40,7 +43,7 @@ const icons = FUND_ICONS;
       </div>
     </div>
 
-    <!-- Central icon: shared across the fund, owner-only -->
+    <!-- Central icon: shared across the fund, admin-only -->
     <div>
       <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
         {{ $t('fundSettings.styleIconTitle') }}
@@ -55,7 +58,7 @@ const icons = FUND_ICONS;
           v-for="item in icons"
           :key="item.icon"
           type="button"
-          :disabled="!isOwner || loading"
+          :disabled="!canEdit || loading"
           @click="$emit('set-icon', item.icon)"
           :title="item.label"
           class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm disabled:cursor-not-allowed disabled:hover:bg-transparent"
@@ -67,8 +70,8 @@ const icons = FUND_ICONS;
           <i :class="item.icon"></i>
         </button>
       </div>
-      <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        {{ $t('fundSettings.ownerOnlyIcon') }}
+      <p v-if="!canEdit" class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        {{ $t('fundSettings.adminOnlyIcon') }}
       </p>
     </div>
   </div>

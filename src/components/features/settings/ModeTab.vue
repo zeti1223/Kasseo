@@ -1,11 +1,16 @@
 <script setup>
-defineProps({
+import { computed } from "vue";
+
+const props = defineProps({
   mode: { type: String, required: true },
   modes: { type: Array, required: true },
   isOwner: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
 });
 defineEmits(["change"]);
+
+const canEdit = computed(() => props.isAdmin || props.isOwner);
 </script>
 
 <template>
@@ -14,7 +19,7 @@ defineEmits(["change"]);
       v-for="opt in modes"
       :key="opt.value"
       type="button"
-      :disabled="!isOwner || loading"
+      :disabled="!canEdit || loading"
       @click="$emit('change', opt.value)"
       class="w-full text-left p-3 rounded-lg border transition-colors disabled:cursor-not-allowed"
       :class="
@@ -35,8 +40,8 @@ defineEmits(["change"]);
         {{ opt.description }}
       </p>
     </button>
-    <p v-if="!isOwner" class="text-xs text-gray-500 dark:text-gray-400">
-      {{ $t('fundSettings.ownerOnlyMode') }}
+    <p v-if="!canEdit" class="text-xs text-gray-500 dark:text-gray-400">
+      {{ $t('fundSettings.adminOnlyMode') }}
     </p>
     <p class="text-xs text-gray-500 dark:text-gray-400">
       {{ $t('fundSettings.modeSwitchNote') }}
