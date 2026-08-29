@@ -1,5 +1,5 @@
 <script setup>
-defineEmits(["create"]);
+defineEmits(["create", "import"]);
 </script>
 
 <template>
@@ -18,12 +18,21 @@ defineEmits(["create"]);
       <p class="text-gray-600 dark:text-gray-400 mb-4">
         {{ $t('dashboard.emptySubtitle') }}
       </p>
-      <button
-        @click="$emit('create')"
-        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
-      >
-        {{ $t('dashboard.createFirstFund') }}
-      </button>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <button
+          @click="$emit('create')"
+          class="w-full sm:w-auto bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-xs"
+        >
+          {{ $t('dashboard.createFirstFund') }}
+        </button>
+        <button
+          @click="$emit('import')"
+          class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-[#C8A5FC] text-[#8A5FBF] dark:text-[#C8A5FC] bg-white dark:bg-surface-dark hover:bg-[#C8A5FC]/10 transition-colors font-medium flex items-center justify-center gap-2 shadow-xs"
+        >
+          <i class="fas fa-file-import"></i>
+          <span>{{ $t('import.quickImport') }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>

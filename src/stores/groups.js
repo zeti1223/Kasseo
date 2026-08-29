@@ -12,6 +12,7 @@ import {
 } from "firebase/database";
 import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
+import { useTransactionsStore } from "./transactions";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
@@ -454,6 +455,121 @@ export const useGroupsStore = defineStore("groups", () => {
     );
   }
 
+  // Creates a new fund populated with imported data, sets up placeholder profiles, and imports transactions in batch
+  async function createGroupWithImportedData({
+    name,
+    currency,
+    mode = "split",
+    sourceMembers = [],
+    currentUserSourceName = null,
+    transactions = [],
+    customCategories = [],
+    onProgress = null,
+  }) {
+    const authStore = useAuthStore();
+    const user = authStore.user;
+    if (!user) throw new Error("Authentication required");
+
+    const nickname =
+      authStore.userProfile?.nickname || user.displayName || "User";
+    const newGroupRef = push(dbRef(db, "groups"));
+    const groupId = newGroupRef.key;
+
+    // 1. Build members list
+    const groupMembers = {
+      [user.uid]: {
+        displayName: nickname,
+        nickname,
+        photoURL: user.photoURL || null,
+        joinedAt: serverTimestamp(),
+      },
+    };
+
+    const memberMap = {};
+    if (currentUserSourceName) {
+      memberMap[currentUserSourceName] = user.uid;
+    }
+
+    for (const memberName of sourceMembers) {
+      const trimmed = String(memberName).trim();
+      if (!trimmed) continue;
+      if (memberName === currentUserSourceName || memberMap[trimmed]) continue;
+
+      // Check if matches current user nickname/displayName
+      if (
+        !currentUserSourceName &&
+        trimmed.toLowerCase() === nickname.toLowerCase()
+      ) {
+        memberMap[trimmed] = user.uid;
+        continue;
+      }
+
+      // Create placeholder member
+      const placeholderRef = push(dbRef(db, `groups/${groupId}/members`));
+      const placeholderId = placeholderRef.key;
+      groupMembers[placeholderId] = {
+        displayName: trimmed,
+        nickname: trimmed,
+        photoURL: null,
+        isPlaceholder: true,
+        createdAt: serverTimestamp(),
+      };
+      memberMap[trimmed] = placeholderId;
+    }
+
+    // Default fallback: if any member not yet in map, map to current user
+    for (const memberName of sourceMembers) {
+      if (!memberMap[memberName]) {
+        memberMap[memberName] = user.uid;
+      }
+    }
+
+    const groupData = {
+      name: name.trim() || "Imported Fund",
+      currency: currency || "USD",
+      mode: mode || "split",
+      ownerId: user.uid,
+      createdAt: serverTimestamp(),
+      members: groupMembers,
+    };
+
+    if (Array.isArray(customCategories) && customCategories.length > 0) {
+      const catObj = {};
+      for (const cat of customCategories) {
+        const catName = typeof cat === "string" ? cat : cat.name;
+        const catIcon = typeof cat === "object" ? cat.icon : null;
+        if (catName) {
+          const catRef = push(dbRef(db, `groups/${groupId}/categories`));
+          catObj[catRef.key] = {
+            name: catName,
+            icon: catIcon || null,
+            createdAt: serverTimestamp(),
+          };
+        }
+      }
+      if (Object.keys(catObj).length > 0) {
+        groupData.categories = catObj;
+      }
+    }
+
+    await set(newGroupRef, groupData);
+    await set(dbRef(db, `users/${user.uid}/groups/${groupId}`), true);
+
+    // 2. Import transactions in bulk
+    const txStore = useTransactionsStore();
+    if (transactions.length > 0) {
+      await txStore.importTransactionsBatch(
+        groupId,
+        groupData.currency,
+        transactions,
+        memberMap,
+        { onProgress },
+      );
+    }
+
+    return groupId;
+  }
+
   return {
     groups,
     currentGroup,
@@ -462,6 +578,7 @@ export const useGroupsStore = defineStore("groups", () => {
     listenToGroup,
     stopGroupListener,
     createGroup,
+    createGroupWithImportedData,
     joinGroup,
     addPlaceholderMember,
     claimMember,
