@@ -416,5 +416,33 @@
     "testButton": "Envoyer une notification test",
     "testTitle": "Notification Kasseo",
     "testBody": "Les notifications push sont configurées avec succès !"
+  },
+  "recap": {
+    "title": "Récap",
+    "tooltip": "Récap des dépenses",
+    "allTime": "Depuis le début",
+    "introLabel": "Récap",
+    "introSubtitle": "{{count}} transactions enregistrées",
+    "noDataValue": "Rien à afficher pour l'instant",
+    "noDataLabel": "Enregistre quelques transactions pour débloquer ton récap",
+    "totalSpentEyebrow": "Tu as dépensé",
+    "totalSpentLabel": "au total",
+    "totalDepositedSubtitle": "{{amount}} déposé",
+    "topCategoryEyebrow": "Ta catégorie principale",
+    "topCategoryLabel": "{{amount}} dépensé",
+    "topCategorySubtitle": "{{percent}}% des dépenses totales",
+    "biggestExpenseEyebrow": "Plus grosse dépense",
+    "topMonthEyebrow": "Ton mois le plus actif",
+    "topMonthLabel": "{{amount}} dépensé",
+    "topSpenderEyebrow": "Plus gros payeur",
+    "topSpenderLabel": "a payé {{amount}}",
+    "topDepositorEyebrow": "Plus gros contributeur",
+    "topDepositorLabel": "a déposé {{amount}}",
+    "outroValue": "{{count}} dépenses",
+    "outroLabel": "C'est tout !",
+    "outroSubtitle": "Merci de garder {{fund}} sur les rails",
+    "share": "Enregistrer l'image",
+    "sharing": "Enregistrement…",
+    "close": "Fermer"
   }
 }
