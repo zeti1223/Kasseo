@@ -416,5 +416,33 @@
     "testButton": "Teszt értesítés küldése",
     "testTitle": "Kasseo értesítés",
     "testBody": "A push értesítések sikeresen be vannak állítva!"
+  },
+  "recap": {
+    "title": "Összefoglaló",
+    "tooltip": "Költési összefoglaló",
+    "allTime": "Kezdetektől",
+    "introLabel": "Összefoglaló",
+    "introSubtitle": "{{count}} rögzített tranzakció",
+    "noDataValue": "Még nincs mit összegezni",
+    "noDataLabel": "Rögzíts pár tranzakciót, hogy elkészülhessen az összefoglalód",
+    "totalSpentEyebrow": "Összesen elköltöttél",
+    "totalSpentLabel": "ennyit",
+    "totalDepositedSubtitle": "{{amount}} befizetve",
+    "topCategoryEyebrow": "A legtöbbet költött kategóriád",
+    "topCategoryLabel": "{{amount}} elköltve",
+    "topCategorySubtitle": "az összes költés {{percent}}%-a",
+    "biggestExpenseEyebrow": "A legnagyobb egyedi kiadás",
+    "topMonthEyebrow": "A legmozgalmasabb hónapod",
+    "topMonthLabel": "{{amount}} elköltve",
+    "topSpenderEyebrow": "Legtöbbet fizető tag",
+    "topSpenderLabel": "{{amount}} összeget fizetett",
+    "topDepositorEyebrow": "Legtöbbet befizető tag",
+    "topDepositorLabel": "{{amount}} összeget fizetett be",
+    "outroValue": "{{count}} kiadás",
+    "outroLabel": "Ennyi volt!",
+    "outroSubtitle": "Köszönjük, hogy rendben tartod a(z) {{fund}} kasszát",
+    "share": "Kép mentése",
+    "sharing": "Mentés…",
+    "close": "Bezárás"
   }
 }

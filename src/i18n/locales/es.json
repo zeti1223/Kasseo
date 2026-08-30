@@ -416,5 +416,33 @@
     "testButton": "Enviar notificación de prueba",
     "testTitle": "Notificación de Kasseo",
     "testBody": "¡Las notificaciones push están configuradas correctamente!"
+  },
+  "recap": {
+    "title": "Resumen",
+    "tooltip": "Resumen de gastos",
+    "allTime": "Todo el tiempo",
+    "introLabel": "Resumen",
+    "introSubtitle": "{{count}} transacciones registradas",
+    "noDataValue": "Todavía no hay nada",
+    "noDataLabel": "Registra algunas transacciones para desbloquear tu resumen",
+    "totalSpentEyebrow": "Gastaste",
+    "totalSpentLabel": "en total",
+    "totalDepositedSubtitle": "{{amount}} depositado",
+    "topCategoryEyebrow": "Tu categoría principal",
+    "topCategoryLabel": "{{amount}} gastado",
+    "topCategorySubtitle": "{{percent}}% del gasto total",
+    "biggestExpenseEyebrow": "Mayor gasto individual",
+    "topMonthEyebrow": "Tu mes más activo",
+    "topMonthLabel": "{{amount}} gastado",
+    "topSpenderEyebrow": "Quien más pagó",
+    "topSpenderLabel": "pagó {{amount}}",
+    "topDepositorEyebrow": "Quien más aportó",
+    "topDepositorLabel": "depositó {{amount}}",
+    "outroValue": "{{count}} gastos",
+    "outroLabel": "¡Eso es todo!",
+    "outroSubtitle": "Gracias por mantener {{fund}} al día",
+    "share": "Guardar imagen",
+    "sharing": "Guardando…",
+    "close": "Cerrar"
   }
 }

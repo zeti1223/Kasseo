@@ -416,5 +416,33 @@
     "testButton": "Test-Benachrichtigung senden",
     "testTitle": "Kasseo Benachrichtigung",
     "testBody": "Push-Benachrichtigungen sind erfolgreich eingerichtet!"
+  },
+  "recap": {
+    "title": "Jahresrückblick",
+    "tooltip": "Ausgaben-Rückblick",
+    "allTime": "Gesamter Zeitraum",
+    "introLabel": "Rückblick",
+    "introSubtitle": "{{count}} erfasste Transaktionen",
+    "noDataValue": "Noch nichts zu zeigen",
+    "noDataLabel": "Erfasse ein paar Transaktionen, um deinen Rückblick freizuschalten",
+    "totalSpentEyebrow": "Du hast ausgegeben",
+    "totalSpentLabel": "insgesamt",
+    "totalDepositedSubtitle": "{{amount}} eingezahlt",
+    "topCategoryEyebrow": "Deine Top-Kategorie",
+    "topCategoryLabel": "{{amount}} ausgegeben",
+    "topCategorySubtitle": "{{percent}}% aller Ausgaben",
+    "biggestExpenseEyebrow": "Größte Einzelausgabe",
+    "topMonthEyebrow": "Dein aktivster Monat",
+    "topMonthLabel": "{{amount}} ausgegeben",
+    "topSpenderEyebrow": "Größter Ausgeber",
+    "topSpenderLabel": "hat {{amount}} bezahlt",
+    "topDepositorEyebrow": "Größter Einzahler",
+    "topDepositorLabel": "hat {{amount}} eingezahlt",
+    "outroValue": "{{count}} Ausgaben",
+    "outroLabel": "Das war's!",
+    "outroSubtitle": "Danke, dass du {{fund}} auf Kurs hältst",
+    "share": "Bild speichern",
+    "sharing": "Wird gespeichert…",
+    "close": "Schließen"
   }
 }

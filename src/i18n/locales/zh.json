@@ -416,5 +416,33 @@
     "testButton": "发送测试通知",
     "testTitle": "Kasseo 通知",
     "testBody": "推送通知已成功配置！"
+  },
+  "recap": {
+    "title": "年度总结",
+    "tooltip": "消费总结",
+    "allTime": "全部时间",
+    "introLabel": "总结",
+    "introSubtitle": "已记录 {{count}} 笔交易",
+    "noDataValue": "暂无数据",
+    "noDataLabel": "记录几笔交易后即可解锁你的总结",
+    "totalSpentEyebrow": "你一共花费了",
+    "totalSpentLabel": "总计",
+    "totalDepositedSubtitle": "已存入 {{amount}}",
+    "topCategoryEyebrow": "你的最高消费类别",
+    "topCategoryLabel": "花费 {{amount}}",
+    "topCategorySubtitle": "占总支出的 {{percent}}%",
+    "biggestExpenseEyebrow": "单笔最大支出",
+    "topMonthEyebrow": "你最活跃的月份",
+    "topMonthLabel": "花费 {{amount}}",
+    "topSpenderEyebrow": "花费最多的成员",
+    "topSpenderLabel": "支付了 {{amount}}",
+    "topDepositorEyebrow": "贡献最多的成员",
+    "topDepositorLabel": "存入了 {{amount}}",
+    "outroValue": "{{count}} 笔支出",
+    "outroLabel": "总结完毕！",
+    "outroSubtitle": "感谢你悉心打理 {{fund}}",
+    "share": "保存图片",
+    "sharing": "保存中…",
+    "close": "关闭"
   }
 }

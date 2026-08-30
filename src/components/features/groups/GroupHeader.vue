@@ -9,7 +9,7 @@ defineProps({
   icon: { type: String, default: null },
   color: { type: String, default: null },
 });
-defineEmits(["open-settings", "open-export", "open-import"]);
+defineEmits(["open-settings", "open-export", "open-import", "open-recap"]);
 </script>
 
 <template>
@@ -25,6 +25,13 @@ defineEmits(["open-settings", "open-export", "open-import"]);
       </button>
 
       <div class="flex items-center gap-1.5">
+        <button
+          @click="$emit('open-recap')"
+          class="w-9 h-9 rounded-lg bg-gradient-to-br from-[#8A5FBF] to-[#C8A5FC] text-white flex items-center justify-center active:scale-95 transition-all shadow-xs"
+          :title="$t('recap.tooltip')"
+        >
+          <i class="fas fa-wand-magic-sparkles text-xs"></i>
+        </button>
         <button
           @click="$emit('open-import')"
           class="w-9 h-9 rounded-lg bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary flex items-center justify-center active:scale-95 transition-all shadow-xs"
@@ -71,6 +78,14 @@ defineEmits(["open-settings", "open-export", "open-import"]);
 
       <!-- Desktop-only actions -->
       <div class="hidden md:flex items-center gap-2">
+        <button
+          @click="$emit('open-recap')"
+          class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-[#8A5FBF] to-[#C8A5FC] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+          :title="$t('recap.tooltip')"
+        >
+          <i class="fas fa-wand-magic-sparkles text-xs"></i>
+          {{ $t('recap.title') }}
+        </button>
         <button
           @click="$emit('open-import')"
           class="text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] transition-colors p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
