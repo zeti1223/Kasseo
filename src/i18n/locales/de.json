@@ -266,6 +266,12 @@
     "adminOnlyCategories": "Nur Admins können Kategorien hinzufügen",
     "noCustomCategories": "Noch keine benutzerdefinierten Kategorien",
     "clickChooseIcon": "Klicken, um Symbol zu wählen",
+    "tabBudgets": "Budgets",
+    "budgetsHelp": "Lege ein monatliches Ausgabenlimit pro Kategorie fest. Du erhältst eine Warnung bei 80 % und 100 % des Limits.",
+    "ownerOnlyBudgets": "Nur der Eigentümer kann Budgets festlegen",
+    "adminOnlyBudgets": "Nur Admins können Budgets festlegen",
+    "noBudget": "Kein Limit",
+    "clearBudget": "Budget entfernen",
     "tabStyle": "Stil",
     "styleColorTitle": "Meine Farbe",
     "styleColorHelp": "Nur für dich sichtbar — wähle eine Farbe für diese Kasse.",
@@ -394,6 +400,12 @@
     "beautyAndPersonalCare": "Körperpflege & Beauty",
     "generalTag": "Allgemeines Tag"
   },
+  "budgets": {
+    "title": "Budgets",
+    "noneSet": "Noch keine Budgets festgelegt",
+    "warning": "{{percent}} % des Budgets ausgeschöpft",
+    "exceeded": "Budget überschritten ({{percent}} %)"
+  },
   "notifications": {
     "title": "Benachrichtigungen",
     "permission": "Benachrichtigungsberechtigung",
@@ -413,6 +425,9 @@
     "groupIconChanged": "Das Gruppen-Icon wurde aktualisiert",
     "memberJoined": "{{name}} ist der Gruppe beigetreten",
     "memberLeft": "{{name}} hat die Gruppe verlassen",
+    "budgetWarning": "Budget für „{{category}}\" bei 80 %",
+    "budgetExceeded": "Budget für „{{category}}\" überschritten",
+    "budgetBody": "{{spend}} von {{limit}} {{currency}} diesen Monat ausgegeben",
     "testButton": "Test-Benachrichtigung senden",
     "testTitle": "Kasseo Benachrichtigung",
     "testBody": "Push-Benachrichtigungen sind erfolgreich eingerichtet!"

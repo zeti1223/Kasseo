@@ -10,6 +10,7 @@ import { computeSplitBalances } from "@/utils/chartData";
 import ChartCard from "@/components/common/ChartCard.vue";
 import GroupHeader from "@/components/features/groups/GroupHeader.vue";
 import GroupStats from "@/components/features/groups/GroupStats.vue";
+import BudgetProgress from "@/components/features/groups/BudgetProgress.vue";
 import BalanceOverTimeChart from "@/components/charts/BalanceOverTimeChart.vue";
 import CategoryBreakdownChart from "@/components/charts/CategoryBreakdownChart.vue";
 import MemberBreakdownChart from "@/components/charts/MemberBreakdownChart.vue";
@@ -122,6 +123,10 @@ const totals = computed(() => {
     .reduce((sum, t) => sum + t.amount, 0);
   return { deposited, spent, balance: deposited - spent };
 });
+
+const hasBudgets = computed(() =>
+  Object.keys(groupsStore.currentGroup?.categoryBudgets || {}).length > 0,
+);
 </script>
 
 <template>
@@ -286,6 +291,14 @@ const totals = computed(() => {
           />
         </ChartCard>
 
+        <ChartCard v-if="hasBudgets" :title="$t('budgets.title')">
+          <BudgetProgress
+            :transactions="transactionsStore.transactions"
+            :category-budgets="groupsStore.currentGroup.categoryBudgets"
+            :currency="groupsStore.currentGroup.currency"
+          />
+        </ChartCard>
+
         <ChartCard
           :title="mode === 'split' ? $t('charts.monthlySpending') : $t('charts.monthlyCashFlow')"
         >
@@ -364,6 +377,16 @@ const totals = computed(() => {
         <ChartCard :title="$t('charts.categoryTrend')">
           <CategoryTrendChart
             :transactions="transactionsStore.transactions"
+            :currency="groupsStore.currentGroup.currency"
+          />
+        </ChartCard>
+      </div>
+
+      <div v-if="hasBudgets" class="grid grid-cols-1 gap-4 mb-6">
+        <ChartCard :title="$t('budgets.title')">
+          <BudgetProgress
+            :transactions="transactionsStore.transactions"
+            :category-budgets="groupsStore.currentGroup.categoryBudgets"
             :currency="groupsStore.currentGroup.currency"
           />
         </ChartCard>

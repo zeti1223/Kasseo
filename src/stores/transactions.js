@@ -14,6 +14,11 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { convertCurrency } from "@/services/currency";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
+import {
+  getMonthRange,
+  getCategorySpend,
+  getNewlyCrossedThreshold,
+} from "@/utils/budgets";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -44,6 +49,79 @@ async function dispatchPushToGroupMembers(
     });
   } catch (err) {
     console.warn("Could not dispatch push to group members:", err);
+  }
+}
+
+// Checks whether adding `addedAmount` to `categoryName` pushes that
+// category's spend for the calendar month containing `date` across its 80%
+// or 100% budget threshold for the first time. Returns
+// `{ crossed, limit, spendAfter }` or null if there's no budget set, or the
+// threshold was already crossed before this transaction.
+async function checkBudgetThresholdCrossed(
+  groupId,
+  categoryName,
+  addedAmount,
+  date,
+  currentTransactions,
+) {
+  try {
+    const budgetsSnap = await get(
+      dbRef(db, `groups/${groupId}/categoryBudgets`),
+    );
+    if (!budgetsSnap.exists()) return null;
+    const budget = Object.values(budgetsSnap.val()).find(
+      (b) => b?.name === categoryName,
+    );
+    if (!budget || !(Number(budget.amount) > 0)) return null;
+
+    const limit = Number(budget.amount);
+    const range = getMonthRange(new Date(date));
+    const spendBefore = getCategorySpend(currentTransactions, categoryName, range);
+    const crossed = getNewlyCrossedThreshold(spendBefore, addedAmount, limit);
+    if (!crossed) return null;
+
+    return { crossed, limit, spendAfter: spendBefore + addedAmount };
+  } catch (err) {
+    console.warn("Could not check category budget threshold:", err);
+    return null;
+  }
+}
+
+// Notifies every member of the fund (unlike other notifications, this
+// includes the person who just added the expense — they need to know they
+// just crossed their own fund's budget too) that a category budget hit a
+// warning or exceeded threshold.
+async function dispatchBudgetWarning(
+  groupId,
+  { categoryName, threshold, limit, spend, currency },
+) {
+  try {
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) return;
+    const members = groupSnap.val().members || {};
+    const allUids = Object.keys(members);
+    if (allUids.length === 0) return;
+
+    await sendPushNotificationToUsers({
+      recipientUids: allUids,
+      titleKey:
+        threshold === "exceeded"
+          ? "notifications.budgetExceeded"
+          : "notifications.budgetWarning",
+      titleParams: { category: categoryName },
+      bodyKey: "notifications.budgetBody",
+      bodyParams: {
+        spend: Math.round(spend),
+        limit: Math.round(limit),
+        currency: currency || "",
+      },
+      data: {
+        type: threshold === "exceeded" ? "budgetExceeded" : "budgetWarning",
+        category: categoryName,
+      },
+    });
+  } catch (err) {
+    console.warn("Could not dispatch budget warning:", err);
   }
 }
 
@@ -167,6 +245,11 @@ export const useTransactionsStore = defineStore("transactions", () => {
     if (type === "settlement" && to) {
       payload.to = to;
     }
+    // Snapshot spend *before* this transaction is written, so the threshold
+    // check below isn't thrown off by the realtime listener possibly having
+    // already echoed this same write back into `transactions.value`.
+    const preWriteTransactions = transactions.value;
+
     await set(newRef, payload);
 
     if (notify) {
@@ -178,6 +261,25 @@ export const useTransactionsStore = defineStore("transactions", () => {
         body: description || category || "",
         data: { type: "transactionAdded" },
       });
+    }
+
+    if (type === "expense") {
+      const budgetAlert = await checkBudgetThresholdCrossed(
+        groupId,
+        payload.category,
+        conversion.amount,
+        date,
+        preWriteTransactions,
+      );
+      if (budgetAlert) {
+        dispatchBudgetWarning(groupId, {
+          categoryName: payload.category,
+          threshold: budgetAlert.crossed,
+          limit: budgetAlert.limit,
+          spend: budgetAlert.spendAfter,
+          currency: groupCurrency,
+        });
+      }
     }
 
     return newRef.key;

@@ -14,6 +14,7 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { useTransactionsStore } from "./transactions";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
+import { categoryBudgetKey } from "@/utils/budgets";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -497,6 +498,24 @@ export const useGroupsStore = defineStore("groups", () => {
     await remove(dbRef(db, `groups/${groupId}/categories/${categoryId}`));
   }
 
+  // Budgets are keyed by category name (not id) so a limit can be set on
+  // built-in categories (Food & Groceries, Transport, ...) as well as
+  // custom ones, none of which need to already exist in `categories`.
+  async function setCategoryBudget(groupId, categoryName, amount, icon = null) {
+    const key = categoryBudgetKey(categoryName);
+    await set(dbRef(db, `groups/${groupId}/categoryBudgets/${key}`), {
+      name: categoryName,
+      amount: Number(amount),
+      icon: icon || null,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async function removeCategoryBudget(groupId, categoryName) {
+    const key = categoryBudgetKey(categoryName);
+    await remove(dbRef(db, `groups/${groupId}/categoryBudgets/${key}`));
+  }
+
   // The fund's "central" icon — shared by everyone, meant to be set by the
   // owner only (enforced in the UI, same convention as currency/mode/categories).
   async function setGroupIcon(groupId, icon) {
@@ -658,6 +677,8 @@ export const useGroupsStore = defineStore("groups", () => {
     transferOwnership,
     addCategory,
     removeCategory,
+    setCategoryBudget,
+    removeCategoryBudget,
     setGroupIcon,
     setMyColor,
   };

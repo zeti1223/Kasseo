@@ -266,6 +266,12 @@
     "adminOnlyCategories": "只有管理员可以添加分类",
     "noCustomCategories": "暂无自定义分类",
     "clickChooseIcon": "点击选择图标",
+    "tabBudgets": "预算",
+    "budgetsHelp": "为每个分类设置每月支出限额。达到限额的 80% 和 100% 时会收到提醒。",
+    "ownerOnlyBudgets": "只有所有者可以设置预算",
+    "adminOnlyBudgets": "只有管理员可以设置预算",
+    "noBudget": "无限额",
+    "clearBudget": "移除预算",
     "tabStyle": "样式",
     "styleColorTitle": "我的颜色",
     "styleColorHelp": "仅你可见 — 为该基金选择一种颜色。",
@@ -394,6 +400,12 @@
     "beautyAndPersonalCare": "美容与个护",
     "generalTag": "通用标签"
   },
+  "budgets": {
+    "title": "预算",
+    "noneSet": "尚未设置预算",
+    "warning": "已使用预算的 {{percent}}%",
+    "exceeded": "预算已超支（{{percent}}%）"
+  },
   "notifications": {
     "title": "通知",
     "permission": "通知权限",
@@ -413,6 +425,9 @@
     "groupIconChanged": "群组图标已更新",
     "memberJoined": "{{name}} 加入了群组",
     "memberLeft": "{{name}} 离开了群组",
+    "budgetWarning": "“{{category}}”预算已达 80%",
+    "budgetExceeded": "“{{category}}”预算已超支",
+    "budgetBody": "本月已花费 {{spend}} / {{limit}} {{currency}}",
     "testButton": "发送测试通知",
     "testTitle": "Kasseo 通知",
     "testBody": "推送通知已成功配置！"

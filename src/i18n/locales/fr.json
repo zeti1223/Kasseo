@@ -266,6 +266,12 @@
     "adminOnlyCategories": "Seuls les administrateurs peuvent ajouter des catégories",
     "noCustomCategories": "Aucune catégorie personnalisée",
     "clickChooseIcon": "Cliquer pour choisir une icône",
+    "tabBudgets": "Budgets",
+    "budgetsHelp": "Définis une limite de dépense mensuelle par catégorie. Tu recevras un avertissement à 80 % et à 100 % de la limite.",
+    "ownerOnlyBudgets": "Seul le propriétaire peut définir des budgets",
+    "adminOnlyBudgets": "Seuls les administrateurs peuvent définir des budgets",
+    "noBudget": "Aucune limite",
+    "clearBudget": "Supprimer le budget",
     "tabStyle": "Style",
     "styleColorTitle": "Ma couleur",
     "styleColorHelp": "Visible uniquement par toi — choisis une couleur pour cette cagnotte.",
@@ -394,6 +400,12 @@
     "beautyAndPersonalCare": "Beauté & Soins",
     "generalTag": "Étiquette générale"
   },
+  "budgets": {
+    "title": "Budgets",
+    "noneSet": "Aucun budget défini pour l'instant",
+    "warning": "{{percent}} % du budget utilisé",
+    "exceeded": "Budget dépassé ({{percent}} %)"
+  },
   "notifications": {
     "title": "Notifications",
     "permission": "Permission de notification",
@@ -413,6 +425,9 @@
     "groupIconChanged": "L'icône du groupe a été mise à jour",
     "memberJoined": "{{name}} a rejoint le groupe",
     "memberLeft": "{{name}} a quitté le groupe",
+    "budgetWarning": "Le budget « {{category}} » atteint 80 %",
+    "budgetExceeded": "Le budget « {{category}} » est dépassé",
+    "budgetBody": "{{spend}} sur {{limit}} {{currency}} dépensés ce mois-ci",
     "testButton": "Envoyer une notification test",
     "testTitle": "Notification Kasseo",
     "testBody": "Les notifications push sont configurées avec succès !"
