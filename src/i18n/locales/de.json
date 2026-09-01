@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Einstellungen",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "offline": "Offline",
+    "offlineTooltip": "Keine Verbindung — lokale Daten werden angezeigt, Änderungen werden synchronisiert, sobald du wieder online bist."
   },
   "footer": {
     "build": "Build",

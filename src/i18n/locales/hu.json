@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Beállítások",
-    "signOut": "Kijelentkezés"
+    "signOut": "Kijelentkezés",
+    "offline": "Offline",
+    "offlineTooltip": "Nincs kapcsolat — helyi adatok jelennek meg, a változtatások az újracsatlakozáskor szinkronizálódnak."
   },
   "footer": {
     "build": "Build",

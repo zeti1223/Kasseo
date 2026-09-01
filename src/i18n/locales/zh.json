@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "设置",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "offline": "离线",
+    "offlineTooltip": "无网络连接——正在显示本地数据，恢复连接后更改将自动同步。"
   },
   "footer": {
     "build": "构建",

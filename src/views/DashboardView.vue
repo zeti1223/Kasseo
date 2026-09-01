@@ -5,6 +5,7 @@ import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
+import { cacheGet, withTimeout } from "@/services/offline/db";
 import CreateGroupDialog from "@/components/features/groups/CreateGroupDialog.vue";
 import EmptyState from "@/components/features/dashboard/EmptyState.vue";
 import FundsList from "@/components/features/dashboard/FundsList.vue";
@@ -47,9 +48,23 @@ async function loadRecentTransactions() {
     const fetched = [];
 
     for (const group of groupsStore.groups) {
-      const snap = await get(dbRef(db, `transactions/${group.id}`));
-      if (snap.exists()) {
-        const txs = Object.entries(snap.val()).map(([id, tx]) => ({
+      let val = null;
+      try {
+        // Times out rather than hanging indefinitely while offline, so one
+        // unreachable fund can't block the whole dashboard from loading.
+        const snap = await withTimeout(get(dbRef(db, `transactions/${group.id}`)));
+        val = snap.exists() ? snap.val() : null;
+      } catch (err) {
+        // Fall back to whatever GroupView last cached for this fund (the
+        // same cache key `transactions.js`'s listener writes to).
+        console.warn(`Could not load transactions for fund ${group.id}, using cache:`, err);
+        const cached = await cacheGet(`transactions:${group.id}`);
+        if (cached) {
+          val = Object.fromEntries(cached.map(({ id, ...tx }) => [id, tx]));
+        }
+      }
+      if (val) {
+        const txs = Object.entries(val).map(([id, tx]) => ({
           id,
           ...tx,
           groupId: group.id,

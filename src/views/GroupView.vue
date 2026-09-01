@@ -4,8 +4,6 @@ import { useRoute, useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
-import { ref as dbRef, get } from "firebase/database";
-import { db } from "@/services/firebase/config";
 import { computeSplitBalances } from "@/utils/chartData";
 import ChartCard from "@/components/common/ChartCard.vue";
 import GroupHeader from "@/components/features/groups/GroupHeader.vue";
@@ -39,7 +37,15 @@ const showScan = ref(false);
 const showExport = ref(false);
 const showImport = ref(false);
 const showRecap = ref(false);
-const customCategories = ref([]);
+// Derived from currentGroup (already kept live by listenToGroup/loadGroup)
+// rather than a separate one-off fetch, so it works from cached/offline
+// data too and never blocks the rest of the page from loading.
+const customCategories = computed(() => {
+  const categories = groupsStore.currentGroup?.categories;
+  return categories
+    ? Object.entries(categories).map(([id, cat]) => ({ id, ...cat }))
+    : [];
+});
 const settleTarget = ref(null); // { memberId, amount } prefilled into the "Settle up" form
 
 const mode = computed(() => groupsStore.currentGroup?.mode || "kitty");
@@ -56,17 +62,8 @@ function handleSettle(payload) {
   mobileTab.value = "transactions";
 }
 
-async function loadCategories() {
-  if (!groupId.value) return;
-  const snap = await get(dbRef(db, `groups/${groupId.value}/categories`));
-  customCategories.value = snap.exists()
-    ? Object.entries(snap.val()).map(([id, cat]) => ({ id, ...cat }))
-    : [];
-}
-
 async function load(id) {
   await groupsStore.loadGroup(id);
-  await loadCategories();
   transactionsStore.listen(id);
   groupsStore.listenToGroup(id);
 }
@@ -92,7 +89,6 @@ watch(
 watch(showSettings, async (isOpen) => {
   if (!isOpen && groupId.value) {
     await groupsStore.loadGroup(groupId.value);
-    await loadCategories();
   }
 });
 onUnmounted(() => {

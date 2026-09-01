@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Ajustes",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "offline": "Sin conexión",
+    "offlineTooltip": "Sin conexión — mostrando datos locales, los cambios se sincronizarán al reconectar."
   },
   "footer": {
     "build": "Build",

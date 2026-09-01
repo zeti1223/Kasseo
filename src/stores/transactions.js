@@ -19,6 +19,8 @@ import {
   getCategorySpend,
   getNewlyCrossedThreshold,
 } from "@/utils/budgets";
+import { isOnline } from "@/services/offline/network";
+import { cacheGet, cacheSet, queueAdd, queueList } from "@/services/offline/db";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -168,6 +170,46 @@ async function buildConversionFields(groupCurrency, amount, currency, date) {
   };
 }
 
+// Same as buildConversionFields, but never throws: if the exchange-rate API
+// can't be reached (most commonly: offline, and no cached rate for this
+// currency pair/date), the raw amount is stored unconverted rather than
+// blocking the transaction from being added at all. `conversionPending`
+// marks it so it can be corrected later once a rate is available.
+async function safeBuildConversionFields(groupCurrency, amount, currency, date) {
+  try {
+    return await buildConversionFields(groupCurrency, amount, currency, date);
+  } catch (err) {
+    console.warn("Currency conversion failed, storing amount unconverted:", err);
+    return {
+      amount: Number(amount),
+      originalAmount: Number(amount),
+      originalCurrency: currency || groupCurrency,
+      baseCurrency: groupCurrency,
+      convertedAt: null,
+      conversionPending: true,
+    };
+  }
+}
+
+// Merges the local transactions list with any writes still sitting in the
+// offline queue for this group, so a transaction added while offline
+// doesn't visually disappear the moment a fresh (queue-unaware) snapshot
+// comes in from Firebase before the queue has had a chance to flush.
+async function mergeWithQueuedPending(groupId, list) {
+  const ops = await queueList();
+  const prefix = `transactions/${groupId}/`;
+  const existingIds = new Set(list.map((t) => t.id));
+  const merged = [...list];
+  for (const op of ops) {
+    if (op.kind !== "set" || !op.path.startsWith(prefix)) continue;
+    const id = op.path.slice(prefix.length);
+    if (existingIds.has(id)) continue;
+    merged.push({ id, ...op.payload, pending: true });
+    existingIds.add(id);
+  }
+  return merged.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
 export const useTransactionsStore = defineStore("transactions", () => {
   const transactions = ref([]);
   let unsubscribe = null;
@@ -175,12 +217,26 @@ export const useTransactionsStore = defineStore("transactions", () => {
   function listen(groupId) {
     if (unsubscribe) unsubscribe();
 
+    const cacheKey = `transactions:${groupId}`;
+    // Show the last-synced data immediately so the list isn't just empty
+    // while offline or still reconnecting. A real snapshot from onValue
+    // below always supersedes this once it arrives.
+    cacheGet(cacheKey).then((cached) => {
+      if (cached && transactions.value.length === 0) {
+        transactions.value = cached;
+      }
+    });
+
     const txRef = dbRef(db, `transactions/${groupId}`);
     unsubscribe = onValue(txRef, (snapshot) => {
       const val = snapshot.val() || {};
-      transactions.value = Object.entries(val)
+      const list = Object.entries(val)
         .map(([id, tx]) => ({ id, ...tx }))
         .sort((a, b) => new Date(a.date) - new Date(b.date));
+      cacheSet(cacheKey, list);
+      mergeWithQueuedPending(groupId, list).then((merged) => {
+        transactions.value = merged;
+      });
     });
   }
 
@@ -214,7 +270,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
   ) {
     const authStore = useAuthStore();
     const newRef = push(dbRef(db, `transactions/${groupId}`));
-    const conversion = await buildConversionFields(
+    const conversion = await safeBuildConversionFields(
       groupCurrency,
       amount,
       currency,
@@ -249,6 +305,23 @@ export const useTransactionsStore = defineStore("transactions", () => {
     // check below isn't thrown off by the realtime listener possibly having
     // already echoed this same write back into `transactions.value`.
     const preWriteTransactions = transactions.value;
+
+    if (!isOnline.value) {
+      // Offline: apply the change locally right away and queue the actual
+      // write instead of blocking on (or failing) a network call. `push()`
+      // above already generated the id purely client-side, so this is safe
+      // to do without a connection.
+      transactions.value = [
+        ...transactions.value,
+        { id: newRef.key, ...payload, pending: true },
+      ].sort((a, b) => new Date(a.date) - new Date(b.date));
+      await queueAdd({
+        kind: "set",
+        path: `transactions/${groupId}/${newRef.key}`,
+        payload,
+      });
+      return newRef.key;
+    }
 
     await set(newRef, payload);
 
@@ -303,6 +376,13 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
   async function deleteTransaction(groupId, txId) {
     const tx = transactions.value.find((t) => t.id === txId);
+
+    if (!isOnline.value) {
+      transactions.value = transactions.value.filter((t) => t.id !== txId);
+      await queueAdd({ kind: "remove", path: `transactions/${groupId}/${txId}` });
+      return;
+    }
+
     await remove(dbRef(db, `transactions/${groupId}/${txId}`));
     dispatchPushToGroupMembers(groupId, {
       titleKey: "notifications.transactionDeleted",
@@ -365,7 +445,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       splitOption,
     },
   ) {
-    const conversion = await buildConversionFields(
+    const conversion = await safeBuildConversionFields(
       groupCurrency,
       amount,
       currency,
@@ -392,6 +472,19 @@ export const useTransactionsStore = defineStore("transactions", () => {
     if (type === "settlement" && to) {
       payload.to = to;
     }
+
+    if (!isOnline.value) {
+      transactions.value = transactions.value
+        .map((t) => (t.id === txId ? { id: txId, ...payload, pending: true } : t))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      await queueAdd({
+        kind: "set",
+        path: `transactions/${groupId}/${txId}`,
+        payload,
+      });
+      return;
+    }
+
     await set(dbRef(db, `transactions/${groupId}/${txId}`), payload);
 
     const authStore = useAuthStore();

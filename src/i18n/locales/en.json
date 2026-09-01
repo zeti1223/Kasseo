@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Settings",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "offline": "Offline",
+    "offlineTooltip": "No connection — showing local data, changes will sync once you're back online."
   },
   "footer": {
     "build": "Build",
