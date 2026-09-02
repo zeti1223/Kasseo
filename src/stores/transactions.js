@@ -14,6 +14,13 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { convertCurrency } from "@/services/currency";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
+import {
+  getMonthRange,
+  getCategorySpend,
+  getNewlyCrossedThreshold,
+} from "@/utils/budgets";
+import { isOnline } from "@/services/offline/network";
+import { cacheGet, cacheSet, queueAdd, queueList } from "@/services/offline/db";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -44,6 +51,79 @@ async function dispatchPushToGroupMembers(
     });
   } catch (err) {
     console.warn("Could not dispatch push to group members:", err);
+  }
+}
+
+// Checks whether adding `addedAmount` to `categoryName` pushes that
+// category's spend for the calendar month containing `date` across its 80%
+// or 100% budget threshold for the first time. Returns
+// `{ crossed, limit, spendAfter }` or null if there's no budget set, or the
+// threshold was already crossed before this transaction.
+async function checkBudgetThresholdCrossed(
+  groupId,
+  categoryName,
+  addedAmount,
+  date,
+  currentTransactions,
+) {
+  try {
+    const budgetsSnap = await get(
+      dbRef(db, `groups/${groupId}/categoryBudgets`),
+    );
+    if (!budgetsSnap.exists()) return null;
+    const budget = Object.values(budgetsSnap.val()).find(
+      (b) => b?.name === categoryName,
+    );
+    if (!budget || !(Number(budget.amount) > 0)) return null;
+
+    const limit = Number(budget.amount);
+    const range = getMonthRange(new Date(date));
+    const spendBefore = getCategorySpend(currentTransactions, categoryName, range);
+    const crossed = getNewlyCrossedThreshold(spendBefore, addedAmount, limit);
+    if (!crossed) return null;
+
+    return { crossed, limit, spendAfter: spendBefore + addedAmount };
+  } catch (err) {
+    console.warn("Could not check category budget threshold:", err);
+    return null;
+  }
+}
+
+// Notifies every member of the fund (unlike other notifications, this
+// includes the person who just added the expense — they need to know they
+// just crossed their own fund's budget too) that a category budget hit a
+// warning or exceeded threshold.
+async function dispatchBudgetWarning(
+  groupId,
+  { categoryName, threshold, limit, spend, currency },
+) {
+  try {
+    const groupSnap = await get(dbRef(db, `groups/${groupId}`));
+    if (!groupSnap.exists()) return;
+    const members = groupSnap.val().members || {};
+    const allUids = Object.keys(members);
+    if (allUids.length === 0) return;
+
+    await sendPushNotificationToUsers({
+      recipientUids: allUids,
+      titleKey:
+        threshold === "exceeded"
+          ? "notifications.budgetExceeded"
+          : "notifications.budgetWarning",
+      titleParams: { category: categoryName },
+      bodyKey: "notifications.budgetBody",
+      bodyParams: {
+        spend: Math.round(spend),
+        limit: Math.round(limit),
+        currency: currency || "",
+      },
+      data: {
+        type: threshold === "exceeded" ? "budgetExceeded" : "budgetWarning",
+        category: categoryName,
+      },
+    });
+  } catch (err) {
+    console.warn("Could not dispatch budget warning:", err);
   }
 }
 
@@ -90,6 +170,46 @@ async function buildConversionFields(groupCurrency, amount, currency, date) {
   };
 }
 
+// Same as buildConversionFields, but never throws: if the exchange-rate API
+// can't be reached (most commonly: offline, and no cached rate for this
+// currency pair/date), the raw amount is stored unconverted rather than
+// blocking the transaction from being added at all. `conversionPending`
+// marks it so it can be corrected later once a rate is available.
+async function safeBuildConversionFields(groupCurrency, amount, currency, date) {
+  try {
+    return await buildConversionFields(groupCurrency, amount, currency, date);
+  } catch (err) {
+    console.warn("Currency conversion failed, storing amount unconverted:", err);
+    return {
+      amount: Number(amount),
+      originalAmount: Number(amount),
+      originalCurrency: currency || groupCurrency,
+      baseCurrency: groupCurrency,
+      convertedAt: null,
+      conversionPending: true,
+    };
+  }
+}
+
+// Merges the local transactions list with any writes still sitting in the
+// offline queue for this group, so a transaction added while offline
+// doesn't visually disappear the moment a fresh (queue-unaware) snapshot
+// comes in from Firebase before the queue has had a chance to flush.
+async function mergeWithQueuedPending(groupId, list) {
+  const ops = await queueList();
+  const prefix = `transactions/${groupId}/`;
+  const existingIds = new Set(list.map((t) => t.id));
+  const merged = [...list];
+  for (const op of ops) {
+    if (op.kind !== "set" || !op.path.startsWith(prefix)) continue;
+    const id = op.path.slice(prefix.length);
+    if (existingIds.has(id)) continue;
+    merged.push({ id, ...op.payload, pending: true });
+    existingIds.add(id);
+  }
+  return merged.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
 export const useTransactionsStore = defineStore("transactions", () => {
   const transactions = ref([]);
   let unsubscribe = null;
@@ -97,12 +217,26 @@ export const useTransactionsStore = defineStore("transactions", () => {
   function listen(groupId) {
     if (unsubscribe) unsubscribe();
 
+    const cacheKey = `transactions:${groupId}`;
+    // Show the last-synced data immediately so the list isn't just empty
+    // while offline or still reconnecting. A real snapshot from onValue
+    // below always supersedes this once it arrives.
+    cacheGet(cacheKey).then((cached) => {
+      if (cached && transactions.value.length === 0) {
+        transactions.value = cached;
+      }
+    });
+
     const txRef = dbRef(db, `transactions/${groupId}`);
     unsubscribe = onValue(txRef, (snapshot) => {
       const val = snapshot.val() || {};
-      transactions.value = Object.entries(val)
+      const list = Object.entries(val)
         .map(([id, tx]) => ({ id, ...tx }))
         .sort((a, b) => new Date(a.date) - new Date(b.date));
+      cacheSet(cacheKey, list);
+      mergeWithQueuedPending(groupId, list).then((merged) => {
+        transactions.value = merged;
+      });
     });
   }
 
@@ -136,7 +270,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
   ) {
     const authStore = useAuthStore();
     const newRef = push(dbRef(db, `transactions/${groupId}`));
-    const conversion = await buildConversionFields(
+    const conversion = await safeBuildConversionFields(
       groupCurrency,
       amount,
       currency,
@@ -167,6 +301,28 @@ export const useTransactionsStore = defineStore("transactions", () => {
     if (type === "settlement" && to) {
       payload.to = to;
     }
+    // Snapshot spend *before* this transaction is written, so the threshold
+    // check below isn't thrown off by the realtime listener possibly having
+    // already echoed this same write back into `transactions.value`.
+    const preWriteTransactions = transactions.value;
+
+    if (!isOnline.value) {
+      // Offline: apply the change locally right away and queue the actual
+      // write instead of blocking on (or failing) a network call. `push()`
+      // above already generated the id purely client-side, so this is safe
+      // to do without a connection.
+      transactions.value = [
+        ...transactions.value,
+        { id: newRef.key, ...payload, pending: true },
+      ].sort((a, b) => new Date(a.date) - new Date(b.date));
+      await queueAdd({
+        kind: "set",
+        path: `transactions/${groupId}/${newRef.key}`,
+        payload,
+      });
+      return newRef.key;
+    }
+
     await set(newRef, payload);
 
     if (notify) {
@@ -178,6 +334,25 @@ export const useTransactionsStore = defineStore("transactions", () => {
         body: description || category || "",
         data: { type: "transactionAdded" },
       });
+    }
+
+    if (type === "expense") {
+      const budgetAlert = await checkBudgetThresholdCrossed(
+        groupId,
+        payload.category,
+        conversion.amount,
+        date,
+        preWriteTransactions,
+      );
+      if (budgetAlert) {
+        dispatchBudgetWarning(groupId, {
+          categoryName: payload.category,
+          threshold: budgetAlert.crossed,
+          limit: budgetAlert.limit,
+          spend: budgetAlert.spendAfter,
+          currency: groupCurrency,
+        });
+      }
     }
 
     return newRef.key;
@@ -201,6 +376,13 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
   async function deleteTransaction(groupId, txId) {
     const tx = transactions.value.find((t) => t.id === txId);
+
+    if (!isOnline.value) {
+      transactions.value = transactions.value.filter((t) => t.id !== txId);
+      await queueAdd({ kind: "remove", path: `transactions/${groupId}/${txId}` });
+      return;
+    }
+
     await remove(dbRef(db, `transactions/${groupId}/${txId}`));
     dispatchPushToGroupMembers(groupId, {
       titleKey: "notifications.transactionDeleted",
@@ -263,7 +445,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       splitOption,
     },
   ) {
-    const conversion = await buildConversionFields(
+    const conversion = await safeBuildConversionFields(
       groupCurrency,
       amount,
       currency,
@@ -290,6 +472,19 @@ export const useTransactionsStore = defineStore("transactions", () => {
     if (type === "settlement" && to) {
       payload.to = to;
     }
+
+    if (!isOnline.value) {
+      transactions.value = transactions.value
+        .map((t) => (t.id === txId ? { id: txId, ...payload, pending: true } : t))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      await queueAdd({
+        kind: "set",
+        path: `transactions/${groupId}/${txId}`,
+        payload,
+      });
+      return;
+    }
+
     await set(dbRef(db, `transactions/${groupId}/${txId}`), payload);
 
     const authStore = useAuthStore();

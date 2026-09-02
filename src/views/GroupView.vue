@@ -4,12 +4,11 @@ import { useRoute, useRouter } from "vue-router";
 import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { useAuthStore } from "@/stores/auth";
-import { ref as dbRef, get } from "firebase/database";
-import { db } from "@/services/firebase/config";
 import { computeSplitBalances } from "@/utils/chartData";
 import ChartCard from "@/components/common/ChartCard.vue";
 import GroupHeader from "@/components/features/groups/GroupHeader.vue";
 import GroupStats from "@/components/features/groups/GroupStats.vue";
+import BudgetProgress from "@/components/features/groups/BudgetProgress.vue";
 import BalanceOverTimeChart from "@/components/charts/BalanceOverTimeChart.vue";
 import CategoryBreakdownChart from "@/components/charts/CategoryBreakdownChart.vue";
 import MemberBreakdownChart from "@/components/charts/MemberBreakdownChart.vue";
@@ -38,7 +37,15 @@ const showScan = ref(false);
 const showExport = ref(false);
 const showImport = ref(false);
 const showRecap = ref(false);
-const customCategories = ref([]);
+// Derived from currentGroup (already kept live by listenToGroup/loadGroup)
+// rather than a separate one-off fetch, so it works from cached/offline
+// data too and never blocks the rest of the page from loading.
+const customCategories = computed(() => {
+  const categories = groupsStore.currentGroup?.categories;
+  return categories
+    ? Object.entries(categories).map(([id, cat]) => ({ id, ...cat }))
+    : [];
+});
 const settleTarget = ref(null); // { memberId, amount } prefilled into the "Settle up" form
 
 const mode = computed(() => groupsStore.currentGroup?.mode || "kitty");
@@ -55,17 +62,8 @@ function handleSettle(payload) {
   mobileTab.value = "transactions";
 }
 
-async function loadCategories() {
-  if (!groupId.value) return;
-  const snap = await get(dbRef(db, `groups/${groupId.value}/categories`));
-  customCategories.value = snap.exists()
-    ? Object.entries(snap.val()).map(([id, cat]) => ({ id, ...cat }))
-    : [];
-}
-
 async function load(id) {
   await groupsStore.loadGroup(id);
-  await loadCategories();
   transactionsStore.listen(id);
   groupsStore.listenToGroup(id);
 }
@@ -91,7 +89,6 @@ watch(
 watch(showSettings, async (isOpen) => {
   if (!isOpen && groupId.value) {
     await groupsStore.loadGroup(groupId.value);
-    await loadCategories();
   }
 });
 onUnmounted(() => {
@@ -122,6 +119,10 @@ const totals = computed(() => {
     .reduce((sum, t) => sum + t.amount, 0);
   return { deposited, spent, balance: deposited - spent };
 });
+
+const hasBudgets = computed(() =>
+  Object.keys(groupsStore.currentGroup?.categoryBudgets || {}).length > 0,
+);
 </script>
 
 <template>
@@ -286,6 +287,14 @@ const totals = computed(() => {
           />
         </ChartCard>
 
+        <ChartCard v-if="hasBudgets" :title="$t('budgets.title')">
+          <BudgetProgress
+            :transactions="transactionsStore.transactions"
+            :category-budgets="groupsStore.currentGroup.categoryBudgets"
+            :currency="groupsStore.currentGroup.currency"
+          />
+        </ChartCard>
+
         <ChartCard
           :title="mode === 'split' ? $t('charts.monthlySpending') : $t('charts.monthlyCashFlow')"
         >
@@ -364,6 +373,16 @@ const totals = computed(() => {
         <ChartCard :title="$t('charts.categoryTrend')">
           <CategoryTrendChart
             :transactions="transactionsStore.transactions"
+            :currency="groupsStore.currentGroup.currency"
+          />
+        </ChartCard>
+      </div>
+
+      <div v-if="hasBudgets" class="grid grid-cols-1 gap-4 mb-6">
+        <ChartCard :title="$t('budgets.title')">
+          <BudgetProgress
+            :transactions="transactionsStore.transactions"
+            :category-budgets="groupsStore.currentGroup.categoryBudgets"
             :currency="groupsStore.currentGroup.currency"
           />
         </ChartCard>

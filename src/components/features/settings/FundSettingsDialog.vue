@@ -15,6 +15,7 @@ import CurrencyTab from "./CurrencyTab.vue";
 import ModeTab from "./ModeTab.vue";
 import MembersTab from "./MembersTab.vue";
 import CategoriesTab from "./CategoriesTab.vue";
+import BudgetsTab from "./BudgetsTab.vue";
 import StyleTab from "./StyleTab.vue";
 
 const props = defineProps({ modelValue: Boolean, group: Object });
@@ -31,6 +32,7 @@ const tabs = computed(() => [
   { id: "mode", label: t("fundSettings.tabMode") },
   { id: "members", label: t("fundSettings.tabMembers") },
   { id: "categories", label: t("fundSettings.tabCategories") },
+  { id: "budgets", label: t("fundSettings.tabBudgets") },
   { id: "style", label: t("fundSettings.tabStyle") },
 ]);
 const activeTab = ref("currency");
@@ -61,6 +63,9 @@ const recalcFailedCount = ref(0); // set after a run that left some transactions
 
 const newCategory = ref("");
 const categories = ref([]);
+// Lives on the group itself (unlike `categories`), so it updates reactively
+// via the group's realtime listener without a separate fetch.
+const categoryBudgets = computed(() => props.group?.categoryBudgets || {});
 
 const myColor = ref(DEFAULT_FUND_COLOR);
 const groupIcon = ref(DEFAULT_FUND_ICON);
@@ -247,8 +252,34 @@ async function confirmRemoveCategory() {
       props.group.id,
       removeCategoryTarget.value.id,
     );
+    // A budget on a deleted category would otherwise linger, silently
+    // tracking spend against a name nothing can be logged under anymore.
+    await groupsStore.removeCategoryBudget(
+      props.group.id,
+      removeCategoryTarget.value.name,
+    );
     await loadCategories();
     removeCategoryTarget.value = null;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleSaveBudget({ name, icon, amount }) {
+  if (!props.group?.id) return;
+  loading.value = true;
+  try {
+    await groupsStore.setCategoryBudget(props.group.id, name, amount, icon);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleClearBudget(categoryName) {
+  if (!props.group?.id) return;
+  loading.value = true;
+  try {
+    await groupsStore.removeCategoryBudget(props.group.id, categoryName);
   } finally {
     loading.value = false;
   }
@@ -495,6 +526,18 @@ function copyInviteLink() {
         :loading="loading"
         @add="handleAddCategory"
         @remove="(category) => (removeCategoryTarget = category)"
+      />
+
+      <BudgetsTab
+        v-if="activeTab === 'budgets'"
+        :custom-categories="categories"
+        :category-budgets="categoryBudgets"
+        :currency="props.group?.currency"
+        :is-owner="isOwner"
+        :is-admin="isAdmin"
+        :loading="loading"
+        @save="handleSaveBudget"
+        @clear="handleClearBudget"
       />
 
       <StyleTab

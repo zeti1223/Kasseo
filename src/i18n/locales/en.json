@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Settings",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "offline": "Offline",
+    "offlineTooltip": "No connection — showing local data, changes will sync once you're back online."
   },
   "footer": {
     "build": "Build",
@@ -266,6 +268,12 @@
     "adminOnlyCategories": "Only admins can add categories",
     "noCustomCategories": "No custom categories yet",
     "clickChooseIcon": "Click to choose icon",
+    "tabBudgets": "Budgets",
+    "budgetsHelp": "Set a monthly spending limit per category. You'll get a warning at 80% and 100% of the limit.",
+    "ownerOnlyBudgets": "Only the owner can set budgets",
+    "adminOnlyBudgets": "Only admins can set budgets",
+    "noBudget": "No limit",
+    "clearBudget": "Remove budget",
     "tabStyle": "Style",
     "styleColorTitle": "My color",
     "styleColorHelp": "Only visible to you — pick a color for this fund.",
@@ -394,6 +402,12 @@
     "beautyAndPersonalCare": "Beauty & Personal Care",
     "generalTag": "General Tag"
   },
+  "budgets": {
+    "title": "Budgets",
+    "noneSet": "No budgets set yet",
+    "warning": "{{percent}}% of budget used",
+    "exceeded": "Budget exceeded ({{percent}}%)"
+  },
   "notifications": {
     "title": "Notifications",
     "permission": "Notification permission",
@@ -413,6 +427,9 @@
     "groupIconChanged": "Group icon was updated",
     "memberJoined": "{{name}} joined the group",
     "memberLeft": "{{name}} left the group",
+    "budgetWarning": "\"{{category}}\" budget is at 80%",
+    "budgetExceeded": "\"{{category}}\" budget exceeded",
+    "budgetBody": "{{spend}} of {{limit}} {{currency}} spent this month",
     "testButton": "Send test notification",
     "testTitle": "Kasseo Notification",
     "testBody": "Push notifications are successfully set up!"

@@ -51,7 +51,9 @@
   },
   "navbar": {
     "settings": "Beállítások",
-    "signOut": "Kijelentkezés"
+    "signOut": "Kijelentkezés",
+    "offline": "Offline",
+    "offlineTooltip": "Nincs kapcsolat — helyi adatok jelennek meg, a változtatások az újracsatlakozáskor szinkronizálódnak."
   },
   "footer": {
     "build": "Build",
@@ -266,6 +268,12 @@
     "adminOnlyCategories": "Csak az adminok adhatnak hozzá kategóriákat",
     "noCustomCategories": "Még nincsenek egyéni kategóriák",
     "clickChooseIcon": "Kattints az ikon kiválasztásához",
+    "tabBudgets": "Büdzsék",
+    "budgetsHelp": "Állíts be havi költési limitet kategóriánként. A limit 80%-ánál és 100%-ánál figyelmeztetést kapsz.",
+    "ownerOnlyBudgets": "Csak a tulajdonos állíthat be büdzsét",
+    "adminOnlyBudgets": "Csak az adminok állíthatnak be büdzsét",
+    "noBudget": "Nincs limit",
+    "clearBudget": "Büdzsé törlése",
     "tabStyle": "Megjelenés",
     "styleColorTitle": "Saját szín",
     "styleColorHelp": "Csak neked látszik — válassz egy színt ehhez a kasszához.",
@@ -394,6 +402,12 @@
     "beautyAndPersonalCare": "Szépségápolás",
     "generalTag": "Általános címke"
   },
+  "budgets": {
+    "title": "Büdzsék",
+    "noneSet": "Még nincs beállított büdzsé",
+    "warning": "A büdzsé {{percent}}%-a elhasználva",
+    "exceeded": "Büdzsé túllépve ({{percent}}%)"
+  },
   "notifications": {
     "title": "Értesítések",
     "permission": "Értesítési engedély",
@@ -413,6 +427,9 @@
     "groupIconChanged": "A csoport ikonja megváltozott",
     "memberJoined": "{{name}} csatlakozott a csoporthoz",
     "memberLeft": "{{name}} kilépett a csoportból",
+    "budgetWarning": "\"{{category}}\" büdzsé elérte a 80%-ot",
+    "budgetExceeded": "\"{{category}}\" büdzsé túllépve",
+    "budgetBody": "{{spend}} / {{limit}} {{currency}} elköltve ebben a hónapban",
     "testButton": "Teszt értesítés küldése",
     "testTitle": "Kasseo értesítés",
     "testBody": "A push értesítések sikeresen be vannak állítva!"

@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
+import { isOnline } from "@/services/offline/network";
 import SettingsDialog from "../features/settings/SettingsDialog.vue";
 import LanguageSelector from "../common/LanguageSelector.vue";
 
@@ -45,6 +46,17 @@ async function handleLogout() {
       </div>
 
       <div class="flex-1" />
+
+      <!-- Persistent while offline: local data may be stale and any
+           changes are queued until the connection returns. -->
+      <div
+        v-if="!isOnline"
+        class="flex items-center gap-1.5 bg-black/25 text-white text-xs font-semibold px-2.5 py-1 rounded-full mr-2 flex-shrink-0"
+        :title="$t('navbar.offlineTooltip')"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
+        <span>{{ $t('navbar.offline') }}</span>
+      </div>
 
       <!-- User avatar & Profile quick touch -->
       <div

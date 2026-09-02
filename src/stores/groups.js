@@ -14,6 +14,8 @@ import { db } from "@/services/firebase/config";
 import { useAuthStore } from "./auth";
 import { useTransactionsStore } from "./transactions";
 import { sendPushNotificationToUsers } from "@/services/notificationService";
+import { categoryBudgetKey } from "@/utils/budgets";
+import { cacheGet, cacheSet, withTimeout } from "@/services/offline/db";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -104,6 +106,10 @@ export const useGroupsStore = defineStore("groups", () => {
 
   function rebuildGroupsList(ids) {
     groups.value = ids.map((id) => groupCardData.get(id)).filter(Boolean);
+    const authStore = useAuthStore();
+    if (authStore.user) {
+      cacheSet(`myGroups:${authStore.user.uid}`, groups.value);
+    }
   }
 
   // Keeps `groups` in sync with the full data of every fund the user belongs
@@ -114,6 +120,15 @@ export const useGroupsStore = defineStore("groups", () => {
     if (!authStore.user) return;
     if (unsubscribeIds) unsubscribeIds();
     stopGroupCardListeners();
+
+    // Show the last-synced funds immediately (e.g. cold start with no
+    // connection) rather than an empty dashboard until we reconnect.
+    const myGroupsCacheKey = `myGroups:${authStore.user.uid}`;
+    cacheGet(myGroupsCacheKey).then((cached) => {
+      if (cached && groups.value.length === 0) {
+        groups.value = cached;
+      }
+    });
 
     const idsRef = dbRef(db, `users/${authStore.user.uid}/groups`);
     unsubscribeIds = onValue(idsRef, (snapshot) => {
@@ -165,6 +180,16 @@ export const useGroupsStore = defineStore("groups", () => {
   function listenToGroup(groupId) {
     if (unsubscribeCurrentGroup) unsubscribeCurrentGroup();
 
+    const cacheKey = `group:${groupId}`;
+    // Fill the gap before Firebase's own listener fires (e.g. no
+    // connection yet) with whatever we last saw for this fund. Real data
+    // from onValue below always overwrites this once it arrives.
+    cacheGet(cacheKey).then((cached) => {
+      if (cached && !currentGroup.value) {
+        currentGroup.value = { id: groupId, ...cached };
+      }
+    });
+
     const groupRef = dbRef(db, `groups/${groupId}`);
     unsubscribeCurrentGroup = onValue(groupRef, (snapshot) => {
       const data = snapshot.val();
@@ -173,6 +198,7 @@ export const useGroupsStore = defineStore("groups", () => {
         return;
       }
       currentGroup.value = { id: groupId, ...data };
+      cacheSet(cacheKey, data);
     });
   }
 
@@ -358,14 +384,33 @@ export const useGroupsStore = defineStore("groups", () => {
   }
 
   async function loadGroup(groupId) {
-    const snap = await get(dbRef(db, `groups/${groupId}`));
-    if (snap.exists()) {
-      const data = snap.val();
-      const authStore = useAuthStore();
-      syncMyNicknameInGroup(groupId, data, authStore);
-      currentGroup.value = { id: groupId, ...data };
-    } else {
-      currentGroup.value = null;
+    const cacheKey = `group:${groupId}`;
+    try {
+      // Race against a timeout rather than awaiting `get()` indefinitely —
+      // offline with nothing cached server-side, this could otherwise hang
+      // until a connection appears instead of falling back below.
+      const snap = await withTimeout(get(dbRef(db, `groups/${groupId}`)));
+      if (snap.exists()) {
+        const data = snap.val();
+        const authStore = useAuthStore();
+        syncMyNicknameInGroup(groupId, data, authStore);
+        currentGroup.value = { id: groupId, ...data };
+        cacheSet(cacheKey, data);
+      } else {
+        currentGroup.value = null;
+      }
+    } catch (err) {
+      // Likely offline — fall back to the last-synced copy of this fund
+      // instead of leaving the page with nothing (or bouncing the user back
+      // to the dashboard, since callers treat a null currentGroup as "this
+      // fund doesn't exist").
+      const cached = await cacheGet(cacheKey);
+      if (cached) {
+        console.warn("Could not load fund, using last-synced copy:", err);
+        currentGroup.value = { id: groupId, ...cached };
+      } else {
+        throw err;
+      }
     }
     return currentGroup.value;
   }
@@ -495,6 +540,24 @@ export const useGroupsStore = defineStore("groups", () => {
 
   async function removeCategory(groupId, categoryId) {
     await remove(dbRef(db, `groups/${groupId}/categories/${categoryId}`));
+  }
+
+  // Budgets are keyed by category name (not id) so a limit can be set on
+  // built-in categories (Food & Groceries, Transport, ...) as well as
+  // custom ones, none of which need to already exist in `categories`.
+  async function setCategoryBudget(groupId, categoryName, amount, icon = null) {
+    const key = categoryBudgetKey(categoryName);
+    await set(dbRef(db, `groups/${groupId}/categoryBudgets/${key}`), {
+      name: categoryName,
+      amount: Number(amount),
+      icon: icon || null,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async function removeCategoryBudget(groupId, categoryName) {
+    const key = categoryBudgetKey(categoryName);
+    await remove(dbRef(db, `groups/${groupId}/categoryBudgets/${key}`));
   }
 
   // The fund's "central" icon — shared by everyone, meant to be set by the
@@ -658,6 +721,8 @@ export const useGroupsStore = defineStore("groups", () => {
     transferOwnership,
     addCategory,
     removeCategory,
+    setCategoryBudget,
+    removeCategoryBudget,
     setGroupIcon,
     setMyColor,
   };
