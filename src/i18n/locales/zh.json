@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "需要权限",
     "permissionRequiredGotIt": "知道了",
     "permissionRequiredBody": "你只能编辑自己创建的交易。此交易由 {{name}} 创建。",
-    "permissionRequiredHelp": "如需编辑此交易，请联系 {{name}} 进行修改，或联系你的群组管理员。"
+    "permissionRequiredHelp": "如需编辑此交易，请联系 {{name}} 进行修改，或联系你的群组管理员。",
+    "syncPending": "同步中…",
+    "syncPendingTooltip": "此更改尚未同步到服务器，恢复网络连接后会自动同步。",
+    "syncPendingEditBlocked": "此交易仍在同步中，暂时无法编辑或删除。"
   },
   "receiptScan": {
     "title": "扫描小票",

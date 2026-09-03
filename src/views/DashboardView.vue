@@ -5,7 +5,7 @@ import { useGroupsStore } from "@/stores/groups";
 import { useTransactionsStore } from "@/stores/transactions";
 import { ref as dbRef, get } from "firebase/database";
 import { db } from "@/services/firebase/config";
-import { cacheGet, withTimeout } from "@/services/offline/db";
+import { cacheGet, withTimeout, mergeWithQueuedPending } from "@/services/offline/db";
 import CreateGroupDialog from "@/components/features/groups/CreateGroupDialog.vue";
 import EmptyState from "@/components/features/dashboard/EmptyState.vue";
 import FundsList from "@/components/features/dashboard/FundsList.vue";
@@ -63,9 +63,18 @@ async function loadRecentTransactions() {
           val = Object.fromEntries(cached.map(({ id, ...tx }) => [id, tx]));
         }
       }
-      if (val) {
-        const txs = Object.entries(val).map(([id, tx]) => ({
-          id,
+      const baseList = val
+        ? Object.entries(val).map(([id, tx]) => ({ id, ...tx }))
+        : [];
+      // Overlay any writes still sitting in the offline queue for this fund
+      // (added/edited while offline) so they show up here as pending too,
+      // instead of only appearing once they've actually reached Firebase.
+      const merged = await mergeWithQueuedPending(
+        `transactions/${group.id}`,
+        baseList,
+      );
+      if (merged.length) {
+        const txs = merged.map((tx) => ({
           ...tx,
           groupId: group.id,
           groupName: group.name,

@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "Berechtigung erforderlich",
     "permissionRequiredGotIt": "Verstanden",
     "permissionRequiredBody": "Du kannst nur von dir erstellte Transaktionen bearbeiten. Diese Transaktion wurde von {{name}} erstellt.",
-    "permissionRequiredHelp": "Wenn du diese Transaktion bearbeiten möchtest, bitte {{name}} darum oder wende dich an den Administrator."
+    "permissionRequiredHelp": "Wenn du diese Transaktion bearbeiten möchtest, bitte {{name}} darum oder wende dich an den Administrator.",
+    "syncPending": "Wird synchronisiert…",
+    "syncPendingTooltip": "Diese Änderung wurde noch nicht auf dem Server gespeichert. Sie wird automatisch synchronisiert, sobald du wieder online bist.",
+    "syncPendingEditBlocked": "Diese Transaktion wird noch synchronisiert und kann derzeit nicht bearbeitet oder gelöscht werden."
   },
   "receiptScan": {
     "title": "Beleg scannen",

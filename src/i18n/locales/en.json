@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "Permission Required",
     "permissionRequiredGotIt": "Got it",
     "permissionRequiredBody": "You can only edit transactions you created. This transaction was created by {{name}}.",
-    "permissionRequiredHelp": "If you need to edit this transaction, please ask {{name}} to make the changes or contact your group administrator."
+    "permissionRequiredHelp": "If you need to edit this transaction, please ask {{name}} to make the changes or contact your group administrator.",
+    "syncPending": "Syncing…",
+    "syncPendingTooltip": "This change hasn't reached the server yet. It will sync automatically once you're back online.",
+    "syncPendingEditBlocked": "This transaction is still syncing and can't be edited or deleted yet."
   },
   "receiptScan": {
     "title": "Scan a receipt",

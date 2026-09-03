@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "Permission requise",
     "permissionRequiredGotIt": "Compris",
     "permissionRequiredBody": "Vous ne pouvez modifier que les transactions que vous avez créées. Cette transaction a été créée par {{name}}.",
-    "permissionRequiredHelp": "Si vous devez modifier cette transaction, veuillez demander à {{name}} de faire la modification ou contactez l'administrateur."
+    "permissionRequiredHelp": "Si vous devez modifier cette transaction, veuillez demander à {{name}} de faire la modification ou contactez l'administrateur.",
+    "syncPending": "Synchronisation…",
+    "syncPendingTooltip": "Cette modification n'a pas encore atteint le serveur. Elle se synchronisera automatiquement dès que vous serez de nouveau en ligne.",
+    "syncPendingEditBlocked": "Cette transaction est encore en cours de synchronisation et ne peut pas être modifiée ou supprimée pour le moment."
   },
   "receiptScan": {
     "title": "Scanner un reçu",

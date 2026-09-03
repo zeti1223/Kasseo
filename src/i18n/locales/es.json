@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "Permiso requerido",
     "permissionRequiredGotIt": "Entendido",
     "permissionRequiredBody": "Solo puedes editar transacciones que tú hayas creado. Esta transacción fue creada por {{name}}.",
-    "permissionRequiredHelp": "Si necesitas editar esta transacción, por favor pide a {{name}} que haga los cambios o contacta al administrador del grupo."
+    "permissionRequiredHelp": "Si necesitas editar esta transacción, por favor pide a {{name}} que haga los cambios o contacta al administrador del grupo.",
+    "syncPending": "Sincronizando…",
+    "syncPendingTooltip": "Este cambio aún no ha llegado al servidor. Se sincronizará automáticamente en cuanto vuelvas a estar en línea.",
+    "syncPendingEditBlocked": "Esta transacción todavía se está sincronizando y no se puede editar ni eliminar por ahora."
   },
   "receiptScan": {
     "title": "Escanear un recibo",
