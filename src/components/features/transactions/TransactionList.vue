@@ -7,6 +7,7 @@ import { useTranslation } from "i18next-vue";
 import { splitShareAmount } from "@/utils/chartData";
 import { formatCompactNumber } from "@/utils/format";
 import { getCategoryIcon, getCategoryLabel } from "@/constants/categories";
+import { filterTransactions } from "@/utils/exportData";
 import EditTransactionDialog from "./EditTransactionDialog.vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 
@@ -41,6 +42,66 @@ const showEditDialog = ref(false);
 const permissionTx = ref(null);
 const showPermissionAlert = ref(false);
 
+// --- Search & filtering (local state, not persisted) ---
+const searchQuery = ref("");
+const typeFilter = ref("all"); // 'all' | 'expense' | 'deposit' | 'settlement'
+const categoryFilter = ref("all");
+const memberFilter = ref("all");
+const dateFilter = ref("all"); // 'all' | 'this_month' | 'last_month' | 'this_year' | 'custom'
+const startDate = ref("");
+const endDate = ref("");
+const showFilters = ref(false);
+
+const availableCategories = computed(() => {
+  const names = new Set();
+  for (const tx of props.transactions) {
+    if (tx.category) names.add(tx.category);
+  }
+  for (const cat of props.customCategories) {
+    if (cat.name) names.add(cat.name);
+  }
+  return Array.from(names).sort((a, b) => a.localeCompare(b));
+});
+
+const availableMembers = computed(() => {
+  return Object.entries(props.members || {}).map(([id, m]) => ({
+    id,
+    name: m.nickname || m.displayName || m.email || id,
+  }));
+});
+
+const hasActiveFilters = computed(() => {
+  return (
+    searchQuery.value.trim() !== "" ||
+    typeFilter.value !== "all" ||
+    categoryFilter.value !== "all" ||
+    memberFilter.value !== "all" ||
+    dateFilter.value !== "all"
+  );
+});
+
+const filteredTransactions = computed(() => {
+  return filterTransactions(props.transactions, {
+    search: searchQuery.value,
+    typeFilter: typeFilter.value,
+    categoryFilter: categoryFilter.value,
+    memberFilter: memberFilter.value,
+    dateFilter: dateFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+  });
+});
+
+function clearFilters() {
+  searchQuery.value = "";
+  typeFilter.value = "all";
+  categoryFilter.value = "all";
+  memberFilter.value = "all";
+  dateFilter.value = "all";
+  startDate.value = "";
+  endDate.value = "";
+}
+
 function categoryIcon(catName) {
   const customCat = props.customCategories.find((c) => c.name === catName);
   return getCategoryIcon(catName, customCat?.icon);
@@ -60,7 +121,7 @@ const displayEntries = computed(() => {
   const map = new Map();
   const list = [];
 
-  for (const tx of props.transactions) {
+  for (const tx of filteredTransactions.value) {
     if (tx.receiptId) {
       if (!map.has(tx.receiptId)) {
         const groupEntry = {
@@ -208,18 +269,233 @@ function splitBetweenLabel(tx) {
           v-if="transactions.length"
           class="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
         >
-          {{ transactions.length }}
+          {{ hasActiveFilters ? $t('transactions.resultsCount', { count: filteredTransactions.length, total: transactions.length }) : transactions.length }}
         </span>
       </div>
-      <button
-        v-if="transactions.length"
-        @click="$emit('export')"
-        class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors font-medium"
-        :title="$t('groups.exportTooltip')"
-      >
-        <i class="fas fa-file-export"></i>
-        <span>{{ $t('common.export') }}</span>
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          v-if="transactions.length"
+          @click="showFilters = !showFilters"
+          class="text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors font-medium"
+          :class="
+            showFilters || hasActiveFilters
+              ? 'text-[#8A5FBF] dark:text-[#C8A5FC] bg-[#C8A5FC]/10'
+              : 'text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700/50'
+          "
+        >
+          <i class="fas fa-filter"></i>
+          <span
+            v-if="hasActiveFilters"
+            class="w-1.5 h-1.5 rounded-full bg-[#C8A5FC]"
+          ></span>
+        </button>
+        <button
+          v-if="transactions.length"
+          @click="$emit('export')"
+          class="text-xs text-gray-500 dark:text-gray-400 hover:text-[#C8A5FC] dark:hover:text-[#C8A5FC] flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors font-medium"
+          :title="$t('groups.exportTooltip')"
+        >
+          <i class="fas fa-file-export"></i>
+          <span>{{ $t('common.export') }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div v-if="transactions.length" class="mb-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+        <input
+          v-model="searchQuery"
+          type="text"
+          :placeholder="$t('transactions.searchPlaceholder')"
+          class="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#C8A5FC] focus:border-[#C8A5FC]"
+        />
+        <button
+          v-if="searchQuery"
+          @click="searchQuery = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+        >
+          <i class="fas fa-times-circle text-xs"></i>
+        </button>
+      </div>
+
+      <div v-if="showFilters" class="mt-3 p-3 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 space-y-3">
+        <!-- Type chips -->
+        <div class="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            @click="typeFilter = 'all'"
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            :class="
+              typeFilter === 'all'
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent'
+                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            "
+          >
+            {{ $t('export.allTypes') }}
+          </button>
+          <button
+            type="button"
+            @click="typeFilter = 'expense'"
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            :class="
+              typeFilter === 'expense'
+                ? 'bg-[#C1503A] text-white border-transparent'
+                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            "
+          >
+            {{ $t('transactions.expense') }}
+          </button>
+          <button
+            v-if="mode === 'kitty'"
+            type="button"
+            @click="typeFilter = 'deposit'"
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            :class="
+              typeFilter === 'deposit'
+                ? 'bg-[#3FA34D] text-white border-transparent'
+                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            "
+          >
+            {{ $t('transactions.deposit') }}
+          </button>
+          <button
+            v-if="mode === 'split'"
+            type="button"
+            @click="typeFilter = 'settlement'"
+            class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            :class="
+              typeFilter === 'settlement'
+                ? 'bg-[#5C7A99] dark:bg-[#A5E3FC] text-white dark:text-gray-900 border-transparent'
+                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            "
+          >
+            {{ $t('transactions.settleUp') }}
+          </button>
+        </div>
+
+        <!-- Category / Member selects -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+              {{ $t('transactions.filterByCategory') }}
+            </label>
+            <select
+              v-model="categoryFilter"
+              class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#C8A5FC]"
+            >
+              <option value="all">{{ $t('transactions.allCategories') }}</option>
+              <option v-for="cat in availableCategories" :key="cat" :value="cat">
+                {{ getCategoryLabel(cat, $t) }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+              {{ $t('transactions.filterByMember') }}
+            </label>
+            <select
+              v-model="memberFilter"
+              class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#C8A5FC]"
+            >
+              <option value="all">{{ $t('transactions.allMembers') }}</option>
+              <option v-for="m in availableMembers" :key="m.id" :value="m.id">
+                {{ m.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Date range chips -->
+        <div>
+          <label class="block text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+            {{ $t('transactions.filterByDate') }}
+          </label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              @click="dateFilter = 'all'"
+              class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+              :class="
+                dateFilter === 'all'
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              {{ $t('export.allTime') }}
+            </button>
+            <button
+              type="button"
+              @click="dateFilter = 'this_month'"
+              class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+              :class="
+                dateFilter === 'this_month'
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              {{ $t('export.thisMonth') }}
+            </button>
+            <button
+              type="button"
+              @click="dateFilter = 'last_month'"
+              class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+              :class="
+                dateFilter === 'last_month'
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              {{ $t('export.lastMonth') }}
+            </button>
+            <button
+              type="button"
+              @click="dateFilter = 'custom'"
+              class="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+              :class="
+                dateFilter === 'custom'
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              "
+            >
+              {{ $t('export.custom') }}
+            </button>
+          </div>
+
+          <div
+            v-if="dateFilter === 'custom'"
+            class="grid grid-cols-2 gap-2 mt-2"
+          >
+            <div>
+              <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">{{ $t('export.from') }}</label>
+              <input
+                v-model="startDate"
+                type="date"
+                class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#C8A5FC]"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1">{{ $t('export.to') }}</label>
+              <input
+                v-model="endDate"
+                type="date"
+                class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#C8A5FC]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          v-if="hasActiveFilters"
+          type="button"
+          @click="clearFilters"
+          class="text-[11px] text-gray-500 dark:text-gray-400 hover:text-[#C1503A] dark:hover:text-[#C1503A] font-medium flex items-center gap-1"
+        >
+          <i class="fas fa-times text-[10px]"></i>
+          {{ $t('transactions.clearFilters') }}
+        </button>
+      </div>
     </div>
 
     <div
@@ -227,6 +503,25 @@ function splitBetweenLabel(tx) {
       class="bg-[#A5E3FC]/20 border border-[#A5E3FC]/40 text-[#A5E3FC] rounded-xl p-4 text-center text-sm"
     >
       {{ $t('transactions.emptyPrompt', { action: mode === "split" ? $t('transactions.expense').toLowerCase() : `${$t('transactions.deposit').toLowerCase()} / ${$t('transactions.expense').toLowerCase()}` }) }}
+    </div>
+
+    <div
+      v-else-if="!filteredTransactions.length"
+      class="bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-xl p-6 text-center"
+    >
+      <i class="fas fa-search text-xl text-gray-300 dark:text-gray-600 mb-2"></i>
+      <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+        {{ $t('transactions.noResultsTitle') }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+        {{ $t('transactions.noResultsBody') }}
+      </p>
+      <button
+        @click="clearFilters"
+        class="mt-3 text-xs font-medium text-[#8A5FBF] dark:text-[#C8A5FC] hover:underline"
+      >
+        {{ $t('transactions.clearFilters') }}
+      </button>
     </div>
 
     <div v-else class="space-y-3">
