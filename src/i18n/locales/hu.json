@@ -165,7 +165,10 @@
     "permissionRequiredTitle": "Engedély szükséges",
     "permissionRequiredGotIt": "Értem",
     "permissionRequiredBody": "Csak a saját magad által létrehozott tranzakciókat szerkesztheted. Ezt a tranzakciót {{name}} hozta létre.",
-    "permissionRequiredHelp": "Ha módosítani szeretnéd, kérd meg {{name}} felhasználót a módosításra, vagy fordulj a csoport adminisztrátorához."
+    "permissionRequiredHelp": "Ha módosítani szeretnéd, kérd meg {{name}} felhasználót a módosításra, vagy fordulj a csoport adminisztrátorához.",
+    "syncPending": "Szinkronizálás…",
+    "syncPendingTooltip": "Ez a módosítás még nem érkezett meg a szerverre. Automatikusan szinkronizálódik, amint újra online leszel.",
+    "syncPendingEditBlocked": "Ez a tranzakció még szinkronizálás alatt áll, egyelőre nem szerkeszthető vagy törölhető."
   },
   "receiptScan": {
     "title": "Nyugta beolvasása",

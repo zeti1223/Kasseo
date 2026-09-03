@@ -11,6 +11,7 @@ defineEmits(["open"]);
 <template>
   <div
     class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+    :class="{ 'opacity-60': tx.pending }"
     @click="$emit('open')"
   >
     <div class="flex items-start gap-3">
@@ -37,8 +38,13 @@ defineEmits(["open"]);
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between mb-1">
-          <div class="font-medium text-sm dark:text-white truncate">
-            {{ tx.description || getCategoryLabel(tx.category, $t) }}
+          <div class="font-medium text-sm dark:text-white truncate flex items-center gap-1.5">
+            <span class="truncate">{{ tx.description || getCategoryLabel(tx.category, $t) }}</span>
+            <i
+              v-if="tx.pending"
+              class="fas fa-rotate text-[10px] text-amber-500 dark:text-amber-400 flex-shrink-0"
+              :title="$t('transactions.syncPendingTooltip')"
+            ></i>
           </div>
           <div
             class="text-sm font-semibold dark:text-white shrink-0 ml-2 font-mono tabular-nums"
@@ -54,6 +60,13 @@ defineEmits(["open"]);
           <div class="truncate flex items-center gap-1.5">
             <span>{{ tx.groupName }}</span>
             <span v-if="tx.category && tx.type === 'expense'" class="text-gray-400 dark:text-gray-500">· {{ getCategoryLabel(tx.category, $t) }}</span>
+            <span
+              v-if="tx.pending"
+              class="text-amber-600 dark:text-amber-400 font-medium"
+              :title="$t('transactions.syncPendingTooltip')"
+            >
+              · {{ $t('transactions.syncPending') }}
+            </span>
           </div>
           <div>{{ new Date(tx.date).toLocaleDateString() }}</div>
         </div>

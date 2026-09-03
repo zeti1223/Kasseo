@@ -100,10 +100,12 @@ function memberName(uid) {
 }
 
 function canEdit(tx) {
+  if (tx.pending) return false;
   return tx.paidBy === authStore.user?.uid || isAdmin.value;
 }
 
 function canDelete(tx) {
+  if (tx.pending) return false;
   return tx.paidBy === authStore.user?.uid || isAdmin.value;
 }
 
@@ -137,6 +139,7 @@ function setGroupSplitOption(receiptId, newSplitOption) {
 }
 
 function handleEdit(tx) {
+  if (tx.pending) return;
   if (canEdit(tx)) {
     editingTransaction.value = tx;
     showEditDialog.value = true;
@@ -303,6 +306,7 @@ function splitBetweenLabel(tx) {
               v-for="tx in entry.items"
               :key="tx.id"
               class="p-2.5 sm:p-3 pl-4 sm:pl-6 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-colors"
+              :class="{ 'opacity-60': tx.pending }"
             >
               <div class="flex items-start gap-3">
                 <div class="w-7 h-7 rounded-lg bg-[#C8A5FC]/20 text-[#8A5FBF] dark:text-[#C8A5FC] flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
@@ -311,16 +315,30 @@ function splitBetweenLabel(tx) {
 
                 <div class="flex-1 min-w-0">
                   <div class="flex items-baseline justify-between gap-2">
-                    <span class="font-medium text-sm truncate dark:text-white">
+                    <span class="font-medium text-sm truncate dark:text-white flex items-center gap-1.5">
                       {{ tx.description || getCategoryLabel(tx.category, $t) }}
+                      <i
+                        v-if="tx.pending"
+                        class="fas fa-rotate text-[10px] text-amber-500 dark:text-amber-400"
+                        :title="$t('transactions.syncPendingTooltip')"
+                      ></i>
                     </span>
                     <span class="font-semibold text-xs sm:text-sm font-mono tabular-nums text-[#C1503A] flex-shrink-0">
                       -{{ formatCompactNumber(tx.amount) }}
                     </span>
                   </div>
 
-                  <div class="text-xs text-gray-400 dark:text-gray-400 mt-0.5">
+                  <div class="text-xs text-gray-400 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
                     <span class="dark:text-gray-300">{{ getCategoryLabel(tx.category, $t) }}</span>
+                    <template v-if="tx.pending">
+                      <span class="text-gray-300 dark:text-gray-600">·</span>
+                      <span
+                        class="text-amber-600 dark:text-amber-400 font-medium"
+                        :title="$t('transactions.syncPendingTooltip')"
+                      >
+                        {{ $t('transactions.syncPending') }}
+                      </span>
+                    </template>
                   </div>
 
                   <div
@@ -350,8 +368,8 @@ function splitBetweenLabel(tx) {
                   <button
                     @click="handleEdit(tx)"
                     class="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    :class="{ 'opacity-40': !canEdit(tx) }"
-                    :title="$t('transactions.editItem')"
+                    :class="{ 'opacity-40 cursor-not-allowed': !canEdit(tx) }"
+                    :title="tx.pending ? $t('transactions.syncPendingEditBlocked') : $t('transactions.editItem')"
                   >
                     <i class="fas fa-edit text-xs"></i>
                   </button>
@@ -373,6 +391,7 @@ function splitBetweenLabel(tx) {
         <div
           v-else
           class="p-3 sm:p-3.5 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/40 dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors shadow-xs"
+          :class="{ 'opacity-60': entry.tx.pending }"
         >
           <div class="flex items-start gap-3">
             <!-- Type / Category Icon -->
@@ -402,13 +421,18 @@ function splitBetweenLabel(tx) {
             <div class="flex-1 min-w-0">
               <!-- Row 1: Title & Amount -->
               <div class="flex items-baseline justify-between gap-2">
-                <span class="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                <span class="font-semibold text-sm text-gray-900 dark:text-white truncate flex items-center gap-1.5">
                   <template v-if="entry.tx.type === 'settlement'">
                     {{ $t('transactions.paidTo', { payer: memberName(entry.tx.paidBy), recipient: memberName(entry.tx.to) }) }}
                   </template>
                   <template v-else>
                     {{ entry.tx.description || getCategoryLabel(entry.tx.category, $t) }}
                   </template>
+                  <i
+                    v-if="entry.tx.pending"
+                    class="fas fa-rotate text-[10px] text-amber-500 dark:text-amber-400 flex-shrink-0"
+                    :title="$t('transactions.syncPendingTooltip')"
+                  ></i>
                 </span>
 
                 <!-- Amount Block with Dedicated Right-Aligned Currency Display -->
@@ -458,6 +482,15 @@ function splitBetweenLabel(tx) {
                     <span class="dark:text-gray-300">{{ getCategoryLabel(entry.tx.category, $t) }}</span>
                   </template>
                 </template>
+                <template v-if="entry.tx.pending">
+                  <span class="text-gray-300 dark:text-gray-600">·</span>
+                  <span
+                    class="text-amber-600 dark:text-amber-400 font-medium"
+                    :title="$t('transactions.syncPendingTooltip')"
+                  >
+                    {{ $t('transactions.syncPending') }}
+                  </span>
+                </template>
               </div>
 
               <!-- Row 3: Split info and Actions -->
@@ -488,8 +521,8 @@ function splitBetweenLabel(tx) {
                   <button
                     @click="handleEdit(entry.tx)"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#C8A5FC] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    :class="{ 'opacity-40': !canEdit(entry.tx) }"
-                    :title="$t('transactions.editTransaction')"
+                    :class="{ 'opacity-40 cursor-not-allowed': !canEdit(entry.tx) }"
+                    :title="entry.tx.pending ? $t('transactions.syncPendingEditBlocked') : $t('transactions.editTransaction')"
                   >
                     <i class="fas fa-edit text-xs"></i>
                   </button>

@@ -140,6 +140,21 @@ export async function queueRemove(id) {
   }
 }
 
+export async function mergeWithQueuedPending(path, list) {
+  const ops = await queueList();
+  const prefix = `${path}/`;
+  const existingIds = new Set(list.map((item) => item.id));
+  const merged = [...list];
+  for (const op of ops) {
+    if (op.kind !== "set" || !op.path.startsWith(prefix)) continue;
+    const id = op.path.slice(prefix.length);
+    if (existingIds.has(id)) continue;
+    merged.push({ id, ...op.payload, pending: true });
+    existingIds.add(id);
+  }
+  return merged;
+}
+
 /**
  * Races `promise` against a timeout so a Firebase call that would otherwise
  * hang indefinitely while offline (rather than rejecting) doesn't block the

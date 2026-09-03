@@ -20,7 +20,12 @@ import {
   getNewlyCrossedThreshold,
 } from "@/utils/budgets";
 import { isOnline } from "@/services/offline/network";
-import { cacheGet, cacheSet, queueAdd, queueList } from "@/services/offline/db";
+import {
+  cacheGet,
+  cacheSet,
+  queueAdd,
+  mergeWithQueuedPending,
+} from "@/services/offline/db";
 
 // Note: title/body are always sent via i18n keys + params (titleKey/bodyKey)
 // so notificationService can translate them into every recipient's own
@@ -195,18 +200,8 @@ async function safeBuildConversionFields(groupCurrency, amount, currency, date) 
 // offline queue for this group, so a transaction added while offline
 // doesn't visually disappear the moment a fresh (queue-unaware) snapshot
 // comes in from Firebase before the queue has had a chance to flush.
-async function mergeWithQueuedPending(groupId, list) {
-  const ops = await queueList();
-  const prefix = `transactions/${groupId}/`;
-  const existingIds = new Set(list.map((t) => t.id));
-  const merged = [...list];
-  for (const op of ops) {
-    if (op.kind !== "set" || !op.path.startsWith(prefix)) continue;
-    const id = op.path.slice(prefix.length);
-    if (existingIds.has(id)) continue;
-    merged.push({ id, ...op.payload, pending: true });
-    existingIds.add(id);
-  }
+async function mergeGroupTransactionsWithQueue(groupId, list) {
+  const merged = await mergeWithQueuedPending(`transactions/${groupId}`, list);
   return merged.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
@@ -234,7 +229,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
         .map(([id, tx]) => ({ id, ...tx }))
         .sort((a, b) => new Date(a.date) - new Date(b.date));
       cacheSet(cacheKey, list);
-      mergeWithQueuedPending(groupId, list).then((merged) => {
+      mergeGroupTransactionsWithQueue(groupId, list).then((merged) => {
         transactions.value = merged;
       });
     });
