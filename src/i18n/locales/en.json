@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "If you need to edit this transaction, please ask {{name}} to make the changes or contact your group administrator.",
     "syncPending": "Syncing…",
     "syncPendingTooltip": "This change hasn't reached the server yet. It will sync automatically once you're back online.",
-    "syncPendingEditBlocked": "This transaction is still syncing and can't be edited or deleted yet."
+    "syncPendingEditBlocked": "This transaction is still syncing and can't be edited or deleted yet.",
+    "searchPlaceholder": "Search description or category…",
+    "filterByCategory": "Category",
+    "filterByMember": "Member",
+    "filterByDate": "Date",
+    "allCategories": "All categories",
+    "allMembers": "All members",
+    "clearFilters": "Clear filters",
+    "noResultsTitle": "No matching transactions",
+    "noResultsBody": "Try adjusting your search or filters.",
+    "resultsCount": "{{count}} of {{total}}"
   },
   "receiptScan": {
     "title": "Scan a receipt",
