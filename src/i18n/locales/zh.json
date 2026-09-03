@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "如需编辑此交易，请联系 {{name}} 进行修改，或联系你的群组管理员。",
     "syncPending": "同步中…",
     "syncPendingTooltip": "此更改尚未同步到服务器，恢复网络连接后会自动同步。",
-    "syncPendingEditBlocked": "此交易仍在同步中，暂时无法编辑或删除。"
+    "syncPendingEditBlocked": "此交易仍在同步中，暂时无法编辑或删除。",
+    "searchPlaceholder": "搜索描述或分类…",
+    "filterByCategory": "分类",
+    "filterByMember": "成员",
+    "filterByDate": "日期",
+    "allCategories": "所有分类",
+    "allMembers": "所有成员",
+    "clearFilters": "清除筛选",
+    "noResultsTitle": "没有匹配的交易",
+    "noResultsBody": "请尝试调整搜索或筛选条件。",
+    "resultsCount": "{{count}} / {{total}}"
   },
   "receiptScan": {
     "title": "扫描小票",

@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "Si necesitas editar esta transacción, por favor pide a {{name}} que haga los cambios o contacta al administrador del grupo.",
     "syncPending": "Sincronizando…",
     "syncPendingTooltip": "Este cambio aún no ha llegado al servidor. Se sincronizará automáticamente en cuanto vuelvas a estar en línea.",
-    "syncPendingEditBlocked": "Esta transacción todavía se está sincronizando y no se puede editar ni eliminar por ahora."
+    "syncPendingEditBlocked": "Esta transacción todavía se está sincronizando y no se puede editar ni eliminar por ahora.",
+    "searchPlaceholder": "Buscar descripción o categoría…",
+    "filterByCategory": "Categoría",
+    "filterByMember": "Miembro",
+    "filterByDate": "Fecha",
+    "allCategories": "Todas las categorías",
+    "allMembers": "Todos los miembros",
+    "clearFilters": "Borrar filtros",
+    "noResultsTitle": "No hay transacciones coincidentes",
+    "noResultsBody": "Intenta ajustar tu búsqueda o filtros.",
+    "resultsCount": "{{count}} de {{total}}"
   },
   "receiptScan": {
     "title": "Escanear un recibo",

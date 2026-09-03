@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "Ha módosítani szeretnéd, kérd meg {{name}} felhasználót a módosításra, vagy fordulj a csoport adminisztrátorához.",
     "syncPending": "Szinkronizálás…",
     "syncPendingTooltip": "Ez a módosítás még nem érkezett meg a szerverre. Automatikusan szinkronizálódik, amint újra online leszel.",
-    "syncPendingEditBlocked": "Ez a tranzakció még szinkronizálás alatt áll, egyelőre nem szerkeszthető vagy törölhető."
+    "syncPendingEditBlocked": "Ez a tranzakció még szinkronizálás alatt áll, egyelőre nem szerkeszthető vagy törölhető.",
+    "searchPlaceholder": "Keresés leírás vagy kategória szerint…",
+    "filterByCategory": "Kategória",
+    "filterByMember": "Tag",
+    "filterByDate": "Dátum",
+    "allCategories": "Minden kategória",
+    "allMembers": "Minden tag",
+    "clearFilters": "Szűrők törlése",
+    "noResultsTitle": "Nincs egyező tranzakció",
+    "noResultsBody": "Próbáld módosítani a keresést vagy a szűrőket.",
+    "resultsCount": "{{count}} / {{total}}"
   },
   "receiptScan": {
     "title": "Nyugta beolvasása",

@@ -40,13 +40,46 @@ function getMemberName(uid, members = {}) {
 }
 
 /**
- * Filter transactions based on date range and type
+ * Filter transactions based on date range, type, category, paying member,
+ * and a free-text search matched against description/category.
  */
-export function filterTransactions(transactions = [], { dateFilter = "all", startDate = "", endDate = "", typeFilter = "all" } = {}) {
+export function filterTransactions(
+  transactions = [],
+  {
+    dateFilter = "all",
+    startDate = "",
+    endDate = "",
+    typeFilter = "all",
+    categoryFilter = "all",
+    memberFilter = "all",
+    search = "",
+  } = {},
+) {
+  const query = search.trim().toLowerCase();
+
   return transactions.filter((tx) => {
     // Type filter
     if (typeFilter !== "all" && tx.type !== typeFilter) {
       return false;
+    }
+
+    // Category filter
+    if (categoryFilter !== "all" && tx.category !== categoryFilter) {
+      return false;
+    }
+
+    // Paying member filter
+    if (memberFilter !== "all" && tx.paidBy !== memberFilter) {
+      return false;
+    }
+
+    // Free-text search across description and category
+    if (query) {
+      const description = (tx.description || "").toLowerCase();
+      const category = (tx.category || "").toLowerCase();
+      if (!description.includes(query) && !category.includes(query)) {
+        return false;
+      }
     }
 
     if (!tx.date) return true;

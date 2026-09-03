@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "Si vous devez modifier cette transaction, veuillez demander à {{name}} de faire la modification ou contactez l'administrateur.",
     "syncPending": "Synchronisation…",
     "syncPendingTooltip": "Cette modification n'a pas encore atteint le serveur. Elle se synchronisera automatiquement dès que vous serez de nouveau en ligne.",
-    "syncPendingEditBlocked": "Cette transaction est encore en cours de synchronisation et ne peut pas être modifiée ou supprimée pour le moment."
+    "syncPendingEditBlocked": "Cette transaction est encore en cours de synchronisation et ne peut pas être modifiée ou supprimée pour le moment.",
+    "searchPlaceholder": "Rechercher une description ou catégorie…",
+    "filterByCategory": "Catégorie",
+    "filterByMember": "Membre",
+    "filterByDate": "Date",
+    "allCategories": "Toutes les catégories",
+    "allMembers": "Tous les membres",
+    "clearFilters": "Réinitialiser les filtres",
+    "noResultsTitle": "Aucune transaction correspondante",
+    "noResultsBody": "Essayez d'ajuster votre recherche ou vos filtres.",
+    "resultsCount": "{{count}} sur {{total}}"
   },
   "receiptScan": {
     "title": "Scanner un reçu",

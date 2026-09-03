@@ -66,6 +66,47 @@ describe("exportData.js", () => {
       expect(filtered).toHaveLength(1);
       expect(filtered[0].id).toBe("tx2");
     });
+
+    it("filters by category", () => {
+      const filtered = filterTransactions(transactions, { categoryFilter: "Food" });
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("tx1");
+    });
+
+    it("filters by paying member", () => {
+      const filtered = filterTransactions(transactions, { memberFilter: "u2" });
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("tx2");
+    });
+
+    it("filters by search text matching description", () => {
+      const filtered = filterTransactions(transactions, { search: "lunch" });
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("tx1");
+    });
+
+    it("filters by search text matching category, case-insensitively", () => {
+      const filtered = filterTransactions(transactions, { search: "INCOME" });
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("tx2");
+    });
+
+    it("combines multiple filters", () => {
+      const filtered = filterTransactions(transactions, {
+        typeFilter: "expense",
+        categoryFilter: "Food",
+        memberFilter: "u1",
+        search: "lun",
+      });
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("tx1");
+
+      const empty = filterTransactions(transactions, {
+        typeFilter: "expense",
+        categoryFilter: "Income",
+      });
+      expect(empty).toHaveLength(0);
+    });
   });
 
   describe("downloadFile", () => {

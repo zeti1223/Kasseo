@@ -168,7 +168,17 @@
     "permissionRequiredHelp": "Wenn du diese Transaktion bearbeiten möchtest, bitte {{name}} darum oder wende dich an den Administrator.",
     "syncPending": "Wird synchronisiert…",
     "syncPendingTooltip": "Diese Änderung wurde noch nicht auf dem Server gespeichert. Sie wird automatisch synchronisiert, sobald du wieder online bist.",
-    "syncPendingEditBlocked": "Diese Transaktion wird noch synchronisiert und kann derzeit nicht bearbeitet oder gelöscht werden."
+    "syncPendingEditBlocked": "Diese Transaktion wird noch synchronisiert und kann derzeit nicht bearbeitet oder gelöscht werden.",
+    "searchPlaceholder": "Beschreibung oder Kategorie suchen…",
+    "filterByCategory": "Kategorie",
+    "filterByMember": "Mitglied",
+    "filterByDate": "Datum",
+    "allCategories": "Alle Kategorien",
+    "allMembers": "Alle Mitglieder",
+    "clearFilters": "Filter zurücksetzen",
+    "noResultsTitle": "Keine passenden Transaktionen",
+    "noResultsBody": "Passe deine Suche oder Filter an.",
+    "resultsCount": "{{count}} von {{total}}"
   },
   "receiptScan": {
     "title": "Beleg scannen",
