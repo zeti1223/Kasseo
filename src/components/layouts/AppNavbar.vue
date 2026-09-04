@@ -1,15 +1,28 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useTranslation } from "i18next-vue";
 import { useAuthStore } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
 import { isOnline } from "@/services/offline/network";
+import { lastSyncedAt } from "@/services/offline/db";
+import { formatLastSynced } from "@/utils/format";
 import SettingsDialog from "../features/settings/SettingsDialog.vue";
 import LanguageSelector from "../common/LanguageSelector.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const settingsStore = useSettingsStore();
+const { t } = useTranslation();
+
+// Live-updates as fresh snapshots arrive via onValue (see services/offline/db.js),
+// so the tooltip never shows a stale "last synced" time once we're back online.
+const offlineTooltip = computed(() => {
+  const synced = formatLastSynced(lastSyncedAt.value);
+  return synced
+    ? `${t("navbar.offlineTooltip")} ${t("navbar.lastSynced", { time: synced })}`
+    : t("navbar.offlineTooltip");
+});
 
 const showSettingsDialog = ref(false);
 
@@ -52,7 +65,7 @@ async function handleLogout() {
       <div
         v-if="!isOnline"
         class="flex items-center gap-1.5 bg-black/25 text-white text-xs font-semibold px-2.5 py-1 rounded-full mr-2 flex-shrink-0"
-        :title="$t('navbar.offlineTooltip')"
+        :title="offlineTooltip"
       >
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
         <span>{{ $t('navbar.offline') }}</span>

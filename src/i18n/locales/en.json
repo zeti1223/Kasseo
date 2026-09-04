@@ -53,7 +53,8 @@
     "settings": "Settings",
     "signOut": "Sign out",
     "offline": "Offline",
-    "offlineTooltip": "No connection — showing local data, changes will sync once you're back online."
+    "offlineTooltip": "No connection — showing local data, changes will sync once you're back online.",
+    "lastSynced": "Last synced {{time}}."
   },
   "footer": {
     "build": "Build",
