@@ -48,3 +48,34 @@ export function formatCurrency(amount, currency) {
   const formatted = formatCompactNumber(amount);
   return currency ? `${formatted} ${currency}` : formatted;
 }
+
+/**
+ * Formats a timestamp for the "last synced" indicator: a time-of-day
+ * ("14:32") when it was today, otherwise a short date + time so an old
+ * cached value doesn't look like it just happened.
+ *
+ * @param {number|null|undefined} timestamp - ms since epoch
+ * @returns {string|null} null if there's nothing to show yet
+ */
+export function formatLastSynced(timestamp) {
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  const now = new Date();
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}

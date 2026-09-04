@@ -13,10 +13,20 @@
 // That means queued writes won't survive a reload in that fallback case,
 // but the app keeps working instead of throwing.
 
+import { ref } from "vue";
+
 const DB_NAME = "kasseo-offline";
 const DB_VERSION = 1;
 const CACHE_STORE = "cache";
 const QUEUE_STORE = "queue";
+
+// Timestamp (ms since epoch) of the most recent successful cacheSet — i.e.
+// the last time we actually saw fresh data from the server, across every
+// cached key (funds list, a group's data, transactions, ...). Surfaced in
+// the navbar's offline badge so users can tell how stale what they're
+// looking at might be. Reactive so the UI updates live as new snapshots
+// arrive via onValue, without needing a reload.
+export const lastSyncedAt = ref(null);
 
 function hasIndexedDB() {
   return typeof indexedDB !== "undefined";
@@ -71,6 +81,24 @@ function requestToPromise(req) {
   });
 }
 
+// Seed lastSyncedAt from whatever's already on disk, so a cold start with
+// no connection still shows how old the cached data is instead of nothing
+// (or "just now") until the first fresh write.
+(async function seedLastSyncedAt() {
+  const store = await getStore(CACHE_STORE, "readonly");
+  if (!store) return;
+  try {
+    const all = await requestToPromise(store.getAll());
+    const newest = (all || []).reduce(
+      (max, entry) => Math.max(max, entry.updatedAt || 0),
+      0,
+    );
+    if (newest > 0) lastSyncedAt.value = newest;
+  } catch {
+    // Nothing persisted yet, or read failed — leave lastSyncedAt as null.
+  }
+})();
+
 /** Read a cached value by key. Returns null if missing. */
 export async function cacheGet(key) {
   const store = await getStore(CACHE_STORE, "readonly");
@@ -85,13 +113,18 @@ export async function cacheGet(key) {
 
 /** Store the last-synced value for a key (fire-and-forget is fine). */
 export async function cacheSet(key, value) {
+  const now = Date.now();
+  // Fresh data always means "we just synced", regardless of which key it
+  // was for or whether IndexedDB is actually available.
+  lastSyncedAt.value = now;
+
   const store = await getStore(CACHE_STORE, "readwrite");
   if (!store) {
     memCache.set(key, value);
     return;
   }
   try {
-    store.put({ key, value, updatedAt: Date.now() });
+    store.put({ key, value, updatedAt: now });
   } catch (err) {
     console.warn("Failed to cache value for", key, err);
   }

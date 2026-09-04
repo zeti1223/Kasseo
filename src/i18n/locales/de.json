@@ -53,7 +53,8 @@
     "settings": "Einstellungen",
     "signOut": "Abmelden",
     "offline": "Offline",
-    "offlineTooltip": "Keine Verbindung — lokale Daten werden angezeigt, Änderungen werden synchronisiert, sobald du wieder online bist."
+    "offlineTooltip": "Keine Verbindung — lokale Daten werden angezeigt, Änderungen werden synchronisiert, sobald du wieder online bist.",
+    "lastSynced": "Zuletzt synchronisiert: {{time}}."
   },
   "footer": {
     "build": "Build",

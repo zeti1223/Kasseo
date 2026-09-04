@@ -53,7 +53,8 @@
     "settings": "Ajustes",
     "signOut": "Cerrar sesión",
     "offline": "Sin conexión",
-    "offlineTooltip": "Sin conexión — mostrando datos locales, los cambios se sincronizarán al reconectar."
+    "offlineTooltip": "Sin conexión — mostrando datos locales, los cambios se sincronizarán al reconectar.",
+    "lastSynced": "Última sincronización: {{time}}."
   },
   "footer": {
     "build": "Build",

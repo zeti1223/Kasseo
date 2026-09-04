@@ -53,7 +53,8 @@
     "settings": "Paramètres",
     "signOut": "Se déconnecter",
     "offline": "Hors ligne",
-    "offlineTooltip": "Aucune connexion — affichage des données locales, les modifications seront synchronisées dès le retour de la connexion."
+    "offlineTooltip": "Aucune connexion — affichage des données locales, les modifications seront synchronisées dès le retour de la connexion.",
+    "lastSynced": "Dernière synchronisation : {{time}}."
   },
   "footer": {
     "build": "Build",

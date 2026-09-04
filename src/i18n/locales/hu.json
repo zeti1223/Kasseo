@@ -53,7 +53,8 @@
     "settings": "Beállítások",
     "signOut": "Kijelentkezés",
     "offline": "Offline",
-    "offlineTooltip": "Nincs kapcsolat — helyi adatok jelennek meg, a változtatások az újracsatlakozáskor szinkronizálódnak."
+    "offlineTooltip": "Nincs kapcsolat — helyi adatok jelennek meg, a változtatások az újracsatlakozáskor szinkronizálódnak.",
+    "lastSynced": "Utoljára szinkronizálva: {{time}}."
   },
   "footer": {
     "build": "Build",
