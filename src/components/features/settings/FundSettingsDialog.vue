@@ -274,11 +274,11 @@ async function confirmRemoveCategory() {
   }
 }
 
-async function handleSaveBudget({ name, icon, amount }) {
+async function handleSaveBudget({ name, icon, amount, rollover }) {
   if (!props.group?.id) return;
   loading.value = true;
   try {
-    await groupsStore.setCategoryBudget(props.group.id, name, amount, icon);
+    await groupsStore.setCategoryBudget(props.group.id, name, amount, icon, rollover);
   } finally {
     loading.value = false;
   }
@@ -627,16 +627,20 @@ function copyInviteLink() {
       :loading="loading"
       @confirm="confirmRemoveCategory"
     >
-      <p>
+      <p class="text-sm text-gray-600 dark:text-gray-300">
         {{
           affectedTransactionCount > 0
             ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
             : $t('fundSettings.removeCategoryConfirm')
         }}
       </p>
-      <p v-if="removeCategoryTargetHasBudget" class="mt-2 text-red-600 dark:text-red-400">
-        {{ $t('fundSettings.removeCategoryConfirmBudgetWarning') }}
-      </p>
+      <div
+        v-if="removeCategoryTargetHasBudget"
+        class="mt-3 flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-xs leading-relaxed"
+      >
+        <i class="fas fa-triangle-exclamation text-amber-500 dark:text-amber-400 shrink-0 mt-0.5"></i>
+        <span>{{ $t('fundSettings.removeCategoryConfirmBudgetWarning') }}</span>
+      </div>
     </ConfirmDialog>
   </div>
 </template>

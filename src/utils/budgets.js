@@ -47,11 +47,37 @@ export function getBudgetStatus(spend, limit) {
 }
 
 /**
+ * Returns the effective spending limit for `budget` in `monthDate`'s
+ * calendar month. When `budget.rollover` is enabled, the previous month's
+ * unspent amount (limit minus what was actually spent) is added on top of
+ * the base limit as credit — or, if last month went over, subtracted as a
+ * debit. Only ever looks one month back, and always against that month's
+ * own *base* limit (never an already-rolled-over one), so a credit or
+ * debit never compounds across more than a single month.
+ *
+ * Floors at a small positive amount rather than 0 so a fully-eaten-into
+ * budget still reads as "exceeded" rather than being mistaken for "no
+ * budget set" by `getBudgetStatus`.
+ */
+export function getEffectiveBudgetLimit(transactions, budget, monthDate = new Date()) {
+  const baseLimit = Number(budget?.amount) || 0;
+  if (!budget?.rollover || baseLimit <= 0) return baseLimit;
+
+  const prevMonthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1);
+  const prevRange = getMonthRange(prevMonthDate);
+  const prevSpend = getCategorySpend(transactions, budget.name, prevRange);
+  const rolloverAmount = baseLimit - prevSpend; // + credit (underspent) / - debit (overspent)
+
+  return Math.max(0.01, baseLimit + rolloverAmount);
+}
+
+/**
  * Builds a per-category budget progress list for `monthDate`'s calendar
  * month, sorted by how close each category is to (or past) its limit.
  *
  * `categoryBudgets` is the raw `groups/{id}/categoryBudgets` map: keys are
- * opaque (see `categoryBudgetKey`), values are `{ name, amount, icon? }`.
+ * opaque (see `categoryBudgetKey`), values are
+ * `{ name, amount, icon?, rollover? }`.
  */
 export function computeBudgetProgress(
   transactions,
@@ -62,14 +88,18 @@ export function computeBudgetProgress(
   return Object.entries(categoryBudgets || {})
     .filter(([, budget]) => budget?.name && Number(budget.amount) > 0)
     .map(([key, budget]) => {
-      const limit = Number(budget.amount);
+      const baseLimit = Number(budget.amount);
+      const limit = getEffectiveBudgetLimit(transactions, budget, monthDate);
       const spend = getCategorySpend(transactions, budget.name, range);
       const percent = limit > 0 ? spend / limit : 0;
       return {
         key,
         name: budget.name,
         icon: budget.icon || null,
+        rollover: Boolean(budget.rollover),
+        baseLimit,
         limit,
+        rolloverAmount: limit - baseLimit,
         spend,
         percent,
         status: getBudgetStatus(spend, limit),

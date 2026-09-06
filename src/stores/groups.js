@@ -545,12 +545,19 @@ export const useGroupsStore = defineStore("groups", () => {
   // Budgets are keyed by category name (not id) so a limit can be set on
   // built-in categories (Food & Groceries, Transport, ...) as well as
   // custom ones, none of which need to already exist in `categories`.
-  async function setCategoryBudget(groupId, categoryName, amount, icon = null) {
+  async function setCategoryBudget(
+    groupId,
+    categoryName,
+    amount,
+    icon = null,
+    rollover = false,
+  ) {
     const key = categoryBudgetKey(categoryName);
     await set(dbRef(db, `groups/${groupId}/categoryBudgets/${key}`), {
       name: categoryName,
       amount: Number(amount),
       icon: icon || null,
+      rollover: Boolean(rollover),
       updatedAt: serverTimestamp(),
     });
   }
