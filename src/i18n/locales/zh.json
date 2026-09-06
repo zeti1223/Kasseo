@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "只有管理员可以设置预算",
     "noBudget": "无限额",
     "clearBudget": "移除预算",
+    "budgetRollover": "将未用完的额度结转到下个月",
     "tabStyle": "样式",
     "styleColorTitle": "我的颜色",
     "styleColorHelp": "仅你可见 — 为该基金选择一种颜色。",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "预算",
     "noneSet": "尚未设置预算",
+    "rolloverCredit": "包含上月结转的 {{amount}}",
+    "rolloverDebit": "因上月超支已扣减 {{amount}}",
     "warning": "已使用预算的 {{percent}}%",
     "exceeded": "预算已超支（{{percent}}%）"
   },

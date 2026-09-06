@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "Csak az adminok állíthatnak be büdzsét",
     "noBudget": "Nincs limit",
     "clearBudget": "Büdzsé törlése",
+    "budgetRollover": "Fel nem használt összeg átvitele a következő hónapra",
     "tabStyle": "Megjelenés",
     "styleColorTitle": "Saját szín",
     "styleColorHelp": "Csak neked látszik — válassz egy színt ehhez a kasszához.",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "Büdzsék",
     "noneSet": "Még nincs beállított büdzsé",
+    "rolloverCredit": "Tartalmaz {{amount}} átvitt összeget az előző hónapból",
+    "rolloverDebit": "{{amount}} összeggel csökkentve az előző havi túlköltés miatt",
     "warning": "A büdzsé {{percent}}%-a elhasználva",
     "exceeded": "Büdzsé túllépve ({{percent}}%)"
   },

@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "Solo los administradores pueden establecer presupuestos",
     "noBudget": "Sin límite",
     "clearBudget": "Eliminar presupuesto",
+    "budgetRollover": "Trasladar el monto no utilizado al mes siguiente",
     "tabStyle": "Estilo",
     "styleColorTitle": "Mi color",
     "styleColorHelp": "Solo lo ves tú — elige un color para este fondo.",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "Presupuestos",
     "noneSet": "Aún no hay presupuestos establecidos",
+    "rolloverCredit": "Incluye {{amount}} trasladado del mes pasado",
+    "rolloverDebit": "Reducido en {{amount}} por exceso de gasto el mes pasado",
     "warning": "{{percent}} % del presupuesto usado",
     "exceeded": "Presupuesto superado ({{percent}} %)"
   },

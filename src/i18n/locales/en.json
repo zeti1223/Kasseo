@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "Only admins can set budgets",
     "noBudget": "No limit",
     "clearBudget": "Remove budget",
+    "budgetRollover": "Carry over unused amount to next month",
     "tabStyle": "Style",
     "styleColorTitle": "My color",
     "styleColorHelp": "Only visible to you — pick a color for this fund.",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "No budgets set yet",
+    "rolloverCredit": "Includes {{amount}} carried over from last month",
+    "rolloverDebit": "Reduced by {{amount}} overspent last month",
     "warning": "{{percent}}% of budget used",
     "exceeded": "Budget exceeded ({{percent}}%)"
   },

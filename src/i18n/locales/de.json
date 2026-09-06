@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "Nur Admins können Budgets festlegen",
     "noBudget": "Kein Limit",
     "clearBudget": "Budget entfernen",
+    "budgetRollover": "Nicht genutzten Betrag auf nächsten Monat übertragen",
     "tabStyle": "Stil",
     "styleColorTitle": "Meine Farbe",
     "styleColorHelp": "Nur für dich sichtbar — wähle eine Farbe für diese Kasse.",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "Noch keine Budgets festgelegt",
+    "rolloverCredit": "Enthält {{amount}} aus dem letzten Monat übertragen",
+    "rolloverDebit": "Um {{amount}} reduziert wegen Überschreitung im letzten Monat",
     "warning": "{{percent}} % des Budgets ausgeschöpft",
     "exceeded": "Budget überschritten ({{percent}} %)"
   },

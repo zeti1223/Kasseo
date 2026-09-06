@@ -289,6 +289,7 @@
     "adminOnlyBudgets": "Seuls les administrateurs peuvent définir des budgets",
     "noBudget": "Aucune limite",
     "clearBudget": "Supprimer le budget",
+    "budgetRollover": "Reporter le montant inutilisé au mois suivant",
     "tabStyle": "Style",
     "styleColorTitle": "Ma couleur",
     "styleColorHelp": "Visible uniquement par toi — choisis une couleur pour cette cagnotte.",
@@ -420,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "Aucun budget défini pour l'instant",
+    "rolloverCredit": "Inclut {{amount}} reporté du mois dernier",
+    "rolloverDebit": "Réduit de {{amount}} en raison d'un dépassement le mois dernier",
     "warning": "{{percent}} % du budget utilisé",
     "exceeded": "Budget dépassé ({{percent}} %)"
   },
