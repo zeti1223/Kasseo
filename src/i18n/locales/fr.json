@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "Cette catégorie sera supprimée de la cagnotte.",
     "removeCategoryConfirmWithCount": "Cette catégorie sera supprimée, et {{count}} transaction qui l'utilise sera recatégorisée en « Autre ».",
     "removeCategoryConfirmWithCount_plural": "Cette catégorie sera supprimée, et {{count}} transactions qui l'utilisent seront recatégorisées en « Autre ».",
+    "removeCategoryConfirmBudgetWarning": "Sa limite de budget sera également supprimée.",
     "newCategory": "Nouvelle catégorie (choisir icône et nom)",
     "categoryNamePlaceholder": "Nom de la catégorie",
     "add": "Ajouter",

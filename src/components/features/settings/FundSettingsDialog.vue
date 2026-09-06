@@ -9,6 +9,7 @@ import { db } from "@/services/firebase/config";
 import { getAppBaseUrl } from "@/constants/appUrl";
 import { CURRENCIES } from "@/constants/currencies";
 import { DEFAULT_FUND_COLOR, DEFAULT_FUND_ICON } from "@/constants/fundStyle";
+import { categoryBudgetKey } from "@/utils/budgets";
 import { useTranslation } from "i18next-vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 import CurrencyTab from "./CurrencyTab.vue";
@@ -81,6 +82,14 @@ const affectedTransactionCount = computed(() => {
   return transactionsStore.transactions.filter(
     (t) => t.type === "expense" && t.category === removeCategoryTarget.value.name,
   ).length;
+});
+
+// Whether the category about to be deleted has a budget limit set, so the
+// confirmation dialog can warn that it'll be removed along with it.
+const removeCategoryTargetHasBudget = computed(() => {
+  if (!removeCategoryTarget.value) return false;
+  const key = categoryBudgetKey(removeCategoryTarget.value.name);
+  return Boolean(categoryBudgets.value?.[key]);
 });
 
 const isOwner = computed(() => props.group?.ownerId === authStore.user?.uid);
@@ -618,11 +627,16 @@ function copyInviteLink() {
       :loading="loading"
       @confirm="confirmRemoveCategory"
     >
-      {{
-        affectedTransactionCount > 0
-          ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
-          : $t('fundSettings.removeCategoryConfirm')
-      }}
+      <p>
+        {{
+          affectedTransactionCount > 0
+            ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
+            : $t('fundSettings.removeCategoryConfirm')
+        }}
+      </p>
+      <p v-if="removeCategoryTargetHasBudget" class="mt-2 text-red-600 dark:text-red-400">
+        {{ $t('fundSettings.removeCategoryConfirmBudgetWarning') }}
+      </p>
     </ConfirmDialog>
   </div>
 </template>
