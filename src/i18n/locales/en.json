@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "This category will be removed from the fund.",
     "removeCategoryConfirmWithCount": "This category will be removed, and {{count}} transaction using it will be recategorized to \"Other\".",
     "removeCategoryConfirmWithCount_plural": "This category will be removed, and {{count}} transactions using it will be recategorized to \"Other\".",
+    "removeCategoryConfirmBudgetWarning": "Its budget limit will be removed too.",
     "newCategory": "New category (choose icon & name)",
     "categoryNamePlaceholder": "Category name",
     "add": "Add",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "Only admins can set budgets",
     "noBudget": "No limit",
     "clearBudget": "Remove budget",
+    "budgetRollover": "Carry over unused amount to next month",
     "tabStyle": "Style",
     "styleColorTitle": "My color",
     "styleColorHelp": "Only visible to you — pick a color for this fund.",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "No budgets set yet",
+    "rolloverCredit": "Includes {{amount}} carried over from last month",
+    "rolloverDebit": "Reduced by {{amount}} overspent last month",
     "warning": "{{percent}}% of budget used",
     "exceeded": "Budget exceeded ({{percent}}%)"
   },

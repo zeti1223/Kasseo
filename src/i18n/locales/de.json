@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "Diese Kategorie wird aus der Kasse entfernt.",
     "removeCategoryConfirmWithCount": "Diese Kategorie wird entfernt, und {{count}} Transaktion, die sie verwendet, wird zu „Sonstiges\" umkategorisiert.",
     "removeCategoryConfirmWithCount_plural": "Diese Kategorie wird entfernt, und {{count}} Transaktionen, die sie verwenden, werden zu „Sonstiges\" umkategorisiert.",
+    "removeCategoryConfirmBudgetWarning": "Das dazugehörige Budgetlimit wird ebenfalls entfernt.",
     "newCategory": "Neue Kategorie (Symbol & Name wählen)",
     "categoryNamePlaceholder": "Kategoriename",
     "add": "Hinzufügen",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "Nur Admins können Budgets festlegen",
     "noBudget": "Kein Limit",
     "clearBudget": "Budget entfernen",
+    "budgetRollover": "Nicht genutzten Betrag auf nächsten Monat übertragen",
     "tabStyle": "Stil",
     "styleColorTitle": "Meine Farbe",
     "styleColorHelp": "Nur für dich sichtbar — wähle eine Farbe für diese Kasse.",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "Noch keine Budgets festgelegt",
+    "rolloverCredit": "Enthält {{amount}} aus dem letzten Monat übertragen",
+    "rolloverDebit": "Um {{amount}} reduziert wegen Überschreitung im letzten Monat",
     "warning": "{{percent}} % des Budgets ausgeschöpft",
     "exceeded": "Budget überschritten ({{percent}} %)"
   },

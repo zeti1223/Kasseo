@@ -9,6 +9,7 @@ import { db } from "@/services/firebase/config";
 import { getAppBaseUrl } from "@/constants/appUrl";
 import { CURRENCIES } from "@/constants/currencies";
 import { DEFAULT_FUND_COLOR, DEFAULT_FUND_ICON } from "@/constants/fundStyle";
+import { categoryBudgetKey } from "@/utils/budgets";
 import { useTranslation } from "i18next-vue";
 import ConfirmDialog from "../../common/ConfirmDialog.vue";
 import CurrencyTab from "./CurrencyTab.vue";
@@ -81,6 +82,14 @@ const affectedTransactionCount = computed(() => {
   return transactionsStore.transactions.filter(
     (t) => t.type === "expense" && t.category === removeCategoryTarget.value.name,
   ).length;
+});
+
+// Whether the category about to be deleted has a budget limit set, so the
+// confirmation dialog can warn that it'll be removed along with it.
+const removeCategoryTargetHasBudget = computed(() => {
+  if (!removeCategoryTarget.value) return false;
+  const key = categoryBudgetKey(removeCategoryTarget.value.name);
+  return Boolean(categoryBudgets.value?.[key]);
 });
 
 const isOwner = computed(() => props.group?.ownerId === authStore.user?.uid);
@@ -265,11 +274,11 @@ async function confirmRemoveCategory() {
   }
 }
 
-async function handleSaveBudget({ name, icon, amount }) {
+async function handleSaveBudget({ name, icon, amount, rollover }) {
   if (!props.group?.id) return;
   loading.value = true;
   try {
-    await groupsStore.setCategoryBudget(props.group.id, name, amount, icon);
+    await groupsStore.setCategoryBudget(props.group.id, name, amount, icon, rollover);
   } finally {
     loading.value = false;
   }
@@ -618,11 +627,20 @@ function copyInviteLink() {
       :loading="loading"
       @confirm="confirmRemoveCategory"
     >
-      {{
-        affectedTransactionCount > 0
-          ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
-          : $t('fundSettings.removeCategoryConfirm')
-      }}
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        {{
+          affectedTransactionCount > 0
+            ? $t('fundSettings.removeCategoryConfirmWithCount', { count: affectedTransactionCount })
+            : $t('fundSettings.removeCategoryConfirm')
+        }}
+      </p>
+      <div
+        v-if="removeCategoryTargetHasBudget"
+        class="mt-3 flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-xs leading-relaxed"
+      >
+        <i class="fas fa-triangle-exclamation text-amber-500 dark:text-amber-400 shrink-0 mt-0.5"></i>
+        <span>{{ $t('fundSettings.removeCategoryConfirmBudgetWarning') }}</span>
+      </div>
     </ConfirmDialog>
   </div>
 </template>

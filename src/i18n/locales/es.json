@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "Esta categoría será eliminada del fondo.",
     "removeCategoryConfirmWithCount": "Esta categoría se eliminará y {{count}} transacción que la usa se recategorizará como \"Otro\".",
     "removeCategoryConfirmWithCount_plural": "Esta categoría se eliminará y {{count}} transacciones que la usan se recategorizarán como \"Otro\".",
+    "removeCategoryConfirmBudgetWarning": "Su límite de presupuesto también se eliminará.",
     "newCategory": "Nueva categoría (elegir icono y nombre)",
     "categoryNamePlaceholder": "Nombre de la categoría",
     "add": "Añadir",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "Solo los administradores pueden establecer presupuestos",
     "noBudget": "Sin límite",
     "clearBudget": "Eliminar presupuesto",
+    "budgetRollover": "Trasladar el monto no utilizado al mes siguiente",
     "tabStyle": "Estilo",
     "styleColorTitle": "Mi color",
     "styleColorHelp": "Solo lo ves tú — elige un color para este fondo.",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "Presupuestos",
     "noneSet": "Aún no hay presupuestos establecidos",
+    "rolloverCredit": "Incluye {{amount}} trasladado del mes pasado",
+    "rolloverDebit": "Reducido en {{amount}} por exceso de gasto el mes pasado",
     "warning": "{{percent}} % del presupuesto usado",
     "exceeded": "Presupuesto superado ({{percent}} %)"
   },

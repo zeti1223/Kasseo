@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "该分类将从基金中移除。",
     "removeCategoryConfirmWithCount": "此类别将被删除，使用该类别的 {{count}} 笔交易将被重新归类为“其他”。",
     "removeCategoryConfirmWithCount_plural": "此类别将被删除，使用该类别的 {{count}} 笔交易将被重新归类为“其他”。",
+    "removeCategoryConfirmBudgetWarning": "其预算限额也将一并删除。",
     "newCategory": "新建分类（选择图标和名称）",
     "categoryNamePlaceholder": "分类名称",
     "add": "添加",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "只有管理员可以设置预算",
     "noBudget": "无限额",
     "clearBudget": "移除预算",
+    "budgetRollover": "将未用完的额度结转到下个月",
     "tabStyle": "样式",
     "styleColorTitle": "我的颜色",
     "styleColorHelp": "仅你可见 — 为该基金选择一种颜色。",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "预算",
     "noneSet": "尚未设置预算",
+    "rolloverCredit": "包含上月结转的 {{amount}}",
+    "rolloverDebit": "因上月超支已扣减 {{amount}}",
     "warning": "已使用预算的 {{percent}}%",
     "exceeded": "预算已超支（{{percent}}%）"
   },

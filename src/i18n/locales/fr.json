@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "Cette catégorie sera supprimée de la cagnotte.",
     "removeCategoryConfirmWithCount": "Cette catégorie sera supprimée, et {{count}} transaction qui l'utilise sera recatégorisée en « Autre ».",
     "removeCategoryConfirmWithCount_plural": "Cette catégorie sera supprimée, et {{count}} transactions qui l'utilisent seront recatégorisées en « Autre ».",
+    "removeCategoryConfirmBudgetWarning": "Sa limite de budget sera également supprimée.",
     "newCategory": "Nouvelle catégorie (choisir icône et nom)",
     "categoryNamePlaceholder": "Nom de la catégorie",
     "add": "Ajouter",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "Seuls les administrateurs peuvent définir des budgets",
     "noBudget": "Aucune limite",
     "clearBudget": "Supprimer le budget",
+    "budgetRollover": "Reporter le montant inutilisé au mois suivant",
     "tabStyle": "Style",
     "styleColorTitle": "Ma couleur",
     "styleColorHelp": "Visible uniquement par toi — choisis une couleur pour cette cagnotte.",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "Budgets",
     "noneSet": "Aucun budget défini pour l'instant",
+    "rolloverCredit": "Inclut {{amount}} reporté du mois dernier",
+    "rolloverDebit": "Réduit de {{amount}} en raison d'un dépassement le mois dernier",
     "warning": "{{percent}} % du budget utilisé",
     "exceeded": "Budget dépassé ({{percent}} %)"
   },

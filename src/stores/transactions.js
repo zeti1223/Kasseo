@@ -18,6 +18,7 @@ import {
   getMonthRange,
   getCategorySpend,
   getNewlyCrossedThreshold,
+  getEffectiveBudgetLimit,
 } from "@/utils/budgets";
 import { isOnline } from "@/services/offline/network";
 import {
@@ -81,8 +82,11 @@ async function checkBudgetThresholdCrossed(
     );
     if (!budget || !(Number(budget.amount) > 0)) return null;
 
-    const limit = Number(budget.amount);
-    const range = getMonthRange(new Date(date));
+    const txDate = new Date(date);
+    // Account for any rollover credit/debit so the 80%/100% thresholds are
+    // checked against the same effective limit shown in the budget UI.
+    const limit = getEffectiveBudgetLimit(currentTransactions, budget, txDate);
+    const range = getMonthRange(txDate);
     const spendBefore = getCategorySpend(currentTransactions, categoryName, range);
     const crossed = getNewlyCrossedThreshold(spendBefore, addedAmount, limit);
     if (!crossed) return null;

@@ -275,6 +275,7 @@
     "removeCategoryConfirm": "Ez a kategória törlésre kerül a kasszából.",
     "removeCategoryConfirmWithCount": "Ez a kategória törlődik, és {{count}} tranzakció, amely használja, át lesz sorolva \"Egyéb\" kategóriába.",
     "removeCategoryConfirmWithCount_plural": "Ez a kategória törlődik, és {{count}} tranzakció, amely használja, át lesz sorolva \"Egyéb\" kategóriába.",
+    "removeCategoryConfirmBudgetWarning": "A hozzá tartozó költségkeret is törlődik.",
     "newCategory": "Új kategória (ikon és név választása)",
     "categoryNamePlaceholder": "Kategória neve",
     "add": "Hozzáadás",
@@ -288,6 +289,7 @@
     "adminOnlyBudgets": "Csak az adminok állíthatnak be büdzsét",
     "noBudget": "Nincs limit",
     "clearBudget": "Büdzsé törlése",
+    "budgetRollover": "Fel nem használt összeg átvitele a következő hónapra",
     "tabStyle": "Megjelenés",
     "styleColorTitle": "Saját szín",
     "styleColorHelp": "Csak neked látszik — válassz egy színt ehhez a kasszához.",
@@ -419,6 +421,8 @@
   "budgets": {
     "title": "Büdzsék",
     "noneSet": "Még nincs beállított büdzsé",
+    "rolloverCredit": "Tartalmaz {{amount}} átvitt összeget az előző hónapból",
+    "rolloverDebit": "{{amount}} összeggel csökkentve az előző havi túlköltés miatt",
     "warning": "A büdzsé {{percent}}%-a elhasználva",
     "exceeded": "Büdzsé túllépve ({{percent}}%)"
   },
